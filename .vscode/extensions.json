@@ -1,13 +1,9 @@
 {
   "recommendations": [
-    "bierner.markdown-emoji",
     "DavidAnson.vscode-markdownlint",
     "EditorConfig.EditorConfig",
-    "esbenp.prettier-vscode",
     "Gruntfuggly.todo-tree",
-    "mads-hartmann.bash-ide-vscode",
     "James-Yu.latex-workshop",
-    "timonwong.shellcheck",
     "usernamehw.errorlens"
   ]
 }

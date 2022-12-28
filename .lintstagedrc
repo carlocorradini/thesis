@@ -1,4 +1,0 @@
-{
-  "*.tex": ["prettier --write"],
-  "*.md": ["markdownlint --fix", "prettier --write"]
-}
