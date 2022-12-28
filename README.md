@@ -1,5 +1,7 @@
 # Thesis
 
+[![ci](https://github.com/carlocorradini/thesis/actions/workflows/ci.yml/badge.svg)](https://github.com/carlocorradini/thesis/actions/workflows/ci.yml)
+
 Master Thesis.
 
 ## Members
