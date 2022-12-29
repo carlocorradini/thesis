@@ -12,7 +12,7 @@
 ]{geometry}
 % Chapter
 \usepackage{titlesec}
-\singlespacing{}
+\singlespacing
 \setcounter{secnumdepth}{3}
 \setcounter{tocdepth}{3}
 % Letter
@@ -24,54 +24,58 @@
 % Image
 \usepackage{graphicx}
 
+
 % Document
 \begin{document}
-% Cover
-\pagenumbering{gobble}
-\input{etc/cover}
-\clearpage
+  % Cover
+  \pagenumbering{gobble}
+  \input{etc/cover}
+  \clearpage
 
-% Acknowledgements
-\input{etc/acknowledgements}
-\clearpage
-\pagestyle{plain}
 
-% Start page numbering
-\mainmatter{}
+  % Acknowledgements
+  \input{etc/acknowledgements}
+  \clearpage
+  \pagestyle{plain}
 
-% Index
-\tableofcontents
-\clearpage
 
-% Group to define space between chapters
-\begingroup
-% No page break between chapters
-% Override clear page commands
-\renewcommand{\cleardoublepage}{}
-\renewcommand{\clearpage}{}
-% Override format of title chapter
-\titleformat{\chapter} {\normalfont\Huge\bfseries}{\thechapter}{1em}{}
-\titlespacing*{\chapter}{0pt}{0.59in}{0.02in}
-\titlespacing*{\section}{0pt}{0.20in}{0.02in}
-\titlespacing*{\subsection}{0pt}{0.10in}{0.02in}
-\titlespacing*{\subsubsection}{0pt}{0.05in}{0.02in}
+  % Start page numbering
+  \mainmatter
 
-% Abstract
-\input{etc/abstract}
 
-% Chapters
-\input{chapters/00/chapter1.tex}
-\endgroup
+  % Index
+  \tableofcontents
+  \clearpage
 
-% Bibliography
-\addcontentsline{toc}{chapter}{Bibliography}
-% Alphabetical order of authors
-\bibliographystyle{plain}
-\bibliography{bibliography}
 
-% Attachments
-\titleformat{\chapter}
-{\normalfont\Huge\bfseries}{Appendix \thechapter}{1em}{}
-\appendix
-\input{etc/attachments}
+  % Group to define space between chapters
+  \begingroup
+  % No page break between chapters
+  % Override clear page commands
+  \renewcommand{\cleardoublepage}{}
+  \renewcommand{\clearpage}{}
+  % Override format of title chapter
+  \titleformat{\chapter} {\normalfont\Huge\bfseries}{\thechapter}{1em}{} \titlespacing*{\chapter}{0pt}{0.59in}{0.02in}
+  \titlespacing*{\section}{0pt}{0.20in}{0.02in} \titlespacing*{\subsection}{0pt}{0.10in}{0.02in}
+  \titlespacing*{\subsubsection}{0pt}{0.05in}{0.02in}
+
+  % Abstract
+  \input{etc/abstract}
+
+
+  % Chapters
+  \input{chapters/00/chapter1.tex}
+  \endgroup
+
+  % Bibliography
+  \addcontentsline{toc}{chapter}{Bibliography}
+  % Alphabetical order of authors
+  \bibliographystyle{plain}
+  \bibliography{bibliography}
+
+
+  % Attachments
+  \titleformat{\chapter} {\normalfont\Huge\bfseries}{Appendix \thechapter}{1em}{}
+  \appendix
+  \input{etc/attachments}
 \end{document}

@@ -1,0 +1,47 @@
+{
+  "name": "thesis",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Master Thesis",
+  "homepage": "https://github.com/carlocorradini/thesis#readme",
+  "bugs": {
+    "url": "https://github.com/carlocorradini/thesis/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/carlocorradini/thesis.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Carlo Corradini",
+    "email": "carlo.corradini98@gmail.com",
+    "url": "https://www.linkedin.com/in/carlo-corradini"
+  },
+  "scripts": {
+    "build": "latexmk -interaction=nonstopmode -file-line-error -pdf -halt-on-error -outdir=build main",
+    "check": "npx npm-run-all --npm-path npm check:*",
+    "check:format": "npx prettier --check .",
+    "check:markdown": "npx markdownlint \"**/*.md\"",
+    "check:spell": "npx cspell lint --config cspell.json --no-progress --show-context \"**\"",
+    "clean": "shx rm -rf build",
+    "fix": "npx npm-run-all --npm-path npm fix:*",
+    "fix:format": "npx prettier --write .",
+    "fix:markdown": "npx markdownlint --fix \"**/*.md\"",
+    "prebuild": "npm run clean"
+  },
+  "devDependencies": {
+    "@cspell/dict-en_us": "^4.1.2",
+    "@cspell/dict-latex": "^3.1.0",
+    "@cspell/dict-markdown": "^2.0.1",
+    "@cspell/dict-npm": "^5.0.1",
+    "@cspell/dict-shell": "^1.0.1",
+    "cspell": "^6.18.0",
+    "markdownlint": "^0.26.2",
+    "markdownlint-cli": "^0.32.2",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.8.1",
+    "prettier-plugin-latex": "^1.2.4",
+    "prettier-plugin-sh": "^0.12.8",
+    "shx": "^0.3.4"
+  }
+}

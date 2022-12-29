@@ -1,0 +1,14 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "useGitignore": true,
+  "import": [
+    "@cspell/dict-en_us/cspell-ext.json",
+    "@cspell/dict-latex/cspell-ext.json",
+    "@cspell/dict-markdown/cspell-ext.json",
+    "@cspell/dict-npm/cspell-ext.json",
+    "@cspell/dict-shell/cspell-ext.json"
+  ],
+  "ignorePaths": ["**/build/", "**/coverage/", "**/node_modules/"],
+  "words": ["carlocorradini", "corradini", "latexmk", "nonstopmode", "outdir"]
+}

@@ -1,52 +1,77 @@
 name: ci
 
 on:
+  schedule:
+    - cron: '0 0 * * *'
   push:
     branches: [main]
-    tags: ["v*.*.*"]
+    tags: ['v*.*.*']
   pull_request:
     branches: [main]
-
-env:
-  THESIS_ROOT_FILE: main.tex
-  THESIS_OUTPUT_DIR: build
-  THESIS_PDF_NAME: corradini_carlo_computer_science_2022_2023.pdf
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  ci:
+  check_run:
     runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.run.outputs.run }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Lint
-        uses: xu-cheng/texlive-action/full@v1
+      - name: Check
+        id: run
+        run: |
+          _run=true
+          if [ ${{ github.event_name == 'schedule' }} = true ] && [ -z "$(git rev-list --after='24 hours' ${{ github.sha }})" ]; then
+            _run=false
+          fi
+
+          printf '%s\n' "::set-output name=run::$_run"
+
+  ci:
+    runs-on: ubuntu-latest
+    needs: check_run
+    if: ${{ needs.check_run.outputs.run == 'true' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Install TeX Live
+        uses: teatimeguest/setup-texlive-action@v2
         with:
-          run: |
-            chktex -wall -n22 -n30 -e16 -q -f%f:%l:%c:%d:%k:%n:%m\n ${{ env.THESIS_ROOT_FILE }} \
-              | tee /dev/stderr \
-              | [ -z "$(</dev/stdin)" ]
+          packages: >-
+            scheme-full
+      - name: Install dependencies
+        run: |
+          npm ci
+      - name: Check
+        run: |
+          npm run check
       - name: Compile
-        uses: xu-cheng/latex-action@v2
-        with:
-          root_file: ${{ env.THESIS_ROOT_FILE }}
-          args: >-
-            -interaction=nonstopmode
-            -file-line-error
-            -pdf
-            -halt-on-error
-            -outdir=${{ env.THESIS_OUTPUT_DIR }}
+        run: |
+          npm run build
       - name: Rename
         run: |
-          _file_name=$(basename -- ${{ env.THESIS_ROOT_FILE }})
-          mv "${{ env.THESIS_OUTPUT_DIR }}/${_file_name%.*}.pdf" ${{ env.THESIS_OUTPUT_DIR }}/${{ env.THESIS_PDF_NAME }}
+          cp build/main.pdf corradini_carlo_computer_science_2022_2023.pdf
+      - name: Release name
+        id: release_name
+        if: startsWith(github.ref , 'refs/tags/') || ${{ github.event_name == 'schedule' }}
+        run: |
+          _release="Nightly $(date --utc '+%d/%m/%YT%H:%M:%S')"
+          if [ ${{ startsWith(github.ref , 'refs/tags/') }} = true ]; then
+            _release="${{ github.ref_name }}"
+          fi
+
+          printf '%s\n' "::set-output name=release::$_release"
       - name: Release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref , 'refs/tags/') || ${{ github.event_name == 'schedule' }}
         with:
+          name: ${{ steps.release_name.outputs.release }}
+          prerelease: ${{ startsWith(github.ref , 'refs/tags/') != true }}
+          fail_on_unmatched_files: true
           files: |
             LICENSE
-            ${{ env.THESIS_OUTPUT_DIR }}/${{ env.THESIS_PDF_NAME }}
+            corradini_carlo_computer_science_2022_2023.pdf
