@@ -2,10 +2,10 @@ name: ci
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
   push:
     branches: [main]
-    tags: ['v*.*.*']
+    tags: ["v*.*.*"]
   pull_request:
     branches: [main]
 
@@ -29,7 +29,7 @@ jobs:
             _run=false
           fi
 
-          printf '%s\n' "::set-output name=run::$_run"
+          printf '%s\n' "run=$_run" >> $GITHUB_OUTPUT
 
   ci:
     runs-on: ubuntu-latest
@@ -64,7 +64,7 @@ jobs:
             _release="${{ github.ref_name }}"
           fi
 
-          printf '%s\n' "::set-output name=release::$_release"
+          printf '%s\n' "release=$_release" >> $GITHUB_OUTPUT
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref , 'refs/tags/') || ${{ github.event_name == 'schedule' }}
