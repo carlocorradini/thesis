@@ -10,7 +10,7 @@ Master Thesis.
 | :---: | :-------: | :--------------: | :--------: |
 | Carlo | Corradini | `carlocorradini` | **223811** |
 
-## :computer: Development
+## Development
 
 ### Requirements
 
@@ -37,7 +37,7 @@ Master Thesis.
 
 ### Build
 
-> **Warning**: On _Windows_, a script may fail to execute, run it directly
+> **Note**: Compiled PDF [`corradini_carlo_computer_science_2022_2023.pdf`](./corradini_carlo_computer_science_2022_2023.pdf)
 
 ```sh
 npm run build
@@ -51,6 +51,7 @@ npm run build
 | -------- | ---------------- |
 | `build`  | Build PDF        |
 | `check`  | Check for errors |
+| `clean`  | Clean            |
 | `fix`    | Fix errors       |
 
 ## License
