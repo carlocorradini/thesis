@@ -7,6 +7,8 @@
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
+  "grammarly.files.include": ["**/*.md", "**/*.txt", "**/*.tex"],
+  "grammarly.config.documentDialect": "american",
   "latex-workshop.bibtex-format.sort.enabled": true,
   "latex-workshop.latex.clean.subfolder.enabled": true,
   "latex-workshop.latex.outDir": "%WORKSPACE_FOLDER%/build",

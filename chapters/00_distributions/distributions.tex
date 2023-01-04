@@ -6,30 +6,39 @@ Test
 \section{Alpine Linux}
 \label{sec:distributions_alpine_linux}
 
-Alpine is a security-centered and very lightweight distro that is usually employed
-to build firewalls, routers, VPN, VoIP, servers, and set-top boxes. Lately, it
-has gained increasing popularity as a minimal Docker image (only 5MB). It's built
-around musl (a C library alternative to glibc) and BusyBox (an alternative to
-the several Linux core utilities in one executable), both very lightweight
-alternatives. The security features include a Linux kernel with PaX and grsecurity
-patches and stack-smashing protection (SSP) in all of the packages. Also, Alpine
-can be loaded and run from memory RAM, one of the reasons why it is used in
-embedded devices. Alpine use its own package manager, APK, with a considerable package
-base given its lightweight nature\cite{alpine_linux}.
+\begin{wrapfigure}
+  {r}{.25\textwidth}
+  \centering
+  \includegraphics[width=.23\textwidth]{images/logos/alpine.png}
+  \caption{Alpine Linux logo}
+\end{wrapfigure}
+
+Alpine Linux is a lightweight, security-focused, and resource-efficient
+distribution. In recent years, has grown in popularity as the foundation for the
+majority of Docker images. It is based on musl\footnote{\url{https://musl.libc.org}}
+(an implementation of the C standard library, an alternative to glibc), BusyBox\footnote{\url{https://busybox.net}}
+(a single, small executable that combines tiny versions of many common UNIX utilities),
+a custom package manager called APK\footnote{\url{https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper}}
+and the OpenRC init system ()\cite{alpine_linux}. % TODO OpenRC reference
 
 \section{Arch Linux}
 \label{sec:distributions_arch_linux}
 
-Arch Linux is an independently developed, x86-64 general purpose GNU/Linux
-distribution versatile enough to suit any role. Development focuses on simplicity,
-minimalism, and code elegance. Arch is installed as a minimal base system, configured
-by the user upon which their own ideal environment is assembled by installing only
-what is required or desired for their unique purposes. (...) Arch strives to
-stay bleeding edge, and typically offers the latest stable versions of most software.
-Arch Linux uses its own Pacman package manager, which couples simple binary packages
-with an easy-to-use package build system. (...) Arch Linux uses a "rolling release"
-system which allows one-time installation and perpetual software upgrades. It is
-not generally necessary to reinstall or upgrade your Arch Linux system from one "version"
-to the next. By issuing one command, an Arch system is kept up-to-date and on the
-bleeding edge. Arch strives to keep its packages as close to the original
-upstream software as possible\cite{arch_linux}.
+% TODO Position
+\begin{wrapfigure}
+  {r}{.25\textwidth}
+  \centering
+  \includegraphics[width=.23\textwidth]{images/logos/arch.png}
+  \caption{Arch Linux logo}
+\end{wrapfigure}
+
+Arch Linux is a general-purpose distribution that focuses on simplicity, minimalism,
+and code elegance. It is based on Systemd init system () % TODO Systemd reference
+and strives to stay bleeding edge, offering the latest stable versions of most
+software through Pacman\footnote{\url{https://wiki.archlinux.org/title/Pacman}}
+package manager. Uses a rolling release system that allows one-time installation
+and perpetual software upgrades, allowing to not reinstall or upgrade the system
+from one version to the next. Notably, Arch Linux is the foundation for several
+many popular enterprise-grade distributions, such as Manjaro\footnote{\url{https://manjaro.org}}
+and SteamOS\footnote{\url{https://store.steampowered.com/steamos}},
+demonstrating its customizability, power, and stability\cite{arch_linux}.
