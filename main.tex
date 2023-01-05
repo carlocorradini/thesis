@@ -29,6 +29,9 @@
 \usepackage[pdfa]{hyperref}
 \hypersetup{breaklinks=true}
 \urlstyle{same}
+% Quote
+\usepackage{epigraph}
+
 
 % Document
 \begin{document}
@@ -57,8 +60,9 @@
   \begingroup
   % No page break between chapters
   % Override clear page commands
-  \renewcommand{\cleardoublepage}{}
-  \renewcommand{\clearpage}{}
+  % TODO Page break between chapters
+  %\renewcommand{\cleardoublepage}{}
+  %\renewcommand{\clearpage}{}
   % Override format of title chapter
   \titleformat{\chapter} {\normalfont\Huge\bfseries}{\thechapter}{1em}{} \titlespacing*{\chapter}{0pt}{0.59in}{0.02in}
   \titlespacing*{\section}{0pt}{0.20in}{0.02in} \titlespacing*{\subsection}{0pt}{0.10in}{0.02in}
@@ -69,7 +73,9 @@
 
 
   % Chapters
-  \input{chapters/00_distributions/distributions.tex}
+  \input{chapters/introduction.tex}
+  \input{chapters/recluster.tex}
+  \input{chapters/implementation.tex}
   \endgroup
 
   % Bibliography

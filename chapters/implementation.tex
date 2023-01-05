@@ -1,0 +1,170 @@
+\chapter{Implementation}
+\label{cha:implementation}
+
+\epigraph{Ideas are easy, Implementation is hard.}{Guy Kawasaki}
+
+\section{Server}
+\label{sec:implementation_server}
+
+\subsection{Database}
+\label{subsec:implementation_server_database}
+
+\subsubsection{PostgreSQL}
+\label{subsubsec:implementation_server_database_postgresql}
+
+\begin{wrapfigure}
+  {r}{.125\textwidth}
+  \centering
+  \includegraphics[width=.125\textwidth]{images/logos/postgresql.png}
+\end{wrapfigure}
+
+\subsubsection{Prisma}
+\label{subsubsec:implementation_server_database_prisma}
+
+\begin{wrapfigure}
+  {r}{.125\textwidth}
+  \centering
+  \includegraphics[width=.125\textwidth]{images/logos/prisma.png}
+\end{wrapfigure}
+
+\subsubsection{Schema}
+\label{subsubsec:implementation_server_database_schema}
+
+\subsection{GraphQL}
+\label{subsec:implementation_server_graphql}
+
+\subsubsection{GraphQL vs REST}
+\label{subsubsec:implementation_server_graphql_graphql_vs_rest}
+
+\subsubsection{Schema}
+\label{subsubsec:implementation_server_graphql_schema}
+
+\subsection{Node Pool}
+\label{subsec:implementation_server_node_pool}
+
+\subsection{Node Registration}
+\label{subsec:implementation_server_node_registration}
+
+\subsubsection{JSON Web Token}
+\label{subsubsec:implementation_server_node_registration_json_web_token}
+
+\subsection{Scale Up}
+\label{subsec:implementation_server_scale_up}
+
+\subsubsection{Wake-on-LAN}
+\label{subsubsec:implementation_server_scale_up_wake_on_lan}
+
+\subsection{Scale Down}
+\label{subsec:implementation_server_scale_down}
+
+\subsubsection{SSH}
+\label{subsubsec:implementation_server_scale_up_ssh}
+
+\section{Distributions}
+\label{sec:implementation_distributions}
+
+\subsection{Packages}
+\label{subsec:implementation_distributions_packages}
+
+\subsection{Init System}
+\label{subsec:implementation_distributions_init_system}
+
+\subsubsection{OpenRC}
+\label{subsec:implementation_distributions_init_system_openrc}
+
+\subsubsection{Systemd}
+\label{subsec:implementation_distributions_init_system_systemd}
+
+\subsection{ISO}
+\label{subsec:implementation_distributions_iso}
+
+\subsubsection{Generation}
+\label{subsubsec:implementation_distributions_iso_generation}
+
+\subsubsection{Alpine Linux}
+\label{subsubsec:implementation_distributions_iso_alpine_linux}
+
+\begin{wrapfigure}
+  {r}{.125\textwidth}
+  \centering
+  \includegraphics[width=.125\textwidth]{images/logos/alpine.png}
+\end{wrapfigure}
+
+Alpine Linux\footnote{\url{https://www.alpinelinux.org}} is a lightweight, security-focused,
+and resource-efficient distribution. In recent years, has grown in popularity as
+the foundation for the majority of Docker images. It is based on musl\footnote{\url{https://musl.libc.org}}
+(an implementation of the C standard library, an alternative to glibc), BusyBox\footnote{\url{https://busybox.net}}
+(a single, small executable that combines tiny versions of many common UNIX utilities),
+a custom package manager called APK\footnote{\url{https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper}}
+and the OpenRC init system ()\cite{alpine_linux}. \\ % TODO OpenRC reference
+Alpine Linux is the preferred reCluster distribution. It has been utilized and
+tested during development and is now present in every cluster node.
+
+\subsubsection{Arch Linux}
+\label{subsubsec:implementation_distributions_iso_arch_linux}
+
+\begin{wrapfigure}
+  {r}{.125\textwidth}
+  \centering
+  \includegraphics[width=.125\textwidth]{images/logos/arch.png}
+\end{wrapfigure}
+
+Arch Linux\footnote{\url{https://archlinux.org}} is a general-purpose
+distribution that focuses on simplicity, minimalism, and code elegance. It is based
+on Systemd init system () % TODO Systemd reference
+and strives to stay bleeding edge, offering the latest stable versions of most
+software through Pacman\footnote{\url{https://wiki.archlinux.org/title/Pacman}}
+package manager. Uses a rolling release system that allows one-time installation
+and perpetual software upgrades, allowing to not reinstall or upgrade the system
+from one version to the next. Notably, Arch Linux is the foundation for several
+many popular enterprise-grade distributions, such as Manjaro\footnote{\url{https://manjaro.org}}
+and SteamOS\footnote{\url{https://store.steampowered.com/steamos}},
+demonstrating its customizability, power, and stability\cite{arch_linux}.
+
+\section{Dependencies}
+\label{sec:implementation_dependencies}
+
+\subsection{Air-Gap Environment}
+\label{subsec:implementation_dependencies_air_gap_environment}
+
+\subsection{Management}
+\label{subsec:implementation_dependencies_management}
+
+\subsubsection{Configuration}
+\label{subsec:implementation_dependencies_management_configuration}
+
+\subsubsection{Script}
+\label{subsec:implementation_dependencies_management_script}
+
+\subsection{K3s}
+\label{subsec:implementation_dependencies_k3s}
+
+\begin{wrapfigure}
+  {r}{.125\textwidth}
+  \centering
+  \includegraphics[width=.125\textwidth]{images/logos/k3s.png}
+\end{wrapfigure}
+
+\subsection{Node Exporter}
+\label{subsec:implementation_dependencies_node_exporter}
+
+\subsection{Prometheus}
+\label{subsec:implementation_dependencies_prometheus}
+
+\begin{wrapfigure}
+  {r}{.125\textwidth}
+  \centering
+  \includegraphics[width=.125\textwidth]{images/logos/prometheus.png}
+\end{wrapfigure}
+
+\subsection{Autoscaler}
+\label{subsec:implementation_dependencies_autoscaler}
+
+\subsubsection{Cluster Autoscaler}
+\label{subsec:implementation_dependencies_autoscaler_cluster_autoscaler}
+
+\section{Installer}
+\label{sec:implementation_installer}
+
+\subsection{POSIX Shell}
+\label{subsec:implementation_installer_posix_shell}

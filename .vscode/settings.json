@@ -13,5 +13,7 @@
   "latex-workshop.latex.clean.subfolder.enabled": true,
   "latex-workshop.latex.outDir": "%WORKSPACE_FOLDER%/build",
   "latex-workshop.synctex.afterBuild.enabled": true,
-  "latex-workshop.view.pdf.zoom": "page-fit"
+  "latex-workshop.view.pdf.zoom": "page-fit",
+  "todo-tree.regex.regex": "((//|#|<!--|;|/\\*|^|%|\\\\)\\s*($TAGS)\\{*|^\\s*- \\[ \\])",
+  "todo-tree.regex.regexCaseSensitive": false
 }
