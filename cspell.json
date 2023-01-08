@@ -10,6 +10,7 @@
   ],
   "ignorePaths": ["**/build/", "**/coverage/", "**/node_modules/"],
   "words": [
+    "angeli",
     "autoscaler",
     "apress",
     "carlocorradini",
@@ -21,6 +22,7 @@
     "howpublished",
     "insourcing",
     "latexmk",
+    "maurizio",
     "nonstopmode",
     "outdir",
     "pacman",
