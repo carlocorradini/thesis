@@ -1,11 +1,101 @@
 \chapter{Projects}
 \label{cha:projects}
 
+During the development, I noticed that several portions of the code might be
+turned into independent libraries and utility scripts that may be valuable to
+other programmers as well as my single use-case scenario. Even though it is now external
+to reCluster, this software is still an essential part of it, which is now open to
+the entire community. \\ Shortly after the publication, I started receiving various
+feedback and contributions, but most importantly, appreciation (GitHub stars\footnote{\url{https://docs.github.com/en/get-started/exploring-projects-on-github/saving-repositories-with-stars}}):
+\begin{displayquote}
+  Starring a repository shows appreciation to the repository maintainer for their
+  work\cite{github_stars}
+\end{displayquote}
+% TODO Reference Philosophy and MIT
+The three projects derived from the development of reCluster are briefly
+illustrated and explained in the sections that follow. As stated in the Philosophy
+section, everything is completely Open Source and available under the MIT
+license.
+
 \section{Node Exporter Installer}
 \label{sec:projects_node_exporter_installer}
+
+Available at \url{https://github.com/carlocorradini/node\_exporter\_installer} \\
+% TODO Node exporter reference
+% TODO K3s reference
+Node exporter does not provide any installation script and the default procedure
+(see \url{https://github.com/prometheus/node_exporter#installation-and-usage}) is
+far from user-friendly and easily configurable. \\ Inspired by K3s \texttt{install.sh}\footnote{\url{https://github.com/k3s-io/k3s/blob/master/install.sh}}
+script, Node exporter installer helps the user by automatically installing Node
+exporter on the machine. Condensed in a single \texttt{install.sh} POSIX script,
+it is easily configurable (see section
+\ref{subsec:projects_node_exporter_installer_configuration}) and can be downloaded
+and piped directly to \texttt{sh} in a single line.
+
+\subsection{Example}
+\label{subsec:projects_node_exporter_installer_example}
+
+% TODO
+
+\subsection{Configuration}
+\label{subsec:projects_node_exporter_installer_configuration}
+
+\begin{tabularx}
+  {\textwidth} { l | X | c }
+
+  \multicolumn{1}{ c |}{\large{\textbf{Name}}} &
+  \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
+  \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hline \hline
+
+  \texttt{INSTALL\_NODE\_EXPORTER\_SKIP\_DOWNLOAD} & Skip downloading Node
+  exporter.
+  \newline
+  A local executable binary must already exist at \texttt{<BIN\_DIR>/node\_exporter}
+  \newline
+  Useful in an Air-Gapped environment. % TODO Air-Gap environment reference
+  & \texttt{false} \\ \hline
+
+  \texttt{INSTALL\_NODE\_EXPORTER\_FORCE\_RESTART} & Force restarting Node exporter
+  service. & \texttt{false} \\ \hline
+
+  \texttt{INSTALL\_NODE\_EXPORTER\_SKIP\_ENABLE} & Do not enable Node exporter service
+  at startup. & \texttt{false}\\ \hline
+
+  \texttt{INSTALL\_NODE\_EXPORTER\_SKIP\_START} & Do not start Node exporter
+  service. & \texttt{false} \\ \hline
+
+  \texttt{INSTALL\_NODE\_EXPORTER\_SKIP\_FIREWALL} & Do not apply any firewall
+  rules.
+  \newline
+  Supported firewalls are: \texttt{iptables}\footnote{\url{https://www.netfilter.org/projects/iptables}},
+  \texttt{firewalld}\footnote{\url{https://firewalld.org}} and \texttt{UFW}\footnote{\url{https://wiki.ubuntu.com/UncomplicatedFirewall}}.
+  & \texttt{false} \\ \hline
+
+  \texttt{INSTALL\_NODE\_EXPORTER\_SKIP\_SELINUX} & Do not change \texttt{SELinux\footnote{\url{https://selinuxproject.org}}}
+  context for Node exporter binary. & \texttt{false} \\ \hline
+
+  \texttt{INSTALL\_NODE\_EXPORTER\_VERSION} & Node exporter version to download.
+  & \texttt{latest} \\ \hline
+
+  \texttt{INSTALL\_NODE\_EXPORTER\_BIN\_DIR} & Directory where to install Node exporter
+  binary and uninstall script. & \makecell[Xt]{\centering{\texttt{/usr/local/bin} \\ or \\ \texttt{/opt/bin}}}
+  \\ \hline
+
+  \texttt{INSTALL\_NODE\_EXPORTER\_SYSTEMD\_DIR} & Directory where to install
+  Systemd service files. & \texttt{/etc/systemd/system} \\ \hline
+
+  \texttt{INSTALL\_NODE\_EXPORTER\_EXEC} & Node exporter arguments.
+  \newline
+  For a complete list of supported arguments see
+  \url{https://github.com/prometheus/node\_exporter\#collectors} & \\
+\end{tabularx}
 
 \section{Inline}
 \label{sec:projects_inline}
 
+Available at \url{https://github.com/carlocorradini/inline}
+
 \section{GraphQL Auth Directive}
 \label{sec:projects_graphql_auth_diretive}
+
+Available at \url{https://github.com/carlocorradini/graphql-auth-directive}
