@@ -5,97 +5,252 @@ During the development, I noticed that several portions of the code might be
 turned into independent libraries and utility scripts that may be valuable to
 other programmers as well as my single use-case scenario. Even though it is now external
 to reCluster, this software is still an essential part of it, which is now open to
-the entire community. \\ Shortly after the publication, I started receiving various
-feedback and contributions, but most importantly, appreciation (GitHub stars\footnote{\url{https://docs.github.com/en/get-started/exploring-projects-on-github/saving-repositories-with-stars}}):
+the entire community. \\ %
+Shortly after the publication, I started receiving various feedback and
+contributions, but most importantly, appreciation (GitHub stars\footnote{\url{https://docs.github.com/en/get-started/exploring-projects-on-github/saving-repositories-with-stars}}):
 \begin{displayquote}
   Starring a repository shows appreciation to the repository maintainer for their
   work\cite{github_stars}
 \end{displayquote}
 % TODO Reference Philosophy and MIT
-The three projects derived from the development of reCluster are briefly
-illustrated and explained in the sections that follow. As stated in the Philosophy
-section, everything is completely Open Source and available under the MIT
-license.
+The three projects derived from the development of reCluster are briefly illustrated
+and explained in the sections that follow. As stated in the Philosophy section, everything
+is completely Open Source and available under the MIT license.
 
 \section{Node Exporter Installer}
 \label{sec:projects_node_exporter_installer}
 
-Available at \url{https://github.com/carlocorradini/node\_exporter\_installer} \\
 % TODO Node exporter reference
 % TODO K3s reference
+Available at \url{https://github.com/carlocorradini/node\_exporter\_installer}
+\\ %
+Used while installing reCluster on a Node. \\ %
 Node exporter does not provide any installation script and the default procedure
 (see \url{https://github.com/prometheus/node_exporter#installation-and-usage}) is
-far from user-friendly and easily configurable. \\ Inspired by K3s \texttt{install.sh}\footnote{\url{https://github.com/k3s-io/k3s/blob/master/install.sh}}
-script, Node exporter installer helps the user by automatically installing Node
-exporter on the machine. Condensed in a single \texttt{install.sh} POSIX script,
-it is easily configurable (see section
-\ref{subsec:projects_node_exporter_installer_configuration}) and can be downloaded
-and piped directly to \texttt{sh} in a single line.
-
-\subsection{Example}
-\label{subsec:projects_node_exporter_installer_example}
-
-% TODO
+far from user-friendly and easily configurable. \\ %
+Inspired by K3s \texttt{install.sh}\footnote{\url{https://github.com/k3s-io/k3s/blob/master/install.sh}}
+script, Node exporter installer helps the user by automatically installing Node exporter
+on the machine. Condensed in a single \texttt{install.sh} POSIX script, it is
+easily configurable (see section \ref{subsec:projects_node_exporter_installer_configuration})
+and can be downloaded and executed directly by \texttt{sh} (see example
+\ref{subsubsec:projects_node_exporter_installer_example_basic}).
 
 \subsection{Configuration}
 \label{subsec:projects_node_exporter_installer_configuration}
 
-\begin{tabularx}
-  {\textwidth} { l | X | c }
+Node exporter installer accepts environment variables only as configuration
+parameters. This is done to avoid any potential conflict with the default behavior
+of Node exporter, which employs argument flags. See \url{https://github.com/prometheus/node\_exporter\#collectors}
+for a comprehensive list of Node exporter configuration parameters. \\ %
+The configuration settings allowed by Node exporter installer are shown in the table
+below.
+
+\begin{xltabular}
+  {\textwidth} { >{\ttfamily}l | X | >{\ttfamily}c }
 
   \multicolumn{1}{ c |}{\large{\textbf{Name}}} &
   \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
   \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hline \hline
 
-  \texttt{INSTALL\_NODE\_EXPORTER\_SKIP\_DOWNLOAD} & Skip downloading Node
-  exporter.
+  INSTALL\_NODE\_EXPORTER\_SKIP\_DOWNLOAD & Skip downloading Node exporter.
   \newline
   A local executable binary must already exist at \texttt{<BIN\_DIR>/node\_exporter}
   \newline
   Useful in an Air-Gapped environment. % TODO Air-Gap environment reference
-  & \texttt{false} \\ \hline
+  & false \\ \hline
 
-  \texttt{INSTALL\_NODE\_EXPORTER\_FORCE\_RESTART} & Force restarting Node exporter
-  service. & \texttt{false} \\ \hline
+  INSTALL\_NODE\_EXPORTER\_FORCE\_RESTART & Force restarting Node exporter
+  service. & false \\ \hline
 
-  \texttt{INSTALL\_NODE\_EXPORTER\_SKIP\_ENABLE} & Do not enable Node exporter service
-  at startup. & \texttt{false}\\ \hline
+  INSTALL\_NODE\_EXPORTER\_SKIP\_ENABLE & Do not enable Node exporter service at
+  startup. & false \\ \hline
 
-  \texttt{INSTALL\_NODE\_EXPORTER\_SKIP\_START} & Do not start Node exporter
-  service. & \texttt{false} \\ \hline
+  INSTALL\_NODE\_EXPORTER\_SKIP\_START & Do not start Node exporter service. & false
+  \\ \hline
 
-  \texttt{INSTALL\_NODE\_EXPORTER\_SKIP\_FIREWALL} & Do not apply any firewall
-  rules.
+  INSTALL\_NODE\_EXPORTER\_SKIP\_FIREWALL & Do not apply any firewall rules.
   \newline
   Supported firewalls are: \texttt{iptables}\footnote{\url{https://www.netfilter.org/projects/iptables}},
   \texttt{firewalld}\footnote{\url{https://firewalld.org}} and \texttt{UFW}\footnote{\url{https://wiki.ubuntu.com/UncomplicatedFirewall}}.
-  & \texttt{false} \\ \hline
+  & false \\ \hline
 
-  \texttt{INSTALL\_NODE\_EXPORTER\_SKIP\_SELINUX} & Do not change \texttt{SELinux\footnote{\url{https://selinuxproject.org}}}
-  context for Node exporter binary. & \texttt{false} \\ \hline
+  INSTALL\_NODE\_EXPORTER\_SKIP\_SELINUX & Do not change \texttt{SELinux\footnote{\url{https://selinuxproject.org}}}
+  context for Node exporter binary. & false \\ \hline
 
-  \texttt{INSTALL\_NODE\_EXPORTER\_VERSION} & Node exporter version to download.
-  & \texttt{latest} \\ \hline
-
-  \texttt{INSTALL\_NODE\_EXPORTER\_BIN\_DIR} & Directory where to install Node exporter
-  binary and uninstall script. & \makecell[Xt]{\centering{\texttt{/usr/local/bin} \\ or \\ \texttt{/opt/bin}}}
+  INSTALL\_NODE\_EXPORTER\_VERSION & Node exporter version to download. & latest
   \\ \hline
 
-  \texttt{INSTALL\_NODE\_EXPORTER\_SYSTEMD\_DIR} & Directory where to install
-  Systemd service files. & \texttt{/etc/systemd/system} \\ \hline
+  INSTALL\_NODE\_EXPORTER\_BIN\_DIR & Directory where to install Node exporter binary
+  and uninstall script. & \makecell[Xt]{\centering{/usr/local/bin \\ or \\ /opt/bin}}
+  \\ \hline
 
-  \texttt{INSTALL\_NODE\_EXPORTER\_EXEC} & Node exporter arguments.
-  \newline
-  For a complete list of supported arguments see
-  \url{https://github.com/prometheus/node\_exporter\#collectors} & \\
-\end{tabularx}
+  INSTALL\_NODE\_EXPORTER\_SYSTEMD\_DIR & Directory where to install Systemd service
+  files. & /etc/systemd/system \\ \hline
+
+  INSTALL\_NODE\_EXPORTER\_EXEC & Node exporter configuration flags. & \\
+
+  \caption{Node exporter installer configuration parameters}
+\end{xltabular}
+
+\subsection{Example}
+\label{subsec:projects_node_exporter_installer_example}
+
+This section shows some examples of how to use Node exporter installer. In both,
+we use \texttt{curl} (a command-line tool for getting or sending data using URL syntax\cite{curl})
+to download the script from \url{https://raw.githubusercontent.com/carlocorradini/node_exporter_installer/main/install.sh}
+and pipe (redirect the output of a program to the input of another program) the result
+to \texttt{sh} (UNIX shell command-line interpreter\footnote{\url{https://wikipedia.org/wiki/Unix_shell}})
+for execution.
+
+\subsubsection{Basic}
+\label{subsubsec:projects_node_exporter_installer_example_basic}
+
+Install Node exporter using the default configuration parameters for both installer
+and binary.
+
+\begin{lstlisting}[language=sh, morekeywords={curl, sh}, morestring={[s]{.sh}}, caption=Basic installation with default configuration parameters]
+  curl \
+    --silent \      # Do not show progress meter or error messages
+    --show-error \  # Show an error message if it fails
+    --fail \        # Fail fast with no output at all on server errors
+    --location \    # If the requested resource has moved, redo the request to the new location
+    "https://raw.githubusercontent.com/carlocorradini/node_exporter_installer/main/install.sh" \
+    | sh -
+\end{lstlisting}
+
+\subsubsection{Advanced}
+\label{subsubsec:projects_node_exporter_installer_example_advanced}
+
+Install Node exporter v1.5.0 without starting the service automatically. Disable
+all default collectors, leaving only CPU and memory statistics enabled.
+
+\begin{lstlisting}[language=sh, morekeywords={curl, sh}, caption=Advanced installation with custom configuration parameters]
+  curl \
+    ... \
+    | INSTALL_NODE_EXPORTER_VERSION="v1.5.0" \   # Download and install Node exporter v1.5.0
+      INSTALL_NODE_EXPORTER_SKIP_START="true" \  # Do not start Node exporter service
+      sh - \
+        --collector.disable-defaults \             # Disable default collectors
+        --collector.cpu \                          # Expose CPU statistics
+        --collector.meminfo                        # Expose memory statistics
+\end{lstlisting}
 
 \section{Inline}
 \label{sec:projects_inline}
 
-Available at \url{https://github.com/carlocorradini/inline}
+% TODO Bundle reference
+Available at \url{https://github.com/carlocorradini/inline} \\ %
+Used while generating the final release bundle for distribution. \\ %
+It is useful to be able to split a large script into many files to make it
+easier to work with while still being able to distribute it as a single script. This
+program reads an input file and produces an output file with all of the sources inlined.
+\\ %
+The source command, \texttt{.\ <FILE>} for POSIX shells or \texttt{source <FILE>}
+for non-POSIX shells (e.g. Bash\footnote{\url{https://www.gnu.org/software/bash}}),
+read, and executes commands from the file specified in the current shell environment.
+It is useful to load functions, variables, and configuration files into the
+current shell context\cite{source}. \\ %
+Inline is a static tool that does not execute the input script. As a result, it cannot
+determine the value of a variable dynamically if it is used inside the source command
+path (i.e. \texttt{source "\$DIR/path/to/script/sh"}). To avoid this, inline
+requires a hint on where to find the specified file.
+
+\subsection{Features}
+\label{subsec:projects_inline_features}
+
+Many helpful features of Inline are described below.
+
+\begin{itemize}
+  \item POSIX standard-compliant.
+
+  \item Sourcing with quotes, spaces, and more.
+
+  \item Sourcing from global variable \texttt{\$PATH}.
+
+  \item Sourcing from \texttt{ShellCheck} (a shell script static analysis tool\footnote{\url{https://www.shellcheck.net}})
+    source directive\footnote{\url{https://www.shellcheck.net/wiki/Directive}}.
+    \newline
+    This is considered a hint to Inline and is used only if the source path is invalid.
+    \newline
+    \begin{lstlisting}[language=sh, morekeywords={., source}, numbers=none, aboveskip=0pt, belowskip=0pt, abovecaptionskip=0pt, belowcaptionskip=0pt]
+      # shellcheck source=path/to/script.sh
+      . "$DIR/path/to/script.sh"
+
+      # shellcheck source=path/to/script.sh
+      source "$DIR/path/to/script.sh"
+    \end{lstlisting}
+
+  \item Recursive sources. If a sourced file contains additional source commands,
+    they are also inlined and included in the final output script.
+    \newline
+    It should be noted that these can cause infinite recursion.
+
+  \item Recursion detection. To avoid infinite recursion, an exception is thrown
+    if a file is sourced multiple times. This is accomplished through the use of
+    an internal cache that saves the absolute path to each sourced file. If the path
+    to a script file in a source command is already in the cache, a recursion is
+    detected.
+
+  \item Shebang removal in sourced files.
+    \newline
+    A shebang is the character sequence consisting of the characters number sign
+    and exclamation mark (\texttt{\#!}) at the beginning of a script. In a Unix-like
+    operating system, when a text file with a shebang is used as if it is an
+    executable, the program loader executes the specified interpreter program,
+    passing as an argument the path that was initially used when attempting to
+    run the script, so that the program can use the file as input data\cite{shebang}
+    \newline
+    The shell interpreter only allows one shebang per script. As a result, the
+    shebang is only allowed in the input script file, while it is automatically removed
+    in all sourced script files.
+\end{itemize}
+
+\subsection{Configuration}
+\label{subsec:projects_inline_configuration}
+
+\begin{xltabular}
+  {\textwidth} { >{\ttfamily}l | X | >{\ttfamily}c }
+
+  \multicolumn{1}{ c |}{\large{\textbf{Name}}} &
+  \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
+  \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hline \hline
+
+  --in-file <FILE> & Input script file (\texttt{<FILE>}).
+  \newline
+  If the file does not exist, an error is thrown. & \\ \hline
+
+  --out-file <FILE> & Output script file (\texttt{<FILE>}). & \\ \hline
+
+  --overwrite & & false \\ \hline
+
+  --log-level <LEVEL> & & info \\ \hline
+
+  --disable-color & & false \\ \hline
+
+  --help & Display a help message and then exit. & \\
+
+  \caption{TODO}
+\end{xltabular}
+
+\subsection{Example}
+\label{subsec:projects_inline_example}
 
 \section{GraphQL Auth Directive}
 \label{sec:projects_graphql_auth_diretive}
 
-Available at \url{https://github.com/carlocorradini/graphql-auth-directive}
+% TODO GraphQL reference
+Available at \url{https://github.com/carlocorradini/graphql-auth-directive} \\ %
+Used in the \texttt{GraphQL} API to protect resources from unauthenticated and
+unauthorized access in high-security contexts. \\ %
+
+\subsection{Configuration}
+\label{subsec:projects_graphql_auth_diretive_configuration}
+
+\begin{xltabular}
+  {\textwidth} { >{\ttfamily}l | X | >{\ttfamily}c }
+
+  \multicolumn{1}{ c |}{\large{\textbf{Name}}} &
+  \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
+  \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hline \hline
+  \caption{TODO}
+\end{xltabular}

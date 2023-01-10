@@ -17,6 +17,7 @@
 \setcounter{tocdepth}{3}
 % Letter
 \usepackage[utf8]{inputenc}
+\usepackage{bold-extra}
 % Language
 \usepackage[english]{babel}
 % PDF/A
@@ -28,15 +29,46 @@
 \usepackage{xurl}
 \usepackage[pdfa]{hyperref}
 \hypersetup{breaklinks=true}
-\urlstyle{same}
 % Quote
 \usepackage{csquotes}
 \usepackage{epigraph}
 \renewcommand{\mkbegdispquote}[2]{\itshape}
 % Table
-\usepackage{tabularx}
 \usepackage{makecell}
-
+\usepackage{xltabular}
+\usepackage{caption}
+\captionsetup[table]{position=bottom}
+% Code
+\usepackage{listings}
+\usepackage{lstautogobble}
+\usepackage{xcolor}
+\definecolor{gray}{RGB}{102,102,102}
+\definecolor{green}{RGB}{0,153,0}
+\definecolor{red}{RGB}{196,122,91}
+\lstset{ %
+basicstyle=\ttfamily\footnotesize, %
+columns=fullflexible, %
+showstringspaces=false, %
+numbers=left, %
+numberstyle=\tiny\color{gray}, %
+numbersep=5pt, %
+backgroundcolor=\color{white}, %
+showspaces=false, %
+showstringspaces=false, %
+showtabs=false, %
+stringstyle=\color{red}, %
+frame=lines, %
+rulecolor=\color{black}, %
+tabsize=2, %
+captionpos=b, %
+breaklines=true, %
+breakatwhitespace=false, %
+keepspaces=true, %
+title=\lstname, %
+commentstyle=\color{green}\upshape, %
+autogobble=true, %
+keywordstyle=\bfseries %
+}
 
 % Document
 \begin{document}
