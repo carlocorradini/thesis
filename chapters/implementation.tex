@@ -3,6 +3,204 @@
 
 \epigraph{Ideas are easy, Implementation is hard.}{Guy Kawasaki}
 
+\section{Distributions}
+\label{sec:implementation_distributions}
+
+% TODO Reference introduction dependencies
+
+\subsection{Packages}
+\label{subsec:implementation_distributions_packages}
+
+\subsection{Init System}
+\label{subsec:implementation_distributions_init_system}
+
+\subsubsection{OpenRC}
+\label{subsec:implementation_distributions_init_system_openrc}
+
+\subsubsection{Systemd}
+\label{subsec:implementation_distributions_init_system_systemd}
+
+\subsection{ISO image}
+\label{subsec:implementation_distributions_iso_image}
+
+\subsubsection{Generation}
+\label{subsubsec:implementation_distributions_iso_generation}
+
+\subsubsection{Alpine Linux}
+\label{subsubsec:implementation_distributions_iso_alpine_linux}
+
+\begin{wrapfigure}
+  {r}{.25\textwidth}
+  \centering
+  \includegraphics[width=.25\textwidth]{images/logos/alpine.png}
+  \caption{Alpine Linux logo}
+\end{wrapfigure}
+
+Alpine Linux\footnote{\url{https://www.alpinelinux.org}} is a lightweight, security-focused,
+and resource-efficient distribution. In recent years, has grown in popularity as
+the foundation for the majority of Docker images. It is based on musl\footnote{\url{https://musl.libc.org}}
+(an implementation of the C standard library, an alternative to glibc), BusyBox\footnote{\url{https://busybox.net}}
+(a single, small executable that combines tiny versions of many common UNIX utilities),
+a custom package manager called APK\footnote{\url{https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper}}
+and the OpenRC init system ()\cite{alpine_linux}. \\ % TODO OpenRC reference
+Alpine Linux is the preferred reCluster distribution. It has been utilized and
+tested during development and is now present in every cluster node.
+
+\subsubsection{Arch Linux}
+\label{subsubsec:implementation_distributions_iso_arch_linux}
+
+\begin{wrapfigure}
+  {r}{.25\textwidth}
+  \centering
+  \includegraphics[width=.25\textwidth]{images/logos/arch.png}
+  \caption{Arch Linux logo}
+\end{wrapfigure}
+
+Arch Linux\footnote{\url{https://archlinux.org}} is a general-purpose
+distribution that focuses on simplicity, minimalism, and code elegance. It is based
+on Systemd init system () % TODO Systemd reference
+and strives to stay bleeding edge, offering the latest stable versions of most
+software through Pacman\footnote{\url{https://wiki.archlinux.org/title/Pacman}}
+package manager. Uses a rolling release system that allows one-time installation
+and perpetual software upgrades, allowing to not reinstall or upgrade the system
+from one version to the next. Notably, Arch Linux is the foundation for several
+many popular enterprise-grade distributions, such as Manjaro\footnote{\url{https://manjaro.org}}
+and SteamOS\footnote{\url{https://store.steampowered.com/steamos}},
+demonstrating its customizability, power, and stability\cite{arch_linux}.
+
+\section{Dependencies}
+\label{sec:implementation_dependencies}
+
+% TODO Dependencies presentation
+
+\subsection{Air-Gap Environment}
+\label{subsec:implementation_dependencies_air_gap_environment}
+
+\subsection{Management}
+\label{subsec:implementation_dependencies_management}
+
+\subsubsection{Configuration}
+\label{subsec:implementation_dependencies_management_configuration}
+
+\subsubsection{Script}
+\label{subsec:implementation_dependencies_management_script}
+
+\subsection{K3s}
+\label{subsec:implementation_dependencies_k3s}
+
+\begin{wrapfigure}
+  {r}{.25\textwidth}
+  \centering
+  \includegraphics[width=.25\textwidth]{images/logos/k3s.png}
+  \caption{K3s logo}
+\end{wrapfigure}
+
+\subsection{Node Exporter}
+\label{subsec:implementation_dependencies_node_exporter}
+
+\subsection{Prometheus}
+\label{subsec:implementation_dependencies_prometheus}
+
+\begin{wrapfigure}
+  {r}{.25\textwidth}
+  \centering
+  \includegraphics[width=.25\textwidth]{images/logos/prometheus.png}
+  \caption{Prometheus logo}
+\end{wrapfigure}
+
+\subsection{Autoscaler}
+\label{subsec:implementation_dependencies_autoscaler}
+
+\subsubsection{Cluster Autoscaler}
+\label{subsec:implementation_dependencies_autoscaler_cluster_autoscaler}
+
+\section{Installer}
+\label{sec:implementation_installer}
+
+\subsection{POSIX Shell}
+\label{subsec:implementation_installer_posix_shell}
+
+\subsection{Configuration Arguments}
+\label{subsec:implementation_installer_configuration_arguments}
+
+\subsection{Configuration Files}
+\label{subsec:implementation_installer_configuration_files}
+
+\subsubsection{Certificates}
+\label{subsubsec:implementation_installer_configuration_files_certificates}
+
+\subsubsection{K3s}
+\label{subsubsec:implementation_installer_configuration_files_k3s}
+
+\subsubsection{K8s}
+\label{subsubsec:implementation_installer_configuration_filesn_k8s}
+
+\subsubsection{Node exporter}
+\label{subsubsec:implementation_installer_configuration_files_node_exporter}
+
+\subsubsection{reCluster}
+\label{subsubsec:implementation_installer_configuration_files_recluster}
+
+\subsubsection{SSH}
+\label{subsubsec:implementation_installer_configuration_files_ssh}
+
+\subsection{Node Facts}
+\label{subsec:implementation_installer_node_facts}
+
+\subsection{Node Information}
+\label{subsec:implementation_installer_node_information}
+
+\subsection{Node Benchmarks}
+\label{subsec:implementation_installer_node_benchmarks}
+
+\subsubsection{SysBench}
+\label{subsubsec:implementation_installer_node_benchmarks_sysbench}
+
+\subsection{Node Power Consumption}
+\label{subsec:implementation_installer_node_power_consumption}
+
+\subsubsection{CloudFree Smart Plug}
+\label{subsubsec:implementation_installer_node_power_consumption_cloudfree_smart_plug}
+
+\subsection{Node Registration}
+\label{subsec:implementation_installer_node_registration}
+
+\subsubsection{K8s Node Label And Name}
+\label{subsubsec:implementation_installer_node_registration_k8s_node_label_and_name}
+
+\subsection{Cluster Initialization}
+\label{subsec:implementation_installer_cluster_initialization}
+
+\subsubsection{Kubeconfig}
+\label{subsubsec:implementation_installer_cluster_initialization_kubeconfig}
+
+\subsubsection{Database}
+\label{subsubsec:implementation_installer_cluster_initialization_database}
+
+\subsubsection{Server}
+\label{subsubsec:implementation_installer_cluster_initialization_server}
+
+\subsubsection{Admin And Autoscaler Users}
+\label{subsubsec:implementation_installer_cluster_initialization_admin_and_autoscaler_users}
+
+\subsubsection{K8s}
+\label{subsubsec:implementation_installer_cluster_initialization_k8s}
+
+\subsection{Services}
+\label{subsec:implementation_installer_services}
+
+\subsubsection{Start}
+\label{subsubsec:implementation_installer_services_start}
+
+\subsubsection{Stop}
+\label{subsubsec:implementation_installer_services_stop}
+
+\subsubsection{Boot}
+\label{subsubsec:implementation_installer_services_boot}
+
+\subsubsection{Shutdown}
+\label{subsubsec:implementation_installer_services_shutdown}
+
 \section{Server}
 \label{sec:implementation_server}
 
@@ -62,196 +260,28 @@
 \subsubsection{SSH}
 \label{subsubsec:implementation_server_scale_up_ssh}
 
-\section{Distributions}
-\label{sec:implementation_distributions}
+\section{Autoscaling}
+\label{sec:implementation_autoscaling}
 
-\subsection{Packages}
-\label{subsec:implementation_distributions_packages}
+\subsection{Vertical Pod Autoscaler}
+\label{subsec:implementation_autoscaling_vertical_pod_autoscaler}
 
-\subsection{Init System}
-\label{subsec:implementation_distributions_init_system}
+\subsection{Horizontal Pod Autoscaler}
+\label{subsec:implementation_autoscaling_horizontal_pod_autoscaler}
 
-\subsubsection{OpenRC}
-\label{subsec:implementation_distributions_init_system_openrc}
+\subsection{Cluster Autoscaler}
+\label{subsec:implementation_autoscaling_cluster_autoscaler}
 
-\subsubsection{Systemd}
-\label{subsec:implementation_distributions_init_system_systemd}
-
-\subsection{ISO}
-\label{subsec:implementation_distributions_iso}
-
-\subsubsection{Generation}
-\label{subsubsec:implementation_distributions_iso_generation}
-
-\subsubsection{Alpine Linux}
-\label{subsubsec:implementation_distributions_iso_alpine_linux}
-
-\begin{wrapfigure}
-  {r}{.25\textwidth}
-  \centering
-  \includegraphics[width=.25\textwidth]{images/logos/alpine.png}
-  \caption{Alpine Linux logo}
-\end{wrapfigure}
-
-Alpine Linux\footnote{\url{https://www.alpinelinux.org}} is a lightweight, security-focused,
-and resource-efficient distribution. In recent years, has grown in popularity as
-the foundation for the majority of Docker images. It is based on musl\footnote{\url{https://musl.libc.org}}
-(an implementation of the C standard library, an alternative to glibc), BusyBox\footnote{\url{https://busybox.net}}
-(a single, small executable that combines tiny versions of many common UNIX utilities),
-a custom package manager called APK\footnote{\url{https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper}}
-and the OpenRC init system ()\cite{alpine_linux}. \\ % TODO OpenRC reference
-Alpine Linux is the preferred reCluster distribution. It has been utilized and
-tested during development and is now present in every cluster node.
-
-\subsubsection{Arch Linux}
-\label{subsubsec:implementation_distributions_iso_arch_linux}
-
-\begin{wrapfigure}
-  {r}{.25\textwidth}
-  \centering
-  \includegraphics[width=.25\textwidth]{images/logos/arch.png}
-  \caption{Arch Linux logo}
-\end{wrapfigure}
-
-Arch Linux\footnote{\url{https://archlinux.org}} is a general-purpose
-distribution that focuses on simplicity, minimalism, and code elegance. It is based
-on Systemd init system () % TODO Systemd reference
-and strives to stay bleeding edge, offering the latest stable versions of most
-software through Pacman\footnote{\url{https://wiki.archlinux.org/title/Pacman}}
-package manager. Uses a rolling release system that allows one-time installation
-and perpetual software upgrades, allowing to not reinstall or upgrade the system
-from one version to the next. Notably, Arch Linux is the foundation for several
-many popular enterprise-grade distributions, such as Manjaro\footnote{\url{https://manjaro.org}}
-and SteamOS\footnote{\url{https://store.steampowered.com/steamos}},
-demonstrating its customizability, power, and stability\cite{arch_linux}.
-
-\section{Dependencies}
-\label{sec:implementation_dependencies}
-
-\subsection{Air-Gap Environment}
-\label{subsec:implementation_dependencies_air_gap_environment}
-
-\subsection{Management}
-\label{subsec:implementation_dependencies_management}
+\subsubsection{Cloud Provider}
+\label{subsubsec:implementation_autoscaling_cluster_autoscaler_cloud_provider}
 
 \subsubsection{Configuration}
-\label{subsec:implementation_dependencies_management_configuration}
+\label{subsubsec:implementation_autoscaling_cluster_autoscaler_configuration}
 
-\subsubsection{Script}
-\label{subsec:implementation_dependencies_management_script}
+% TODO Cloud Configuration
 
-\subsection{K3s}
-\label{subsec:implementation_dependencies_k3s}
+\subsubsection{Upscaling}
+\label{subsubsec:implementation_autoscaling_cluster_autoscaler_upscaling}
 
-\begin{wrapfigure}
-  {r}{.25\textwidth}
-  \centering
-  \includegraphics[width=.25\textwidth]{images/logos/k3s.png}
-  \caption{K3s logo}
-\end{wrapfigure}
-
-\subsection{Node Exporter}
-\label{subsec:implementation_dependencies_node_exporter}
-
-\subsection{Prometheus}
-\label{subsec:implementation_dependencies_prometheus}
-
-\begin{wrapfigure}
-  {r}{.25\textwidth}
-  \centering
-  \includegraphics[width=.25\textwidth]{images/logos/prometheus.png}
-  \caption{Prometheus logo}
-\end{wrapfigure}
-
-\subsection{Autoscaler}
-\label{subsec:implementation_dependencies_autoscaler}
-
-\subsubsection{Cluster Autoscaler}
-\label{subsec:implementation_dependencies_autoscaler_cluster_autoscaler}
-
-\section{Configuration}
-\label{sec:implementation_configuration}
-
-\subsection{Certificates}
-\label{subsec:implementation_configuration_certificates}
-
-\subsection{K3s}
-\label{subsec:implementation_configuration_k3s}
-
-\subsection{K8s}
-\label{subsec:implementation_configuration_k8s}
-
-\subsection{Node exporter}
-\label{subsec:implementation_configuration_node_exporter}
-
-\subsection{reCluster}
-\label{subsec:implementation_configuration_recluster}
-
-\subsection{SSH}
-\label{subsec:implementation_configuration_ssh}
-
-\section{Installer}
-\label{sec:implementation_installer}
-
-\subsection{POSIX Shell}
-\label{subsec:implementation_installer_posix_shell}
-
-\subsection{Configuration Arguments}
-\label{subsec:implementation_installer_configuration_arguments}
-
-\subsection{Node Facts}
-\label{subsec:implementation_installer_node_facts}
-
-\subsection{Node Information}
-\label{subsec:implementation_installer_node_information}
-
-\subsection{Node Benchmarks}
-\label{subsec:implementation_installer_node_benchmarks}
-
-\subsubsection{SysBench}
-\label{subsubsec:implementation_installer_node_benchmarks_sysbench}
-
-\subsection{Node Power Consumption}
-\label{subsec:implementation_installer_node_power_consumption}
-
-\subsubsection{CloudFree Smart Plug}
-\label{subsubsec:implementation_installer_node_power_consumption_cloudfree_smart_plug}
-
-\subsection{Node Registration}
-\label{subsec:implementation_installer_node_registration}
-
-\subsubsection{K8s Node Label And Name}
-\label{subsubsec:implementation_installer_node_registration_k8s_node_label_and_name}
-
-\subsection{Cluster Initialization}
-\label{subsec:implementation_installer_cluster_initialization}
-
-\subsubsection{Kubeconfig}
-\label{subsubsec:implementation_installer_cluster_initialization_kubeconfig}
-
-\subsubsection{Database}
-\label{subsubsec:implementation_installer_cluster_initialization_database}
-
-\subsubsection{Server}
-\label{subsubsec:implementation_installer_cluster_initialization_server}
-
-\subsubsection{Admin And Autoscaler Users}
-\label{subsubsec:implementation_installer_cluster_initialization_admin_and_autoscaler_users}
-
-\subsubsection{K8s}
-\label{subsubsec:implementation_installer_cluster_initialization_k8s}
-
-\subsection{Services}
-\label{subsec:implementation_installer_services}
-
-\subsubsection{Start}
-\label{subsubsec:implementation_installer_services_start}
-
-\subsubsection{Stop}
-\label{subsubsec:implementation_installer_services_stop}
-
-\subsubsection{Boot}
-\label{subsubsec:implementation_installer_services_boot}
-
-\subsubsection{Shutdown}
-\label{subsubsec:implementation_installer_services_shutdown}
+\subsubsection{Downscaling}
+\label{subsubsec:implementation_autoscaling_cluster_autoscaler_downscaling}

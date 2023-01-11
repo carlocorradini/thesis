@@ -38,6 +38,7 @@
     "pacman",
     "posix",
     "postbuild",
+    "recluster",
     "rulecolor",
     "shellcheck",
     "showspaces",
