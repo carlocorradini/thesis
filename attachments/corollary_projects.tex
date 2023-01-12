@@ -8,38 +8,40 @@ to reCluster, this software is still an essential part of it, which is now open 
 the entire community. \\ %
 Shortly after the publication, I began receiving some feedback, contributions,
 and, most importantly, appreciation in the form of GitHub stars\footnote{\url{https://docs.github.com/en/get-started/exploring-projects-on-github/saving-repositories-with-stars}}.
+\\ %
 % TODO Reference Philosophy and MIT
-The three projects derived from the development of reCluster are briefly illustrated
-and explained in the sections that follow. As stated in the Philosophy section, everything
-is completely Open Source and available under the MIT license.
+The three projects derived from the development of reCluster are briefly
+illustrated and explained in the sections that follow. As stated in the Philosophy
+section, everything is completely Open Source and available under the MIT
+license.
 
 \section{Node Exporter Installer}
 \label{sec:corollary_projects_node_exporter_installer}
 
 % TODO Node exporter reference
 % TODO K3s reference
-Available at \url{https://github.com/carlocorradini/node\_exporter\_installer}
-\\ %
+Available at \url{https://github.com/carlocorradini/node\_exporter\_installer} \\ %
 Used while installing reCluster on a Node. \\ %
 Node exporter does not provide any installation script and the default procedure
-(see \url{https://github.com/prometheus/node_exporter#installation-and-usage}) is
-far from user-friendly and easily configurable. \\ %
+(see \url{https://github.com/prometheus/node_exporter#installation-and-usage})
+is far from user-friendly and easily configurable. \\ %
 Inspired by K3s \texttt{install.sh}\footnote{\url{https://github.com/k3s-io/k3s/blob/master/install.sh}}
-script, Node exporter installer helps the user by automatically installing Node exporter
-on the machine. Condensed in a single \texttt{install.sh} POSIX script, it is
-easily configurable (see section \ref{subsec:corollary_projects_node_exporter_installer_configuration})
-and can be downloaded and executed directly by \texttt{sh} (see example
-\ref{subsubsec:corollary_projects_node_exporter_installer_example_basic}).
+script, Node exporter installer helps the user by automatically installing Node
+exporter on the machine. Condensed in a single \texttt{install.sh} POSIX script,
+it is easily configurable (see section
+\ref{subsec:corollary_projects_node_exporter_installer_configuration}) and can be
+downloaded and executed directly by \texttt{sh} (see example \ref{subsubsec:corollary_projects_node_exporter_installer_example_basic}).
 
 \subsection{Configuration}
 \label{subsec:corollary_projects_node_exporter_installer_configuration}
 
-Node exporter installer accepts environment variables only as configuration
-parameters. This is done to avoid any potential conflict with the default behavior
-of Node exporter, which employs argument flags. See \url{https://github.com/prometheus/node\_exporter\#collectors}
-for a comprehensive list of Node exporter configuration parameters. \\ %
-The configuration settings allowed by Node exporter installer are shown in the table
-below.
+Node exporter installer accepts environment variables only as configuration parameters.
+This is done to avoid any potential conflict with the default behavior of Node
+exporter, which employs argument flags. See
+\url{https://github.com/prometheus/node\_exporter\#collectors} for a
+comprehensive list of Node exporter configuration parameters. \\ %
+The configuration settings allowed by Node exporter installer are shown in the
+table below.
 
 \begin{xltabular}
   {\textwidth} { >{\ttfamily}l | X | >{\ttfamily}c }
@@ -92,19 +94,20 @@ below.
 \label{subsec:corollary_projects_node_exporter_installer_example}
 
 This section shows some examples of how to use Node exporter installer. In both,
-we use \texttt{curl} (a command-line tool for getting or sending data using URL syntax\cite{curl})
-to download the script from \url{https://raw.githubusercontent.com/carlocorradini/node_exporter_installer/main/install.sh}
-and pipe (redirect the output of a program to the input of another program) the result
-to \texttt{sh} (UNIX shell command-line interpreter\footnote{\url{https://wikipedia.org/wiki/Unix_shell}})
+we use \texttt{curl} (a command-line tool for getting or sending data using URL
+syntax\cite{curl}) to download the script from
+\url{https://raw.githubusercontent.com/carlocorradini/node_exporter_installer/main/install.sh}
+and pipe (redirect the output of a program to the input of another program) the
+result to \texttt{sh} (UNIX shell command-line interpreter\footnote{\url{https://wikipedia.org/wiki/Unix_shell}})
 for execution.
 
 \subsubsection{Basic}
 \label{subsubsec:corollary_projects_node_exporter_installer_example_basic}
 
-Install Node exporter using the default configuration parameters for both installer
-and binary.
+Install Node exporter using the default configuration parameters for both
+installer and binary.
 
-\begin{lstlisting}[language=sh, morekeywords={curl, sh}, morestring={[s]{.sh}}, caption=Basic installation with default configuration parameters]
+\begin{lstlisting}[language=sh, morekeywords={curl, sh}, morestring={[s]{.sh}}, xleftmargin=\parindent, caption=Basic installation with default configuration parameters]
   curl \
     --silent \      # Do not show progress meter or error messages
     --show-error \  # Show an error message if it fails
@@ -120,7 +123,7 @@ and binary.
 Install Node exporter v1.5.0 without starting the service automatically. Disable
 all default collectors, leaving only CPU and memory statistics enabled.
 
-\begin{lstlisting}[language=sh, morekeywords={curl, sh}, caption=Advanced installation with custom configuration parameters]
+\begin{lstlisting}[language=sh, morekeywords={curl, sh}, xleftmargin=\parindent, caption=Advanced installation with custom configuration parameters]
   curl \
     ... \
     | INSTALL_NODE_EXPORTER_VERSION="v1.5.0" \   # Download and install Node exporter v1.5.0
@@ -137,19 +140,19 @@ all default collectors, leaving only CPU and memory statistics enabled.
 % TODO Bundle reference
 Available at \url{https://github.com/carlocorradini/inline} \\ %
 Used while generating the final release bundle for distribution. \\ %
-It is useful to be able to split a large script into many files to make it
-easier to work with while still being able to distribute it as a single script. This
-program reads an input file and produces an output file with all of the sources inlined.
-\\ %
+It is useful to be able to split a large script into many files to make it easier
+to work with while still being able to distribute it as a single script. This
+program reads an input file and produces an output file with all of the sources
+inlined. \\ %
 The source command, \texttt{.\ <FILE>} for POSIX shells or \texttt{source <FILE>}
 for non-POSIX shells (e.g. Bash\footnote{\url{https://www.gnu.org/software/bash}}),
-read, and executes commands from the file specified in the current shell environment.
-It is useful to load functions, variables, and configuration files into the
-current shell context\cite{source}. \\ %
-Inline is a static tool that does not execute the input script. As a result, it cannot
-determine the value of a variable dynamically if it is used inside the source command
-path (i.e. \texttt{source "\$DIR/path/to/script/sh"}). To avoid this, inline
-requires a hint on where to find the specified file.
+read, and executes commands from the file specified in the current shell
+environment. It is useful to load functions, variables, and configuration files into
+the current shell context\cite{source}. \\ %
+Inline is a static tool that does not execute the input script. As a result, it
+cannot determine the value of a variable dynamically if it is used inside the
+source command path (i.e. \texttt{source "\$DIR/path/to/script/sh"}). To avoid
+this, inline requires a hint on where to find the specified file.
 
 \subsection{Features}
 \label{subsec:corollary_projects_inline_features}
@@ -223,6 +226,11 @@ Many helpful features of Inline are described below.
 \subsection{Configuration}
 \label{subsec:corollary_projects_inline_configuration}
 
+Inline's behavior is easily customizable by using argument flags, which begin with
+a double dash followed by the property name and an optional value (\texttt{--NAME
+[VALUE]}). \\ %
+The accepted configuration parameters are listed in the table below.
+
 \begin{xltabular}
   {\textwidth} { >{\ttfamily}l | X | >{\ttfamily}c }
 
@@ -234,29 +242,133 @@ Many helpful features of Inline are described below.
   \newline
   If the file does not exist, an error is thrown. & \\ \hline
 
-  --out-file <FILE> & Output script file (\texttt{<FILE>}). & \\ \hline
+  --out-file <FILE> & Output script file (\texttt{<FILE>}).
+  \newline
+  If a file with the same name and path already exists, an error is thrown.
+  Unless the \texttt{--overwrite} argument is given, the latter is always true (see
+  option below).
+  \newline
+  If no value is specified, the name of the output file is determined by
+  examining the original input file. The first portion is the original name,
+  followed by a \texttt{.inlined} string, and finally, if present, the extension
+  (usually \texttt{.sh}). & <NAME>.inlined[EXTENSION] \\ \hline
 
-  --overwrite & & false \\ \hline
+  --overwrite & Replace the input file.
+  \newline
+  The inlined result replaces the original file content. This is the same as
+  setting the output file's value as the original input file, except that the existence
+  check is bypassed (see option above). & false \\ \hline
 
-  --log-level <LEVEL> & & info \\ \hline
+  --log-level <LEVEL> & Logging level (\texttt{<LEVEL>}).
+  \newline
+  A level is chosen from the list below (in descending order of priority), with
+  the expectation that lower levels are ignored in favor of the higher ones.
+  \begin{itemize}[noitemsep]
+    \item \texttt{fatal}
+      \newline
+      Extremely serious error events that most likely cause the program to
+      terminate.
 
-  --disable-color & & false \\ \hline
+    \item \texttt{warn}
+      \newline
+      Potentially dangerous conditions.
 
-  --help & Display a help message and then exit. & \\
+    \item \texttt{info}
+      \newline
+      Informational messages that emphasize the application's progress at a
+      coarse-grained level.
 
-  \caption{TODO}
+    \item \texttt{debug}
+      \newline
+      Fine-grained informative events are most helpful when debugging an
+      application.
+
+    \item \texttt{silent}
+      \newline
+      Disable logging.
+  \end{itemize}
+  & info \\ \hline
+
+  --disable-color & Disable terminal colors (enabled by default). & false \\ \hline
+
+  --help & Display a help message and terminate (successfully). & \\
+
+  \caption{Inline configuration parameters}
 \end{xltabular}
 
 \subsection{Example}
 \label{subsec:corollary_projects_inline_example}
 
+This section provides an example of how Inline works and how it may be used. \\ %
+There are two script files, both of which begin with a shebang. There is a print
+command in the first file, \texttt{hello.sh}, that outputs \texttt{Hello} and an
+empty space, followed by a source command that includes the script file \texttt{world.sh}.
+The format of the second file, \texttt{world.sh}, is the same as the first, except
+that the print command outputs \texttt{World!} and the newline character (\texttt{\char`\\n}),
+and there are no source commands. \\ %
+The following two listings show the contents of the two files:
+
+\noindent
+\hspace{.775\parindent}
+\begin{minipage}[t]{.45\textwidth}
+  \begin{lstlisting}[language=sh, morekeywords={., printf}, caption=Input script \texttt{hello.sh}]
+    #!/usr/bin/env sh
+
+    printf "Hello "
+
+    . "world.sh"
+  \end{lstlisting}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{.45\textwidth}
+  \begin{lstlisting}[language=sh, morekeywords={., printf}, caption=Sourced script \texttt{world.sh}]
+    #!/usr/bin/env sh
+
+    printf "World!\n"
+  \end{lstlisting}
+\end{minipage}
+
+The goal is to inline the script file \texttt{hello.sh} and produce an output
+file that has no source commands. When the command %
+\lstinline[language=sh, deletekeywords={in}, alsoletter={.}, morekeywords={inline.sh}]{./inline.sh --in-file "hello.sh"} %
+is executed, the following result is obtained:
+
+\begin{lstlisting}[language=sh, morekeywords={., printf}, xleftmargin=\parindent, caption=Inlined script \texttt{hello.inlined.sh}]
+  #!/usr/bin/env sh
+
+  printf "Hello "
+
+  # . "world.sh"
+
+  printf "World!\n"
+\end{lstlisting}
+
+Note the unique shebang as well as the source command that has been commented
+out with the symbol \texttt{\#}. Furthermore, because no \texttt{--out-file}
+option is used, the final output file is named \texttt{hello.inlined.sh}, which does
+not override the original input file.
+
 \section{GraphQL Auth Directive}
 \label{sec:corollary_projects_graphql_auth_diretive}
 
 % TODO GraphQL reference
+% TODO Node.js reference
 Available at \url{https://github.com/carlocorradini/graphql-auth-directive} \\ %
-Used in the \texttt{GraphQL} API to protect resources from unauthenticated and
-unauthorized access in high-security contexts. \\ %
+Used in the \texttt{GraphQL} API. \\ %
+A custom \texttt{GraphQL} directive that protects resources from unauthenticated
+and unauthorized access in high-security contexts. It is available in all major
+\texttt{Node.js} registries as \texttt{graphql-auth-directive}. \\ %
+A directive is an identifier preceded by a \texttt{@} character, optionally
+followed by a list of named arguments, which can appear after almost any form of
+syntax in the \texttt{GraphQL} query or schema languages\cite{graphql_directive}.
+\\ %
+The \texttt{GraphQL} context holds all important information about the current
+request. A \texttt{GraphQL} context is an object that is shared by all resolvers
+in a given execution. It helps store data such as authentication information,
+the current user, database connections, data sources, and other information required
+to operate the business logic\cite{graphql_context}. It is important to note that
+the context does not have to follow a predefined structure; rather, it is highly
+flexible to the user's implementation.
 
 \subsection{Configuration}
 \label{subsec:corollary_projects_graphql_auth_diretive_configuration}
@@ -267,5 +379,123 @@ unauthorized access in high-security contexts. \\ %
   \multicolumn{1}{ c |}{\large{\textbf{Name}}} &
   \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
   \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hline \hline
-  \caption{TODO}
+
+  name & Directive name.
+  \newline
+  If a name different from the default is specified, it must be reflected in the
+  schema where the directive is used, otherwise, an error is thrown. & auth \\
+  \hline
+
+  auth & A function or class that handles authentication and authorization.
+  \newline
+  The current context (which contains information about the current request) and
+  the roles and permissions required by the requested resource must be accepted
+  as arguments by the implementation. If access to the requested resource is granted,
+  the boolean value \texttt{true} is returned; otherwise, \texttt{false} is
+  returned if access is denied.
+  \newline
+  A default basic auth function is already implemented and checks for the existence
+  of an authorized applicant and that its roles and permissions overlap with those
+  of the requested resource. & \\ \hline
+
+  authMode & Auth mode if access is not granted.
+  \newline
+  Methodology for informing the requestor that access to the resource has been
+  denied. It is often desirable to hide the important information that the request
+  is failing due to an auth check and instead deliver an error/informational response
+  stating that the requested resource simply does not exist.
+  \newline
+  The first mode, \texttt{ERROR}, throws an authentication or authorization error
+  (see below), whereas the second mode, \texttt{NULL}, returns the value \texttt{null}
+  (empty). & ERROR \\ \hline
+
+  roles & Roles configuration.
+  \newline
+  An object with two properties:
+  \begin{itemize}
+    \item \texttt{enumName}
+      \newline
+      Defines the array type, which is by default a \texttt{String}.
+      \newline
+      It is standard practice in \texttt{GraphQL} and in programming languages
+      to map a set of values to an enum. An enumeration type is a special kind of
+      scalar that is restricted to a particular set of allowed values\cite{graphql_enum}.
+      \newline
+      This option restricts the allowed values of roles to a specific set rather
+      than a general string.
+
+    \item \texttt{default}
+      \newline
+      Roles that are required by default.
+      \newline
+      No roles are required by default. As a result, access to a protected resource
+      can only be provided with authentication. Overriding this option enables
+      authorization by default, requiring the requestor to have at least one matching
+      role.
+  \end{itemize}
+  & \makecell[Xt]{\centering{enumName: String \\ default: []}} \\ \hline
+
+  permissions & Permissions configuration.
+  \newline
+  An object with the same properties as roles configuration (see above). & \makecell[Xt]{\centering{enumName: String \\ default: []}}
+  \\ \hline
+
+  authenticationError & Authentication error class. The error is thrown if there
+  is no authenticated requestor in the current context. By default, a generic error
+  is thrown. The class must extend the \texttt{Error} class. &
+  AuthenticationError \\ \hline
+
+  authorizationError & Authorization error class. The error is thrown if the
+  roles and/or permissions of the requestor do not overlap with those of the
+  requested resource. By default, a generic error is thrown. The class must extend
+  the \texttt{Error} class. & AuthorizationError \\ \hline
+
+  container & Dependency Injection Container.
+  \newline
+  Dependency injection is a design pattern that shifts the responsibility of resolving
+  dependencies to a dedicated dependency injector that knows which dependent objects
+  to inject into application code\cite{dependency_injection}.
+  \newline
+  It should be noted that dependency injection is only available if \texttt{auth}
+  is a class type. & IOCContainer \\
+
+  \caption{GraphQL auth directive configuration parameters}
 \end{xltabular}
+
+\subsection{Type Definition}
+\label{subsec:corollary_projects_graphql_auth_diretive_type_definition}
+
+\begin{lstlisting}[language=graphql, xleftmargin=\parindent, caption=GraphQL auth directive type definition]
+  """
+  Protect the resource from unauthenticated and unauthorized access.
+  """
+  directive @auth(
+    """
+    Allowed roles to access the resource.
+    """
+    roles: [String!]! = []
+    """
+    Allowed permissions to access the resource.
+    """
+    permissions: [String!]! = []
+  ) on FIELD | FIELD_DEFINITION | OBJECT
+\end{lstlisting}
+
+\subsection{Example}
+\label{subsec:corollary_projects_graphql_auth_diretive_example}
+
+\begin{lstlisting}[language=graphql, xleftmargin=\parindent, caption=TODO]
+  enum Role {
+    ADMIN
+  }
+
+  enum Permission {
+    VIEW
+  }
+
+  type Query {
+    unprotected: String!
+    protected: String! @auth
+    secret: String! @auth(roles: [ADMIN], permissions: [VIEW])
+  }
+\end{lstlisting}

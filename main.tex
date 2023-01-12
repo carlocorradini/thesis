@@ -38,10 +38,16 @@
 \usepackage{xltabular}
 \usepackage{caption}
 \captionsetup[table]{position=bottom}
+% List
+\usepackage{enumitem}
 % Code
 \usepackage{listings}
 \usepackage{lstautogobble}
 \usepackage{xcolor}
+\definecolor{aquamarine}{RGB}{38,127,153}
+\definecolor{blue}{RGB}{0,0,255}
+\definecolor{bluedark}{RGB}{0,16,128}
+\definecolor{gold}{RGB}{121,94,38}
 \definecolor{gray}{RGB}{102,102,102}
 \definecolor{green}{RGB}{0,153,0}
 \definecolor{red}{RGB}{196,122,91}
@@ -68,6 +74,22 @@ title=\lstname, %
 commentstyle=\color{green}\upshape, %
 autogobble=true, %
 keywordstyle=\bfseries %
+}
+
+\lstdefinelanguage{graphql}
+{ %
+literate={{[}{{\textcolor{gray}{[}}}1{]}{{\textcolor{gray}{]}}}1}, %
+morekeywords={directive, on, enum, type, ADMIN, SIMPLE, VIEW, EDIT}, %
+keywordstyle=\color{blue}, %
+morekeywords=[2]{@auth}, %
+keywordstyle=[2]\color{gold}, %
+morekeywords=[3]{String, Role, Permission, ExampleType, Query, FIELD, FIELD\_DEFINITION, OBJECT}, %
+keywordstyle=[3]\color{aquamarine}, %
+morekeywords=[4]{roles, permissions, protected, unprotected, secret}, %
+keywordstyle=[4]\color{bluedark}, %
+morekeywords=[5]{[, ]}, %
+keywordstyle=[5]\color{green}, %
+morecomment=[s]{"""}{"""} %
 }
 
 % Document
