@@ -17,10 +17,13 @@
     "backgroundcolor",
     "breaklines",
     "breakatwhitespace",
+    "burk",
+    "bluedark",
     "carlocorradini",
     "corradini",
     "customizability",
     "captionpos",
+    "configurability",
     "distros",
     "distro",
     "downscaling",
@@ -31,9 +34,12 @@
     "keywordstyle",
     "latexmk",
     "linuxize",
+    "lungu",
     "maurizio",
+    "morecomment",
     "nonstopmode",
     "numbersep",
+    "nierstrasz",
     "outdir",
     "pacman",
     "posix",
@@ -45,7 +51,9 @@
     "showstringspaces",
     "showtabs",
     "stringstyle",
+    "schwarz",
     "tabsize",
-    "upscaling"
+    "upscaling",
+    "xleftmargin"
   ]
 }
