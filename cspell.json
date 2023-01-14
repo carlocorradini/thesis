@@ -8,7 +8,12 @@
     "@cspell/dict-markdown/cspell-ext.json",
     "@cspell/dict-npm/cspell-ext.json"
   ],
-  "ignorePaths": ["**/build/", "**/coverage/", "**/node_modules/"],
+  "ignorePaths": [
+    "**/build/",
+    "**/coverage/",
+    "**/node_modules/",
+    "./thesis.drawio"
+  ],
   "words": [
     "angeli",
     "autoscaler",
@@ -27,6 +32,8 @@
     "distros",
     "distro",
     "downscaling",
+    "downscales",
+    "drawio",
     "firewalld",
     "howpublished",
     "insourcing",
@@ -54,6 +61,7 @@
     "schwarz",
     "tabsize",
     "upscaling",
+    "upscales",
     "xleftmargin"
   ]
 }

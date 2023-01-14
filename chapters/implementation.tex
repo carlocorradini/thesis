@@ -20,6 +20,13 @@
 \subsubsection{Systemd}
 \label{subsec:implementation_distributions_init_system_systemd}
 
+\begin{wrapfigure}
+  {r}{.25\textwidth}
+  \centering
+  \includegraphics[width=.25\textwidth]{images/logos/systemd.png}
+  \caption{Systemd logo}
+\end{wrapfigure}
+
 \subsection{ISO image}
 \label{subsec:implementation_distributions_iso_image}
 
@@ -36,15 +43,16 @@
   \caption{Alpine Linux logo}
 \end{wrapfigure}
 
-Alpine Linux\footnote{\url{https://www.alpinelinux.org}} is a lightweight, security-focused,
-and resource-efficient distribution. In recent years, has grown in popularity as
-the foundation for the majority of Docker images. It is based on musl\footnote{\url{https://musl.libc.org}}
-(an implementation of the C standard library, an alternative to glibc), BusyBox\footnote{\url{https://busybox.net}}
-(a single, small executable that combines tiny versions of many common UNIX utilities),
-a custom package manager called APK\footnote{\url{https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper}}
+Alpine Linux\footnote{\url{https://www.alpinelinux.org}} is a lightweight,
+security-focused, and resource-efficient distribution. In recent years, has grown
+in popularity as the foundation for the majority of Docker images. It is based
+on musl\footnote{\url{https://musl.libc.org}} (an implementation of the C standard
+library, an alternative to glibc), BusyBox\footnote{\url{https://busybox.net}} (a
+single, small executable that combines tiny versions of many common UNIX
+utilities), a custom package manager called APK\footnote{\url{https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper}}
 and the OpenRC init system ()\cite{alpine_linux}. \\ % TODO OpenRC reference
-Alpine Linux is the preferred reCluster distribution. It has been utilized and
-tested during development and is now present in every cluster node.
+Alpine Linux is the preferred reCluster distribution. It has been utilized and tested
+during development and is now present in every cluster node.
 
 \subsubsection{Arch Linux}
 \label{subsubsec:implementation_distributions_iso_arch_linux}
@@ -56,16 +64,15 @@ tested during development and is now present in every cluster node.
   \caption{Arch Linux logo}
 \end{wrapfigure}
 
-Arch Linux\footnote{\url{https://archlinux.org}} is a general-purpose
-distribution that focuses on simplicity, minimalism, and code elegance. It is based
-on Systemd init system () % TODO Systemd reference
-and strives to stay bleeding edge, offering the latest stable versions of most
-software through Pacman\footnote{\url{https://wiki.archlinux.org/title/Pacman}}
-package manager. Uses a rolling release system that allows one-time installation
-and perpetual software upgrades, allowing to not reinstall or upgrade the system
-from one version to the next. Notably, Arch Linux is the foundation for several
-many popular enterprise-grade distributions, such as Manjaro\footnote{\url{https://manjaro.org}}
-and SteamOS\footnote{\url{https://store.steampowered.com/steamos}},
+Arch Linux\footnote{\url{https://archlinux.org}} is a general-purpose distribution
+that focuses on simplicity, minimalism, and code elegance. It is based on
+Systemd init system () % TODO Systemd reference
+and strives to stay bleeding edge, offering the latest stable versions of most software
+through Pacman\footnote{\url{https://wiki.archlinux.org/title/Pacman}} package manager.
+Uses a rolling release system that allows one-time installation and perpetual
+software upgrades, allowing to not reinstall or upgrade the system from one version
+to the next. Notably, Arch Linux is the foundation for several many popular enterprise-grade
+distributions, such as Manjaro\footnote{\url{https://manjaro.org}} and SteamOS\footnote{\url{https://store.steampowered.com/steamos}},
 demonstrating its customizability, power, and stability\cite{arch_linux}.
 
 \section{Dependencies}
