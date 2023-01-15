@@ -53,6 +53,7 @@
     "postbuild",
     "recluster",
     "rulecolor",
+    "schedulable",
     "shellcheck",
     "showspaces",
     "showstringspaces",
