@@ -9,17 +9,33 @@ in which almost everything seen here is extensively explained in terms of how it
 was developed and why certain decisions were taken. Furthermore, the design is
 dynamic and may be modified to include more or fewer components and/or
 requirements to better meet the requirements of the end user. \\ %
-Section \ref{subsec:architecture_cluster_example} depicts a real-world
-functioning example of the cluster design given. \\ %
-It has been extensively tested and is continuously operational 24 hours a day, hosting
-a variety of services. Furthermore, it upscales or downscales automatically dependent
-on demand or requirements. \\ %
+To prevent resource waste at the cost of a little decreased service interruption,
+the overall design is structured around a high availability model rather than a fault
+tolerance approach. Fault tolerance is based on specialized hardware that
+detects a hardware fault and switches to a redundant hardware component
+immediately. Although the transition seems to be seamless and provides continuous
+service, a significant price is paid in terms of both power consumption and
+performance since the redundant components do no processing but are constantly
+operational. More crucially, the fault-tolerant paradigm ignores software errors,
+which are by far the most prevalent cause of downtime. High availability, on the
+other hand, considers availability to be a collection of system-wide, shared resources
+that cooperate to ensure essential services, rather than a series of replicated
+physical components. When a system, component, or application fails, high
+availability combines software and hardware to minimize downtime by quickly
+restoring essential services. While not instantaneous, services are generally
+restored in less than a minute\cite{high_availability_vs_fault_tolerance}. \\ %
+Section \ref{subsec:architecture_cluster_example} depicts a real-world functioning
+example of the cluster design given. It has been extensively tested and is
+continuously operational 24 hours a day, hosting a variety of services.
+Furthermore, it upscales or downscales automatically dependent on demand or requirements.
+\\ %
 The diagram below illustrates the architecture, encompassing its components and
 how they are interconnected, as well as a potential connection to an external network.
 
+% TODO Full width
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\textwidth]{images/recluster/architecture.png}
+  \includegraphics[width=.9\textwidth]{images/recluster/architecture.png}
   \caption{Architecture overview}
 \end{figure}
 
@@ -96,11 +112,44 @@ the conclusion remains the same since it has the lowest power consumption.
   \includegraphics[width=.2\textwidth]{images/recluster/controller.png}}%
 \end{wrapfigure}
 
-The total number of \texttt{active} or \texttt{inactive} nodes in the cluster is
-not limited. However, a large number of nodes increases the workload on
-controller nodes, which must maintain the cluster state updated and synchronized.
-As a result, as shown in table \ref{tbl:controller_node_requirements}\cite{k3s_requirements},
-their quantity and hardware requirements must be carefully balanced.
+A controller node is an essential component of the cluster, acting as a coordinator
+between the worker nodes and the overall workload in the cluster. It continually
+monitors the cluster's state in terms of available nodes, how and where the workload
+should be scheduled, and much more. A consistent and secure API must be provided
+for administration and end-users who wish to deploy custom services in the cluster.
+The API can be made available to an external network if it is available and
+appropriately configured, allowing remote control and improving overall usage.
+\\ %
+To ensure the integrity and management of a cluster, at least one controller
+node must be constantly available. It is strongly suggested to have multiple controller
+nodes that meet the high availability model to withstand potential system,
+component, or application failures. This is possible considering an odd number
+of controller nodes (i.e. three) that are always active. A quorum of controller
+nodes is required for a cluster to agree on cluster state updates. Quorum in a cluster
+with \texttt{n} controllers is \texttt{(n / 2) + 1}. Adding one node to any odd-sized
+controller group will always increase the number of nodes required for a quorum.
+Although adding a node to an odd-sized controller group appears to improve fault
+tolerance since there are more machines, it worsens it because the same number
+of nodes can crash without losing quorum but there are more nodes that can fail.
+If the cluster cannot withstand any more failures, adding a node before removing
+nodes is dangerous because if the new controller node fails to register, the cluster
+quorum would be permanently lost\cite{quorum}. The latter is not a strict necessity,
+but rather a preferable practice, even though it may slightly increase total resource
+waste. Consider this: if the only available controller node encounters a software
+or hardware failure and becomes unavailable, the entire cluster becomes
+unreachable and unusable.\\ %
+To further decrease overall resource waste, a controller can also become a
+worker at the same time. If the overall workload in the cluster is very low and non-zero,
+having one worker and one controller active with minimal utilization at the same
+time is a waste. A single machine can perform the same task, saving precious
+resources. If the entire demand grows later and the sole active node becomes overloaded,
+the cluster reverts to its previous state. This is a configuration that may be enabled
+or disabled based on the management needs of the cluster. \\ %
+It should be noted that the total number of active or inactive nodes in the cluster
+is not limited. However, a large number of nodes increases the workload on controller
+nodes, which must maintain the cluster state updated and synchronized. As a result,
+as shown in table \ref{tbl:controller_node_requirements}\cite{k3s_requirements},
+their number and hardware requirements must be carefully balanced.
 
 \begin{xltabular}
   {\textwidth} { c | >{\ttfamily}c | >{\ttfamily}c | >{\ttfamily}c }
@@ -110,13 +159,13 @@ their quantity and hardware requirements must be carefully balanced.
   \multicolumn{1}{ c |}{\large{\textbf{Cores}}} &
   \multicolumn{1}{ c}{\large{\textbf{Memory}}} \\ \hline \hline
 
-  Small & \char`~ 10 & 2 & 4 GiB \\ \hline
+  Small & \raisebox{0.5ex}{\texttildelow}10 & 2 & 4 GiB \\ \hline
 
-  Medium & \char`~ 100 & 4 & 8 GiB \\ \hline
+  Medium & \raisebox{0.5ex}{\texttildelow}100 & 4 & 8 GiB \\ \hline
 
-  Large & \char`~ 250 & 8 & 16 GiB \\ \hline
+  Large & \raisebox{0.5ex}{\texttildelow}250 & 8 & 16 GiB \\ \hline
 
-  X-Large & \char`~ 500 & 16 & 32 GiB \\ \hline
+  X-Large & \raisebox{0.5ex}{\texttildelow}500 & 16 & 32 GiB \\ \hline
 
   XX-Large & 500+ & 32 & 64 GiB \\
 
