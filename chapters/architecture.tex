@@ -113,13 +113,13 @@ the conclusion remains the same since it has the lowest power consumption.
 \end{wrapfigure}
 
 A controller node is an essential component of the cluster, acting as a coordinator
-between the worker nodes and the overall workload in the cluster. It continually
-monitors the cluster's state in terms of available nodes, how and where the workload
-should be scheduled, and much more. A consistent and secure API must be provided
-for administration and end-users who wish to deploy custom services in the cluster.
-The API can be made available to an external network if it is available and
-appropriately configured, allowing remote control and improving overall usage.
-\\ %
+between the active worker nodes and the overall workload in the cluster. It
+continually monitors the cluster's state in terms of available nodes, how and where
+the workload should be scheduled, and much more. A consistent and secure API must
+be provided for administration and end-users who wish to deploy custom services in
+the cluster. The API can be made available to an external network if it is
+available and appropriately configured, allowing remote control and improving overall
+usage. \\ %
 To ensure the integrity and management of a cluster, at least one controller
 node must be constantly available. It is strongly suggested to have multiple controller
 nodes that meet the high availability model to withstand potential system,
@@ -156,8 +156,8 @@ their number and hardware requirements must be carefully balanced.
 
   \multicolumn{1}{ c |}{\large{\textbf{Deployment Size}}} &
   \multicolumn{1}{ c |}{\large{\textbf{Nodes}}} &
-  \multicolumn{1}{ c |}{\large{\textbf{Cores}}} &
-  \multicolumn{1}{ c}{\large{\textbf{Memory}}} \\ \hline \hline
+  \multicolumn{1}{ c |}{\large{\textbf{CPU Cores}}} &
+  \multicolumn{1}{ c}{\large{\textbf{RAM Memory}}} \\ \hline \hline
 
   Small & \raisebox{0.5ex}{\texttildelow}10 & 2 & 4 GiB \\ \hline
 
@@ -182,8 +182,56 @@ their number and hardware requirements must be carefully balanced.
   \includegraphics[width=.2\textwidth]{images/recluster/server.png}}
 \end{wrapfigure}
 
-\subsection{Database}
-\label{subsec:architecture_components_database}
+A server handles all cluster nodes, user authentication and authorization, and much
+more. It does not directly monitor the workload in the same way as a controller
+node does, but it does serve as a low-level middleware controller. Every action
+is made because of human intervention (e.g., administrators) or another
+component of the cluster that has much higher-level knowledge of the current
+state and reacts appropriately. \\ %
+It is both an essential and a non-essential component of the cluster. It is essential
+in the sense that it is aware of all registered nodes, both active and inactive,
+and understands how to switch them on and off automatically. It reduces resource
+waste by automatically increasing or decreasing the number of nodes in the
+cluster when used in conjunction with the Cluster Autoscaler component (see section
+\ref{subsec:architecture_components_cluster_autoscaler}). Without prior information,
+there is no component in the cluster that can operate as an oracle about the
+nodes, leaving the Cluster Autoscaler worthless and increasing total resource waste.
+It is also deemed non-essential in the sense that, while decreasing resource waste
+is the overall architecture's goal, there is no requirement for a high
+availability model as in controller nodes. If a server instance crashes and does
+not restart, leaving no more servers in the cluster, the entire cluster continues
+to function normally. However, unless failures, human interaction, or server restarts,
+the number of active nodes remains constant, potentially increasing resource waste.
+\\ %
+A server instance does not have to run on a dedicated node. A node can hold
+numerous components at the same time, as previously mentioned. A node may be a
+server, a controller, and a worker all at the same time, drastically decreasing resource
+waste. It is crucial to note, however, that a server should not be executed on a
+worker node since, as previously explained, the total number of active workers
+might be zero, terminating the server instance and the capability of automatically
+adjusting the cluster size. \\ %
+The server provides an API to facilitate cluster administration. Furthermore, as
+previously said, it is in charge of user authentication and authorization. Unharmful
+queries (providing information about active nodes or listing non-sensible
+information about a user) should not require any authentication or only a minimal
+one. Queries that mutate the state of the cluster or display sensitive
+information (turning on or off a node or displaying sensitive user information)
+must be protected by a high-security mechanism. \\ %
+A heartbeat daemon must be implemented on the server to continuously check the
+condition of a node and detect any problems. A heartbeat is a periodic signal or
+message created by hardware or software that is sent between devices at regular intervals
+of seconds. If the endpoint does not receive a heartbeat for an extended period,
+often many heartbeat intervals, the machine that should have sent the heartbeat
+is assumed to have failed\cite{heartbeat}. The latter is commonly implemented by
+controller nodes since they must constantly monitor and acquire information
+about active nodes for workload scheduling. As a result, a server can use the
+controller's API to eliminate duplication, increase consistency and availability,
+and simplify implementation. \\ %
+For more information, section \ref{sec:implementation_server} covers in detail how
+the server component is implemented.
+
+\subsubsection{Database}
+\label{subsubsec:architecture_components_server_database}
 
 \begin{wrapfigure}
   {l}{0pt} %
