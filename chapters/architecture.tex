@@ -230,14 +230,64 @@ and simplify implementation. \\ %
 For more information, section \ref{sec:implementation_server} covers in detail how
 the server component is implemented.
 
-\subsubsection{Database}
-\label{subsubsec:architecture_components_server_database}
+\subsection{Database}
+\label{subsec:architecture_components_server_database}
 
 \begin{wrapfigure}
   {l}{0pt} %
   \raisebox{0pt}[\dimexpr\height-\baselineskip\relax]{\centering
   \includegraphics[width=.2\textwidth]{images/recluster/database.png}}
 \end{wrapfigure}
+
+The database component is strictly related to the server component. Its primary
+function is to store all cluster-related data in a safe, persistent and fault-tolerant
+system. The data in question is generally static and does not change frequently.
+Static data includes all node-related information, such as CPU type and RAM
+quantity, that is hardly modified after the node is added to the cluster.
+However, some data, like information regarding the current node state and its
+last heartbeat, are intrinsically dynamic in the sense that the system regularly
+changes them to ensure integrity. Like the server component, is seen as both necessary
+and non-essential. A server is worthless without the database, resulting in the same
+outcome as previously explained. \\ %
+This component is seen as the union of numerous modules that form it rather than
+as a single entity. A database, in general, is a structured collection of
+information or data that is persistently stored in a computer system. A database
+management system (DBMS) is a software program that acts as an interface between
+the database and its end users or applications, allowing for the retrieval, updating,
+and administration of how information is structured and optimized. A DBMS also facilitates
+database supervision and control by providing several administrative operations such
+as performance monitoring, tuning, and backup and recovery\cite{database}. The latter
+indicates that each module and feature is dependent on the implementation. Only
+for the database itself, there are several distinct types, and for each type, there
+are numerous distributions with varying features and capabilities. To better
+follow the overall design criteria, the ultimate decision on which one to take must
+be carefully examined. \\ %
+Persistency and fault tolerance are strongly related, most importantly, in the data
+layer. Even if an error occurs, the only vital and critical component that must be
+preserved and not lost is all the stored data. Data persistency is the
+preservation of data after the program that produced it has been terminated. To do
+this, the data must be written to non-volatile storage, a type of memory that can
+maintain the information indefinitely even if the program is no longer functioning\cite{persistency}.
+Fault tolerance, which differs slightly from the previous definition, refers to a
+non-volatile storage system's capacity to recover from an error or faulty condition,
+most typically an irreversible hardware failure of some type, without losing any
+previously stored data. Disk fault tolerance is often achieved by disk
+management technologies such as mirroring\footnote{\url{https://wikipedia.org/wiki/Disk_mirroring}},
+data striping\footnote{\url{https://wikipedia.org/wiki/Data_striping}},
+duplexing\footnote{\url{https://www.pcmag.com/encyclopedia/term/disk-duplexing}},
+and Redundant Array of Independent (or Inexpensive) Disks (RAID)\footnote{\url{https://wikipedia.org/wiki/RAID}}\cite{disk_management_technologies}.
+Consider the possibility that the database component has a hardware failure and ceases
+to operate. The damage has compromised not just the replaceable hardware (such as
+the CPU, motherboard, and RAM), but also some (but not all) storage devices storing
+the cluster's data. Typically, all data is irreversibly lost, and the cluster
+must be rebuilt from scratch. However, with a correctly designed disk management
+system, once the faulty hardware is replaced, all data is automatically
+recovered and the cluster becomes functional again. The process of rebuilding the
+data might take a significant amount of time (i.e. calculating the parity bit\footnote{\url{https://wikipedia.org/wiki/Parity_bit}}).
+\\ %
+Finally, an optional cache middleware can be implemented between the server and database,
+enhancing read speed for frequently requested but rarely updated data and
+reducing disk utilization. The cached data is stored in the main volatile memory.
 
 \subsection{Registry}
 \label{subsec:architecture_components_registry}
