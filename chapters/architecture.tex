@@ -298,6 +298,26 @@ reducing disk utilization. The cached data is stored in the main volatile memory
   \includegraphics[width=.2\textwidth]{images/recluster/registry.png}}
 \end{wrapfigure}
 
+% TODO Air-Gap reference
+% TODO Container reference
+
+The registry component is a private container registry that is used in the
+cluster by the K8s orchestrator. A container registry is a stateless, highly
+scalable server-side application that stores and distributes container-based
+application\cite{https://docs.docker.com/registry}.
+
+A registry is a non-essential component because the overall system can work flawlessly
+even without it. If an internet connection is available and one of the many
+public container registries is reachable (i.e. Docker Hub\footnote{https://hub.docker.com}),
+the cluster pulls the specified image from the external network and then
+executes it. Nevertheless, having a private registry in the cluster can solve a
+lot of problems and in the end, is a huge benefit. Imagine that the cluster is
+in an Air-Gapped environment without an internet connection, or the organization
+wants tight control over its images, a newly developed image needs to be tested
+before its release or the image is specifically designed for the cluster. All these
+examples imply that does not need to be published on an official and publicly available
+registry. Private test image Cache
+
 \subsection{Cluster Autoscaler}
 \label{subsec:architecture_components_cluster_autoscaler}
 
