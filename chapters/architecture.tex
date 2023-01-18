@@ -325,11 +325,11 @@ a plethora of potential difficulties. Some of them are as follows:
     Furthermore, if the organization takes a security-first approach, a properly
     configured private registry can improve overall security.
 
-  \item A newly developed image that must be evaluated before begin release to production.
-    Moreover, the registry may be used to improve DevOps techniques by preventing
-    potential bugs, security vulnerabilities, and other difficulties that can arise
-    in a real-world environment. Attachment \ref{cha:good_practices} goes into
-    much depth about DevOps.
+  \item A newly developed image that must be evaluated before beginning release to
+    production. Moreover, the registry may be used to improve DevOps techniques by
+    preventing potential bugs, security vulnerabilities, and other difficulties that
+    can arise in a real-world environment. Attachment \ref{cha:good_practices}
+    goes into much depth about DevOps.
 
   \item An image created exclusively for the cluster. Uploading it to a public
     registry is not only pointless due to incompatibility, but it also limits the
@@ -377,6 +377,59 @@ a registry request.
   \raisebox{0pt}[\dimexpr\height-\baselineskip\relax]{\centering
   \includegraphics[width=.2\textwidth]{images/recluster/cluster_autoscaler.png}}
 \end{wrapfigure}
+
+% TODO K8s reference
+
+The Cluster Autoscaler component is an application that automatically adjusts
+the number of nodes in the cluster such that all deployed services have a place
+to run and there are no unneeded nodes\cite{cluster_autoscaler}. It is not
+responsible for behavior and registration to the cluster of nodes, it only dictates
+that a node needs to be turned on or of but not how. Therefore it must rely on
+the server component for low-level control. Nevertheless, the autoscaler is a
+fundamental part of the cluster because of its automation which completely
+removes the need for human intervention and drastically reduces resource waste.
+
+As for the registry component, the cluster autoscaler is deployed in the K8s environment
+and not on a dedicated node. The container image is uploaded and made available
+to the entire cluster during its initialization phase after the registry becomes
+reachable. Then, it can be deployed in the system. The registry can be scheduled
+on any node, both workers and controllers since it is configured as a critical
+K8s service. Since the cluster can scale to zero workers, the latter applies to
+every critical component that resides in the K8s environment, avoiding a possible
+service disruption. Moreover, the cluster autoscaler must be constantly kept running:
+if a crash or an error occurs it needs to be restarted. The latter is achieved automatically
+by the K8s system itself removing the burden of a custom solution.
+
+The component has at the same time both a high-level and low-level view of the cluster.
+The high-level view is achieved by constantly monitoring the state of the
+cluster to have a knowledge of its integrity: workload and active nodes.
+Therefore, it is aware if there are services that are unable to be deployed due to
+insufficient resources or, on the other hand, if there are underutilized active nodes
+for the current workload causing a waste of resources. This is achieved in the
+same way as in the server component by directly calling the protected API made
+available by the controller nodes. Far from it, the low-level view is achieved
+by constantly updating a local cache that contains all the available nodes, both
+active and inactive, in the cluster, to know how many machines in the cluster are
+available and their status. Therefore, it is aware of the nodes that can be turned
+on or off, and if the system can be scaled up or down. The latter, as written
+before, is achieved by calling the server on a set of protected API endpoints allowing
+direct control of how the nodes in the cluster are managed.
+
+The conditions and possible solutions to automatically adjust the size of the cluster
+are described below: * There are units of computing (pods) that failed to run in
+the cluster due to insufficient resources available. If the current overall workload
+with the current number of active nodes has reached its limit, then, the cluster
+is unable to satisfy newer service deployments. This implies that the newer
+deployed services are never executed and are constantly kept in a sort of
+waiting state. In this state, the controllers continue to monitor the status of
+the cluster for a suitable node that has enough free resources for which a
+waiting service can be deployed. Waiting indefinetely for a current active node to
+free up some resources for the deployment of a service undouble degrades the overall
+usability and quality of service\footnote{\url{https://wikipedia.org/wiki/Quality_of_service}}
+(QoS) of the cluster. The solution is to check if, in the local cache, there is
+a suitable inactive node that can be bootstrapped. If found, a special message
+is sent to the server and later the waiting deployments are automatically
+scheduled to the new node.
 
 \subsection{Load Balancer}
 \label{subsec:architecture_components_load_balancer}
