@@ -301,22 +301,73 @@ reducing disk utilization. The cached data is stored in the main volatile memory
 % TODO Air-Gap reference
 % TODO Container reference
 
-The registry component is a private container registry that is used in the
-cluster by the K8s orchestrator. A container registry is a stateless, highly
-scalable server-side application that stores and distributes container-based
-application\cite{https://docs.docker.com/registry}.
+The registry component is a private container registry that the K8s orchestrator
+uses in the cluster to download a specific image or collection of images. A container
+registry is a stateless, highly scalable server-side application that stores and
+distributes container-based application images\cite{container_registry}. \\ %
+A registry is regarded as a non-essential component because the whole system may
+function without it. If an internet connection is available and one of the
+numerous public container registries (such as Docker Hub\footnote{\url{https://hub.docker.com}})
+is accessible, the cluster downloads and runs the requested image from the external
+network. Having a private register in the cluster, on the other hand, may solve
+a plethora of potential difficulties. Some of them are as follows:
 
-A registry is a non-essential component because the overall system can work flawlessly
-even without it. If an internet connection is available and one of the many
-public container registries is reachable (i.e. Docker Hub\footnote{https://hub.docker.com}),
-the cluster pulls the specified image from the external network and then
-executes it. Nevertheless, having a private registry in the cluster can solve a
-lot of problems and in the end, is a huge benefit. Imagine that the cluster is
-in an Air-Gapped environment without an internet connection, or the organization
-wants tight control over its images, a newly developed image needs to be tested
-before its release or the image is specifically designed for the cluster. All these
-examples imply that does not need to be published on an official and publicly available
-registry. Private test image Cache
+\begin{itemize}
+  \item The K8s orchestrator fails to download the requested images in an Air-Gapped
+    environment when there is no internet connection. As a result, the entire cluster
+    is nearly unusable. The only realistic approach is to make a local duplicate
+    of the remote images for each cluster node. This is hard to accomplish and prone
+    to errors. Furthermore, there is a waste of disk memory, but it also ignores
+    how and where the images are downloaded.
+
+  \item A local solution is required for an organization that wants complete control
+    over its images and is unwilling to put them on an external service.
+    Furthermore, if the organization takes a security-first approach, a properly
+    configured private registry can improve overall security.
+
+  \item A newly developed image that must be evaluated before begin release to production.
+    Moreover, the registry may be used to improve DevOps techniques by preventing
+    potential bugs, security vulnerabilities, and other difficulties that can arise
+    in a real-world environment. Attachment \ref{cha:good_practices} goes into
+    much depth about DevOps.
+
+  \item An image created exclusively for the cluster. Uploading it to a public
+    registry is not only pointless due to incompatibility, but it also limits the
+    available namespace because an image name must be unique.
+
+  \item Registry as a pull-through cache\footnote{\url{https://docs.docker.com/registry/recipes/mirror}}.
+    If multiple cluster nodes require the same external image and it does not
+    exist locally, each of them fetches it from the specified registry. This
+    results in excessive and inefficient network utilization, which might congest
+    the cluster. The private registry can act as a registry mirror, locally caching
+    each externally requested image. Every node points directly to the private
+    registry address. If an image cannot be located locally, the request is
+    routed to the local registry, which downloads and caches it. When a node
+    requests the same image again, the registry provides the cached image without
+    needing any further network traffic.
+\end{itemize}
+
+In practice, the registry is used to distribute the Cluster Autoscaler image (see
+\ref{subsec:architecture_components_cluster_autoscaler}) that is specifically built
+to function with reCluster. \\ %
+Even though it is supported out of the box, the component does not need to be
+instantiated on a specific physical node; rather, it is deployed directly in the
+K8s environment. The registry may be accessible from both inside and outside the
+K8s network, thanks to a correctly configured Load Balancer component (further information
+in section \ref{subsec:architecture_components_load_balancer}) that exposes the
+service to a non-K8s-related external network. Exposing the K8s service is critical
+for conveniently allowing the upload (push) and download (pull) of an image without
+the user requiring any extra settings. The approach must remain the same as when
+utilizing a publicly accessible registry, but with the cluster's registry address
+provided. Because the registry is externally accessible, it must be properly configured
+to improve overall security. HTTPS\footnote{\url{https://wikipedia.org/wiki/HTTPS}},
+which enables secure communication over a cryptographic channel, and
+authentication, which permits access only to a limited group of authenticated users,
+must be set up and/or implemented. \\ %
+The registry is deployed in the K8s environment, but the K8s orchestrator needs it
+to fetch the required images, leading to a circular dependence. To avoid the latter,
+the registry image should be made available on each node, eliminating the need for
+a registry request.
 
 \subsection{Cluster Autoscaler}
 \label{subsec:architecture_components_cluster_autoscaler}
