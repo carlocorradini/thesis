@@ -456,6 +456,57 @@ outlined below:
   \includegraphics[width=.2\textwidth]{images/recluster/load_balancer.png}}
 \end{wrapfigure}
 
+% K8s reference
+The load balancer component provides an externally-accessible IP address to an
+internal K8s application\cite{https://kubernetes.io/docs/concepts/services-networking/service}.
+At a first glance, viewing the architecture schema, it is not immediately clear
+if it can be considered as an essential or non essential component. However, it
+is tighlty coupled to the type and usage of deployed applications/components in
+the cluster. As an example, in an Air-Gapped environment, when there is no internet
+connection, the load balancer is essential to expose the registry. Without it,
+the registry is not reachable from outside the K8s environment and no container
+images can be uploaded and/or downloaded, making the cluster unusable. On the
+other hand, if the cluster is used only as a testing platform there is no need to
+expose the deployments, making the load balancer useless.
+
+In common data centers, owned by big cloud providers like Microsoft, Google or
+Amazon, a load balancer is often an external, complicated and highly customized
+component that is specifically designed to be compatible with the cloud provider.
+The overall architecture in question is much simpler and runs on bare-metal servers.
+A bare-metal server is a physical computer that is used by one consumer, or tenant,
+only\cite{https://wikipedia.org/wiki/Bare-metal_server}. As for the registry and
+cluster autoscaler components, if a load balancer is deployed in the cluster, it
+needs to be constantly kept operational and in an healthy state. Therefore, an
+external load balancer can be replaced with an internal one that is directly
+deployed in the K8s environment. An internal load balancer not only reduces the resource
+waste but also improves its overall operativity.
+
+An application can be composed by multiple replicas that are created and destroyed
+to match the desired state of the cluster. The replicas can be distributed into
+different active nodes enhancing overall performance, availability and fault-tolerance.
+By default, when an application is created in a K8s environment there is no way to
+establish a connection from outside the cluster. Hence, only other K8s deployments
+can instatiate a communication with it. As a solution, a load balancer works by sending
+the external network traffic to the corresponding cluster node where its service
+is deployed. A service is an abstract way to expose the application as a network
+service without requiring unfamiliar service discovery mechanism. It acts as a stable
+entrypoint to connect to the possible many application replicas that are intrinsecally
+dynamic due to their non-permanent resources (i.e., internal IP address).
+
+An example on how a load balancer works and what are the involved components is shown
+in figure \ref{fig:load_balancer}. Note that the load balancer application is
+shown as external to the nodes but in reality it is deployed inside the K8s
+environment. This is done only to simplify the example and to focus only to the key
+concepts.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics
+  [width=.5\textwidth]{images/recluster/load_balancer_service.png}
+  \caption{Load balancer example}
+  \label{fig:load_balancer}
+\end{figure}
+
 \section{Network}
 \label{sec:architecture_network}
 
