@@ -380,56 +380,72 @@ a registry request.
 
 % TODO K8s reference
 
-The Cluster Autoscaler component is an application that automatically adjusts
-the number of nodes in the cluster such that all deployed services have a place
-to run and there are no unneeded nodes\cite{cluster_autoscaler}. It is not
-responsible for behavior and registration to the cluster of nodes, it only dictates
-that a node needs to be turned on or of but not how. Therefore it must rely on
-the server component for low-level control. Nevertheless, the autoscaler is a
-fundamental part of the cluster because of its automation which completely
-removes the need for human intervention and drastically reduces resource waste.
+The Cluster Autoscaler component is a program that automatically adjusts the
+number of nodes in the cluster to guarantee that all deployed services have a
+location to execute and no nodes are underutilized\cite{cluster_autoscaler}. It
+is not in charge of node behavior and registration in the cluster; it only determines
+if a node should be turned on or off, but not how. As a result, for low-level
+control, it must rely on the server component. Nonetheless, the autoscaler is an
+essential component of the cluster due to its automation, which eliminates the
+need for human interaction and dramatically lowers resource waste. \\ %
+The Cluster Autoscaler is deployed in the K8s environment rather than on a
+separate node. After the registry becomes available, the container image of the
+autoscaler is uploaded and made available to the whole cluster during the
+initialization phase. Because the registry is defined as a critical K8s service,
+it may be scheduled on any node, both workers and controllers. Since the cluster
+may scale to zero workers, this applies to every critical component in the K8s environment,
+preventing a service outage. Furthermore, the cluster autoscaler must be
+maintained operational at all times: if a crash or error happens, it must be
+restarted. The latter is accomplished automatically by the K8s system, removing
+the need for a custom solution. \\ %
+The component has both a high-level and a low-level view of the cluster. The high-level
+view is accomplished by continuously monitoring the cluster's condition to ensure
+its integrity: workload and active nodes. As a result, it is aware of whether
+there are services that cannot be deployed owing to a lack of resources, or if there
+are underutilized active nodes for the present demand, resulting in resource
+waste. This is accomplished by directly querying the protected API provided by the
+controller nodes. Far from it, the low-level view is obtained by continually updating
+a local cache that contains all of the available nodes in the cluster, both
+active and inactive, to know how many nodes are available and their status. As a
+result, it is aware of the nodes that can be turned on or off, as well as if the
+system can be scaled up or down. As previously stated, the latter is
+accomplished by accessing the server on a series of secured API endpoints that
+provide direct control over how the cluster's nodes are handled. \\ %
+The prerequisites and solutions for automatically adjusting the cluster size are
+outlined below:
+\begin{itemize}
+  \item There are some computing units (pods) that are unable to operate in the cluster
+    owing to a lack of resources.
+    \newline
+    If the cluster's current total workload with the present number of active
+    nodes has reached its maximum, it will be unable to support further service deployments.
+    This indicates that newly deployed services are never executed and are
+    always in a state of waiting. In this condition, the controllers continue to
+    monitor the cluster's condition for a suitable node with enough free
+    resources to host a waiting service. Waiting forever for a current active node
+    to free up some resources affects the cluster's overall usability and quality
+    of service\footnote{\url{https://wikipedia.org/wiki/Quality_of_service}} (QoS).
+    The solution is to check if there is a suitable inactive node in the local
+    cache that can be turned on. If such a node is identified, a specific
+    request is issued to the server, and the queued deployments are automatically
+    scheduled to the newly bootstrapped node.
 
-As for the registry component, the cluster autoscaler is deployed in the K8s environment
-and not on a dedicated node. The container image is uploaded and made available
-to the entire cluster during its initialization phase after the registry becomes
-reachable. Then, it can be deployed in the system. The registry can be scheduled
-on any node, both workers and controllers since it is configured as a critical
-K8s service. Since the cluster can scale to zero workers, the latter applies to
-every critical component that resides in the K8s environment, avoiding a possible
-service disruption. Moreover, the cluster autoscaler must be constantly kept running:
-if a crash or an error occurs it needs to be restarted. The latter is achieved automatically
-by the K8s system itself removing the burden of a custom solution.
-
-The component has at the same time both a high-level and low-level view of the cluster.
-The high-level view is achieved by constantly monitoring the state of the
-cluster to have a knowledge of its integrity: workload and active nodes.
-Therefore, it is aware if there are services that are unable to be deployed due to
-insufficient resources or, on the other hand, if there are underutilized active nodes
-for the current workload causing a waste of resources. This is achieved in the
-same way as in the server component by directly calling the protected API made
-available by the controller nodes. Far from it, the low-level view is achieved
-by constantly updating a local cache that contains all the available nodes, both
-active and inactive, in the cluster, to know how many machines in the cluster are
-available and their status. Therefore, it is aware of the nodes that can be turned
-on or off, and if the system can be scaled up or down. The latter, as written
-before, is achieved by calling the server on a set of protected API endpoints allowing
-direct control of how the nodes in the cluster are managed.
-
-The conditions and possible solutions to automatically adjust the size of the cluster
-are described below: * There are units of computing (pods) that failed to run in
-the cluster due to insufficient resources available. If the current overall workload
-with the current number of active nodes has reached its limit, then, the cluster
-is unable to satisfy newer service deployments. This implies that the newer
-deployed services are never executed and are constantly kept in a sort of
-waiting state. In this state, the controllers continue to monitor the status of
-the cluster for a suitable node that has enough free resources for which a
-waiting service can be deployed. Waiting indefinetely for a current active node to
-free up some resources for the deployment of a service undouble degrades the overall
-usability and quality of service\footnote{\url{https://wikipedia.org/wiki/Quality_of_service}}
-(QoS) of the cluster. The solution is to check if, in the local cache, there is
-a suitable inactive node that can be bootstrapped. If found, a special message
-is sent to the server and later the waiting deployments are automatically
-scheduled to the new node.
+  \item Some nodes are constantly unneeded for an extended period. When a node's
+    resource utilization is low and all of its scheduled deployments can be
+    transferred to another node, it is no longer required.
+    \newline
+    There is a waste of resources if the current workload on a node falls below
+    a pre-defined threshold for a certain period. To avoid this, all deployments
+    on the node must be rescheduled to another node with sufficient free
+    resources, raising its overall utilization. Following completion of the
+    latter, the unneeded node has almost zero workloads (non-zero since there
+    may be system deployments running that do not require a migration and may be
+    deleted) and can be switched off and removed. The autoscaler makes a
+    specific request to the server with the node identifier; the server removes the
+    node from the K8s environment and subsequently shuts it off altogether. When
+    a node is successfully shut down, its status changes from active to inactive,
+    indicating that it is a candidate for an eventual upscaling.
+\end{itemize}
 
 \subsection{Load Balancer}
 \label{subsec:architecture_components_load_balancer}
