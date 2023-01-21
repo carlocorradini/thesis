@@ -37,6 +37,7 @@ how they are interconnected, as well as a potential connection to an external ne
   \centering
   \includegraphics[width=.9\textwidth]{images/recluster/architecture.png}
   \caption{Architecture overview}
+  \label{fig:architecture}
 \end{figure}
 
 \section{Components}
@@ -537,11 +538,78 @@ and a response is created and sent back to the client.
 \section{Network}
 \label{sec:architecture_network}
 
-\subsection{Overlay Network}
-\label{subsec:architecture_network_overlay_network}
+The cluster is composed of several network layers, each of which may interact
+with components of the same layer but by default, not with components of a different
+layer. Each network layer is heterogeneous: various software/hardware components
+and applications correlate to different network layers. The cluster can support
+communications across layers, but this must be done transparently and accurately
+to avoid significantly increasing the cluster's complexity and resource waste while
+lowering its overall security. Both software and hardware components that reside
+between the two communicating levels enable inter-layer communication. The most fundamental
+requirement for the latter to work is that there be no potential conflicts between
+the two communicating layers. \\ %
+There are three distinct network layers in the cluster architecture seen in figure
+\ref{fig:architecture}. They are covered in the subsections that follow, beginning
+with the most external network and progressing to the most internal network in relation
+to the cluster.
 
-\subsection{Domain}
-\label{subsec:architecture_network_domain}
+\subsection{External Network}
+\label{subsec:architecture_network_external_network}
+
+\begin{wrapfigure}
+  {l}{0pt} %
+  \raisebox{0pt}[\dimexpr\height-\baselineskip\relax]{\centering
+  \includegraphics[width=.2\textwidth]{images/recluster/external_network.png}}
+\end{wrapfigure}
+
+The external network is any network that does not involves the cluster with direct
+communications. It represents any network that is not compatible with the
+Internal Network (see section below) and needs a router or other similar
+components to allow the communication between the two. A router is a device that
+connects two or more packet-switched networks or subnetworks. It serves two
+primary functions: managing traffic between these networks by forwarding data packets
+to their intended IP addresses, and allowing multiple devices to use the same
+Internet connection\cite{https://www.cloudflare.com/learning/network-layer/what-is-a-router}.
+
+To simplify, the external network can be seen as any existing network in the
+world except the Internal Network, hence the Internet: the network of networks.
+
+Access to the external network is necessiry if the deployed applications can be
+accessed by external clients and there are the needs of external resources, such
+as public container images, that are not locally available in the cluster. Moreover,
+if the organization managing the overall architecture wants to have remote
+control and monitoring of the cluster across the globe the only current viable
+and supported solution is through an internet connection. If the latter are not needed,
+the external network can be removed from the cluster architecture implying an
+Air-Gap environment without internet connection. Hence, all needed resources and
+components are already locally available and access to the cluster is only
+needed from within the internal network.
+
+An external network is intrinsecally unsecure. Therefore, high security
+protocols, mechanisms and procedures must be implemented and correctly configured.
+This is a very complicated topic that is not covered.
+
+\subsection{Internal Network}
+\label{subsec:architecture_network_internal_network}
+
+\begin{wrapfigure}
+  {l}{0pt} %
+  \raisebox{0pt}[\dimexpr\height-\baselineskip\relax]{\centering
+  \includegraphics[width=.2\textwidth]{images/recluster/internal_network.png}}
+\end{wrapfigure}
+
+% Domain
+
+\subsection{K8s Network}
+\label{subsec:architecture_network_k8s_network}
+
+\begin{wrapfigure}
+  {l}{0pt} %
+  \raisebox{0pt}[\dimexpr\height-\baselineskip\relax]{\centering
+  \includegraphics[width=.2\textwidth]{images/recluster/k8s_network.png}}
+\end{wrapfigure}
+
+% Overlay Network
 
 \section{Cluster}
 \label{sec:architecture_cluster}
