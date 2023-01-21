@@ -457,59 +457,82 @@ outlined below:
 \end{wrapfigure}
 
 % K8s reference
-The load balancer component provides an externally-accessible IP address to an
-internal K8s application. It can be seen as an abstract way to expose the application
-as a network service without requiring an unfamiliar service discovery mechanism\cite{https://kubernetes.io/docs/concepts/services-networking/service}.
-
-An application can be composed of multiple replicas that are created and
-destroyed to match the desired state of the cluster. The replicas can be distributed
-into different active nodes enhancing overall performance, availability and
-fault tolerance. By default, when an application is created in a K8s environment
-there is no way to establish a connection from outside the cluster. Hence, only
-other K8s deployments can instantiate communication with it. As a solution, a
-load balancer works by sending the external network traffic to the corresponding
-cluster node where a replica of the application is deployed. To homogeneously distribute
-the traffic among all replicas it does support different traffic policies (such
-as round robin(\url{wikipedia.org/wiki/Round-robin_item_allocation}), random, and
-more) to avoid situations where some replicas are overloaded and some not. Therefore,
-it acts as a stable entry point to connect to the possible many application
-replicas that are intrinsically dynamic due to their non-permanent resources (i.e.,
-internal IP address).
-
-At a first glance, viewing the architecture schema, it is not immediately clear
-if it can be considered an essential or non-essential component. However, it is
-tightly coupled to the type and usage of deployed applications/components in the
-cluster. As an example, in an Air-Gapped environment, when there is no internet connection,
-the load balancer is essential to expose the registry. Without it, the registry
-is not reachable from outside the K8s environment and no container images can be
-uploaded and/or downloaded, making the cluster unusable. On the other hand, if the
-cluster is used only as a testing platform there is no need to expose the deployments,
-making the load balancer useless.
-
-In common data centers, owned by big cloud providers like Microsoft, Google or
-Amazon, a load balancer is often an external, complicated and highly customized
+The load balancer component provides an externally accessible IP address to an
+internal K8s application. It may be seen as an abstract mechanism of exposing the
+application as a network service without requiring an unfamiliar service discovery
+mechanism\cite{load_balancer}. \\ %
+An application can be composed of multiple replicas that are generated and
+destroyed to maintain the cluster in the desired state. The replicas can be spread
+over many active nodes, improving overall performance, availability, and fault
+tolerance. When an application is created in a K8s environment, there is no way
+to connect from outside the cluster by default. As a result, only other K8s
+deployments can communicate with it. A load balancer acts as a solution by routing
+external network traffic to the cluster node where a replica of the application is
+deployed. To prevent scenarios where some replicas are overloaded and others are
+not, it does allow different network traffic policies (such as Round-robin\footnote{\url{https://wikipedia.org/wiki/Round-robin_item_allocation}},
+random, and others) to homogeneously distribute traffic across all replicas. As
+a result, it serves as a consistent and fixed entry point for connecting to the potentially
+numerous application replicas that are intrinsically dynamic due to their non-permanent
+resources (i.e., internal IP address). \\ %
+At first, considering the architecture schema, it is unclear if it is an essential
+or non-essential component. Its utilization, however, is tightly associated with
+the kind and usage of deployed applications/components in the cluster. For example,
+if the cluster is intended to host numerous web applications that must be
+accessed over the internet, a load balancer component is necessary to expose each
+application to external network traffic. If the cluster is just used for testing
+or DevOps techniques (see attachment \ref{cha:good_practices}), there is no need
+to expose any applications, leaving the load balancer components unnecessary. As
+a result, it can be removed, increasing the total available resources. \\ %
+In data centers operated by huge cloud providers like Microsoft\footnote{\url{https://azure.microsoft.com}},
+Google\footnote{\url{https://cloud.google.com}}, or Amazon\footnote{\url{https://aws.amazon.com}},
+a load balancer is generally an external, sophisticated, and highly specialized
 component that is specifically designed to be compatible with the specific cloud
-provider. However, the overall architecture in question is much simpler and runs
-on bare-metal servers. A bare-metal server is a physical computer that is used by
-one consumer, or tenant, only\cite{https://wikipedia.org/wiki/Bare-metal_server}.
-Therefore, an external load balancer can be replaced with an internal one that
-is directly deployed in the K8s environment. An internal load balancer reduces the
-overall resource waste and improves its maintainability. Moreover, as for the registry
-and cluster autoscaler components, the internal load balancer is maintained
-automatically operational and in a healthy state at all times by K8s.
+provider. The general architecture in question, however, is far simpler and operates
+on bare-metal servers. A bare-metal server is a physical computer that is
+exclusively operated by one customer or tenant\cite{bare_metal_server}. As a
+result, an external load balancer may be substituted with an internal one that is
+deployed directly in the K8s environment. An internal load balancer minimizes
+overall resource usage while also improving maintainability. Furthermore, as
+with the registry and cluster autoscaler components, the internal load balancer is
+kept automatically operational and in good working condition at all times by the
+K8s orchestrator.
 
-Figure \ref{fig:load_balancer} show an example schema of how an internal load
-balancer works in the cluster architecture. Note that the internal load balancer
-component is shown external to the nodes to simplify the overview and to better understand
-how it works but in reality, it is directly deployed on every node.
+\subsubsection{Example Schema}
+\label{subsubsec:architecture_components_load_balancer_schema}
+
+Figure \ref{fig:load_balancer} depicts an example schema of an Internal Load
+Balancer in a cluster architecture. It is worth noting that the Internal Load Balancer
+component is presented externally to the nodes to simplify the overall overview but
+in reality, it is deployed directly on each active node.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics
   [width=.7\textwidth]{images/recluster/load_balancer_example.png}
-  \caption{Internal Load Balancer example}
+  \caption{Internal Load Balancer schema example}
   \label{fig:load_balancer}
 \end{figure}
+
+There are three active nodes and one Internal Load Balancer in the cluster. The
+nodes' roles have not been specified, however as stated in section
+\ref{subsec:architecture_components_node}, each node can be regarded as both a Controller
+and a Worker. Three applications, \texttt{A}, \texttt{B}, and \texttt{C}, have been
+deployed in the K8s environment, with three replicas available for each. Concerning
+the other replicas, each replica is scheduled on a distinct node. \\ %
+The organization in charge of the cluster wishes to expose each application by
+assigning each one a unique externally accessible IP address from the Internal
+Network (i.e., a private IPv4 address\footnote{\url{https://wikipedia.org/wiki/Private_network}}).
+It should be noted that the process of mapping/routing an IP address from the Internal
+Network to an IP address from the External Network is not mentioned. The Load
+Balancer creates a matching internal service for each application that knows
+where all the replicas are installed and how to efficiently distribute traffic
+among them. Assume that application \texttt{A} is assigned the IP address
+\texttt{10.0.0.97} and that the Load Balancer receives an external request from a
+client on the Internal Network. The Load Balancer examines the target address
+and finds a match; the request is then routed to internal service \texttt{A}. Service
+\texttt{A} then redirects the request to one of the active nodes where a replica
+of application \texttt{A} is deployed. Finally, the replica handles the request,
+and a response is created and sent back to the client.
 
 \section{Network}
 \label{sec:architecture_network}
