@@ -562,32 +562,31 @@ to the cluster.
   \includegraphics[width=.2\textwidth]{images/recluster/external_network.png}}
 \end{wrapfigure}
 
-The external network is any network that does not involves the cluster with direct
-communications. It represents any network that is not compatible with the
-Internal Network (see section below) and needs a router or other similar
-components to allow the communication between the two. A router is a device that
-connects two or more packet-switched networks or subnetworks. It serves two
-primary functions: managing traffic between these networks by forwarding data packets
-to their intended IP addresses, and allowing multiple devices to use the same
-Internet connection\cite{https://www.cloudflare.com/learning/network-layer/what-is-a-router}.
-
-To simplify, the external network can be seen as any existing network in the
-world except the Internal Network, hence the Internet: the network of networks.
-
-Access to the external network is necessiry if the deployed applications can be
-accessed by external clients and there are the needs of external resources, such
-as public container images, that are not locally available in the cluster. Moreover,
-if the organization managing the overall architecture wants to have remote
-control and monitoring of the cluster across the globe the only current viable
-and supported solution is through an internet connection. If the latter are not needed,
-the external network can be removed from the cluster architecture implying an
-Air-Gap environment without internet connection. Hence, all needed resources and
-components are already locally available and access to the cluster is only
-needed from within the internal network.
-
-An external network is intrinsecally unsecure. Therefore, high security
-protocols, mechanisms and procedures must be implemented and correctly configured.
-This is a very complicated topic that is not covered.
+The external network is any network that does not directly connect to the cluster.
+It denotes any network that is incompatible with the Internal Network (see section
+below) and requires a router or other similar components to communicate with the
+latter. A router connects two or more packet-switched networks or subnetworks.
+It performs two key functions: managing traffic across these networks by forwarding
+data packets to their intended IP addresses, and allowing numerous devices to
+use the same Internet connection\cite{router}. To put it simply, the External Network
+is any existing network in the world that is not the Internal Network, ergo the
+Internet: the network of networks\footnote{\url{https://wikipedia.org/wiki/Internet}}.
+\\ %
+If the deployed applications may be accessible by external clients and there is a
+requirement for external resources, such as public container images, that are not
+locally available in the cluster, connectivity to the external network is
+required. Furthermore, if the organization in charge of the overall architecture
+wishes to have remote control and monitoring of the cluster from anywhere in the
+world, the only current practical and supported solution is an internet connection.
+If the latter are not required, the external network can be omitted from the cluster
+design, resulting in an Air-Gap environment without internet access. As a result,
+all required resources and components are already available locally, and access to
+the cluster is restricted to the internal network. \\ %
+Finally, an External Network is inherently insecure. As a result, high security
+protocols, methods, and procedures must be created and effectively set to avoid
+any possible disservices. Although cluster security should be implemented, it is
+not currently the primary focus, and only some basic procedures are used as it is
+such a broad and complicated topic.
 
 \subsection{Internal Network}
 \label{subsec:architecture_network_internal_network}
