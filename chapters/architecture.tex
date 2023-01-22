@@ -548,10 +548,18 @@ lowering its overall security. Both software and hardware components that reside
 between the two communicating levels enable inter-layer communication. The most fundamental
 requirement for the latter to work is that there be no potential conflicts between
 the two communicating layers. \\ %
-There are three distinct network layers in the cluster architecture seen in figure
-\ref{fig:architecture}. They are covered in the subsections that follow, beginning
-with the most external network and progressing to the most internal network in relation
-to the cluster.
+Some network layers of the cluster can be directly compared with ISO/OSI layers,
+depending on the requirements and capabilities. The International Organization for
+Standardization\footnote{\url{https://www.iso.org}} (ISO) developed the Open Systems
+Interconnection (OSI) model, which allows various communication systems to
+communicate using standard protocols. The OSI model may be thought of as a universal
+computer networking language. It is built on the idea of separating a
+communication system into seven abstract layers, each one stacked on top of the previous\cite{osi}.
+\\ %
+There are three distinct network layers in the cluster architecture seen in
+figure \ref{fig:architecture}. They are covered in the subsections that follow,
+beginning with the most external network and progressing to the most internal
+network in relation to the cluster.
 
 \subsection{External Network}
 \label{subsec:architecture_network_external_network}
@@ -562,27 +570,35 @@ to the cluster.
   \includegraphics[width=.2\textwidth]{images/recluster/external_network.png}}
 \end{wrapfigure}
 
-The external network is any network that does not directly connect to the cluster.
-It denotes any network that is incompatible with the Internal Network (see section
-below) and requires a router or other similar components to communicate with the
-latter. A router connects two or more packet-switched networks or subnetworks.
-It performs two key functions: managing traffic across these networks by forwarding
-data packets to their intended IP addresses, and allowing numerous devices to
-use the same Internet connection\cite{router}. To put it simply, the External Network
-is any existing network in the world that is not the Internal Network, ergo the
-Internet: the network of networks\footnote{\url{https://wikipedia.org/wiki/Internet}}.
+The external network is any network that does not directly connect to the
+cluster. It denotes any network that is incompatible with the Internal Network (see
+the section below) and requires a router or other similar components to communicate
+with the latter. A router connects two or more packet-switched networks or
+subnetworks. It performs two key functions: managing traffic across these
+networks by forwarding data packets to their intended IP addresses and allowing
+numerous devices to use the same Internet connection\cite{router}. To put it
+simply, the External Network is any existing network in the world that is not the
+Internal Network, ergo the Internet: the network of networks\footnote{\url{https://wikipedia.org/wiki/Internet}}.
 \\ %
+In terms of the ISO/OSI communication model, the external network is analogous
+to Layer 3, the Network Layer. The Network Layer is in charge of facilitating
+data transfer across two networks. On the sender's device, the Network Layer
+divides segments from the Transport Layer (Layer 4) into smaller pieces called
+packets, which are then reassembled on the receiving device. Routing is the
+process by which the Network Layer determines the optimum physical path for data
+to take to reach its destination. If the two communicating devices are on the same
+network, the Network Layer is not required\cite{osi}. \\ %
 If the deployed applications may be accessible by external clients and there is a
 requirement for external resources, such as public container images, that are not
 locally available in the cluster, connectivity to the external network is
 required. Furthermore, if the organization in charge of the overall architecture
 wishes to have remote control and monitoring of the cluster from anywhere in the
 world, the only current practical and supported solution is an internet connection.
-If the latter are not required, the external network can be omitted from the cluster
+If the latter is not required, the external network can be omitted from the cluster
 design, resulting in an Air-Gap environment without internet access. As a result,
 all required resources and components are already available locally, and access to
 the cluster is restricted to the internal network. \\ %
-Finally, an External Network is inherently insecure. As a result, high security
+Finally, an External Network is inherently insecure. As a result, high-security
 protocols, methods, and procedures must be created and effectively set to avoid
 any possible disservices. Although cluster security should be implemented, it is
 not currently the primary focus, and only some basic procedures are used as it is
@@ -598,6 +614,69 @@ such a broad and complicated topic.
 \end{wrapfigure}
 
 % Domain
+
+The Internal Network interconnects every physical node in the cluster by the use
+of one or more Layer 2 network switches. To put it simply, the Internal Network
+is mostly a device to device communication that does not involves other networks.
+A network switch connects devices within the same network and forwards data packets
+to and from those devices. A device can be another switch, a router, or a
+computer. Unlike a router, a switch only sends data to the single device it is
+intended for, not to networks of multiple devices\cite{https://www.cloudflare.com/learning/network-layer/what-is-a-network-switch}.
+Since the Internal Network it is mostly a group of two or more connected devices,
+and is a network contained within a small geographic area it is considered a LAN
+(Local Area Network)\cite{https://www.cloudflare.com/learning/network-layer/what-is-a-lan}.
+
+Thanks to the overall network design and the utilization of only L2 network switches,
+the Internal Network is analogous to Layer 2, the Data Link Layer, of the ISO/OSI
+communication model. The Data Link Layer is very similar to the Network Layer (L3),
+except that the Data Link Layer facilitates data transfer between two devices on
+the same network. The Data Link Layer takes packets from the Network Layer (L3) and
+breaks them into smaller pieces called frames. Like the Network Layer, the Data Link
+Layer is also responsible for flow control and error control in intra-network communication
+wether the Transport Layer does flow control and error control for inter-network
+communications\cite{osi}.
+
+Within a LAN, due to the network configuration at Layer 2, the communication
+between the internal devices is not based on IP addresses, used at Layer 3,
+rather on MAC addresses. Therefore, network switches forward data based on the
+destination MAC address. A MAC address (Media Access Control address) is a unique
+sequence of numbers assigned to a network interface controller (NIC) that usually
+encodes the manufacturer's registered identification number. A device may have
+more than a single NIC, and each of them has its own unique MAC address. Even
+though a MAC address is permanently stored in the NIC's hardware there are
+software that allows to override it during the communications\cite{https://macaddress.io/faq/what-is-a-mac-address-after-all}.
+One of the difference between IP addresses and MAC addresses is that the first
+are dynamically assigned to each device and can change over time while the
+latter are permament assigned. This difference is key; the device's MAC address
+can be used to uniquelly identify a device in a network and automatically
+bootstrap it. The latter technique is called Wake-on-LAN (WoL) and is extensively
+used in the cluster by the server component. More information available in
+section \ref{cha:implementation}.
+
+If the Internal Network needs to communicate with other networks to access
+different resources or perform external actions, a router device is needed.
+Therefore, the router (Layer 3) is directly connected to a switch (Layer 2) that
+in turn connects every node in the cluster. The latter connection between the
+two layers, is seen as the border from the secure Internal Network to the unsecure
+External Network. Moreover, the total number of switch and/or router devices in the
+architecture is not fixed and can be increased to sustain better performance and
+possible fault tolerance of the overall cluster network. If an external
+communication is not needed, the overall architecture is then simplified and composed
+by only L2 network switches removing the needs of routers. Without them, a significant
+amount of resource waste is decreased, not only involving the pure hardware that
+can be reutilized as worker nodes, but also in terms of the overall cluster power
+consumption since a network switch, compared to a router, is more power-efficient\cite{}.
+
+Finally, to easily identify nodes in the cluster with a friendly name a local domain
+can be used (i.e., recluster.local). .local is a special-use domain name reserved
+by the Internet Engineering Task Force (IETF)\footnote{\url{https://wikipedia.org/wiki/Internet_Engineering_Task_Force}}
+so that it may not be installed as a top-level domain in the Domain Name System (DNS)\footnote{\url{https://wikipedia.org/wiki/Domain_Name_System}}
+of the Internet. As such it is similar to the other special domain names. However,
+.local is designated for use in link-local networking, so that DNS service may
+be established without local installations of conventional DNS infrastructure on
+LANs\cite{https://wikipedia.org/wiki/.local}. As such, a worker node in the cluster
+can be easily identified with the name `worker.recluster.local` instead of its IP
+address or MAC address.
 
 \subsection{K8s Network}
 \label{subsec:architecture_network_k8s_network}
