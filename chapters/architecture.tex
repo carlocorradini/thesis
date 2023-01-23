@@ -613,70 +613,63 @@ such a broad and complicated topic.
   \includegraphics[width=.2\textwidth]{images/recluster/internal_network.png}}
 \end{wrapfigure}
 
-% Domain
-
-The Internal Network interconnects every physical node in the cluster by the use
-of one or more Layer 2 network switches. To put it simply, the Internal Network
-is mostly a device to device communication that does not involves other networks.
-A network switch connects devices within the same network and forwards data packets
-to and from those devices. A device can be another switch, a router, or a
-computer. Unlike a router, a switch only sends data to the single device it is
-intended for, not to networks of multiple devices\cite{https://www.cloudflare.com/learning/network-layer/what-is-a-network-switch}.
-Since the Internal Network it is mostly a group of two or more connected devices,
-and is a network contained within a small geographic area it is considered a LAN
-(Local Area Network)\cite{https://www.cloudflare.com/learning/network-layer/what-is-a-lan}.
-
-Thanks to the overall network design and the utilization of only L2 network switches,
-the Internal Network is analogous to Layer 2, the Data Link Layer, of the ISO/OSI
-communication model. The Data Link Layer is very similar to the Network Layer (L3),
-except that the Data Link Layer facilitates data transfer between two devices on
-the same network. The Data Link Layer takes packets from the Network Layer (L3) and
-breaks them into smaller pieces called frames. Like the Network Layer, the Data Link
-Layer is also responsible for flow control and error control in intra-network communication
-wether the Transport Layer does flow control and error control for inter-network
-communications\cite{osi}.
-
-Within a LAN, due to the network configuration at Layer 2, the communication
-between the internal devices is not based on IP addresses, used at Layer 3,
-rather on MAC addresses. Therefore, network switches forward data based on the
-destination MAC address. A MAC address (Media Access Control address) is a unique
-sequence of numbers assigned to a network interface controller (NIC) that usually
-encodes the manufacturer's registered identification number. A device may have
-more than a single NIC, and each of them has its own unique MAC address. Even
-though a MAC address is permanently stored in the NIC's hardware there are
-software that allows to override it during the communications\cite{https://macaddress.io/faq/what-is-a-mac-address-after-all}.
-One of the difference between IP addresses and MAC addresses is that the first
-are dynamically assigned to each device and can change over time while the
-latter are permament assigned. This difference is key; the device's MAC address
-can be used to uniquelly identify a device in a network and automatically
-bootstrap it. The latter technique is called Wake-on-LAN (WoL) and is extensively
-used in the cluster by the server component. More information available in
-section \ref{cha:implementation}.
-
-If the Internal Network needs to communicate with other networks to access
-different resources or perform external actions, a router device is needed.
-Therefore, the router (Layer 3) is directly connected to a switch (Layer 2) that
-in turn connects every node in the cluster. The latter connection between the
-two layers, is seen as the border from the secure Internal Network to the unsecure
-External Network. Moreover, the total number of switch and/or router devices in the
-architecture is not fixed and can be increased to sustain better performance and
-possible fault tolerance of the overall cluster network. If an external
-communication is not needed, the overall architecture is then simplified and composed
-by only L2 network switches removing the needs of routers. Without them, a significant
-amount of resource waste is decreased, not only involving the pure hardware that
-can be reutilized as worker nodes, but also in terms of the overall cluster power
-consumption since a network switch, compared to a router, is more power-efficient\cite{}.
-
-Finally, to easily identify nodes in the cluster with a friendly name a local domain
-can be used (i.e., recluster.local). .local is a special-use domain name reserved
-by the Internet Engineering Task Force (IETF)\footnote{\url{https://wikipedia.org/wiki/Internet_Engineering_Task_Force}}
-so that it may not be installed as a top-level domain in the Domain Name System (DNS)\footnote{\url{https://wikipedia.org/wiki/Domain_Name_System}}
-of the Internet. As such it is similar to the other special domain names. However,
-.local is designated for use in link-local networking, so that DNS service may
-be established without local installations of conventional DNS infrastructure on
-LANs\cite{https://wikipedia.org/wiki/.local}. As such, a worker node in the cluster
-can be easily identified with the name `worker.recluster.local` instead of its IP
-address or MAC address.
+The Internal Network uses one or more layer 2 network switches to connect each physical
+node in the cluster. Simply described, the Internal Network is primarily direct device-to-device
+communication with no interaction with external networks. Another switch, router,
+or computer might be considered a device. A layer 2 network switch connects devices
+on the same network and forwards data packets between them. A switch, unlike a router,
+only transmits data to the one device for which it is meant, rather than to networks
+of several devices\cite{switch}. Because the Internal Network is usually composed
+of two or more linked devices and is located in a limited geographic area, it is
+classified as a LAN (Local Area Network). For further information\cite{lan}. \\ %
+The Internal Network is equivalent to the ISO/OSI communication model's Layer 2,
+the Data Link Layer, due to the overall network design and use of only layer 2
+network switches. The Data Link Layer is very similar to the Network Layer (L3),
+except that it only allows data to be sent between two devices on the same
+network. The Data Link Layer breaks packets from the Network Layer into smaller pieces
+known as frames. The Data Link Layer, like the Network Layer, is responsible for
+flow control and error control in intra-network communication, whereas the Transport
+Layer is responsible for flow control and error control in intra-network communications\cite{osi}.
+\\ %
+Because of the network design at Layer 2, communication between internal devices
+in a LAN is based on MAC addresses rather than IP addresses, which are utilized
+at Layer 3. As a result, network switches forward data based on the destination MAC
+address. A MAC address (Media Access Control address) is a unique sequence of 12
+hexadecimal digits permanently stored in the Network Interface Controller (NIC)
+that typically encodes the manufacturer's registered identification number. A device
+can have multiple NICs, each with its own unique MAC address\cite{mac_address}.
+One key difference between IP addresses and MAC addresses is the former is
+assigned dynamically to each device and may change over time, whereas the latter
+are assigned permanently. This distinction is critical since the device's MAC
+address may be used to uniquely identify a device in the same network and
+automatically bootstrap it. The latter is known as Wake-on-LAN (WoL) and is employed
+by the server component in the cluster. Chapter \ref{cha:implementation}
+contains further information regarding automatic cluster upscaling. \\ %
+A router device is required if the Internal Network wants to communicate with
+other networks to access various resources or execute external operations. As a result,
+the router (Layer 3) is directly linked to a switch (Layer 2), which connects every
+node in the cluster. The latter link between the two layers is regarded as the
+boundary between the secure Internal Network and the insecure External Network. Furthermore,
+the total number of switch and/or router devices in the architecture is not
+predetermined and can be increased to improve overall cluster network
+performance and fault tolerance. If an external connection is not required, the
+whole design is reduced and made up of solely L2 network switches, eliminating the
+requirement for routers. Without them, a considerable amount of resource waste is
+reduced, not just in terms of pure hardware that can be reutilized as worker
+nodes, but also in terms of overall cluster power consumption, because a network
+switch is more power-efficient than a router\cite{switch_vs_router_power_consumption}.
+\\ %
+Finally, a local domain name may be used to conveniently identify nodes in the
+Internal Network with a hostname (i.e., \texttt{recluster.local}). \texttt{.local}
+is a special-use domain name reserved by the Internet Engineering Task Force (IETF)\footnote{\url{https://www.ietf.org}}
+so that it cannot be installed as a top-level domain in the Internet's Domain
+Name System (DNS)\footnote{\url{https://wikipedia.org/wiki/Domain_Name_System}}.
+As a result, it is similar to the other special domain names. However, \texttt{.local}
+is intended for usage in link-local networking, allowing DNS service to be established
+without the need for local deployments of standard DNS infrastructure on LANs\cite{local_domain_name}.
+As a result, instead of an IP address or MAC address, a worker node may be recognized
+with the hostname \texttt{worker.recluster.local} and a controller node with the
+hostname \texttt{controller.recluster.local}.
 
 \subsection{K8s Network}
 \label{subsec:architecture_network_k8s_network}
