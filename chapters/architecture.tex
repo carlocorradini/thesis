@@ -680,7 +680,48 @@ hostname \texttt{controller.recluster.local}.
   \includegraphics[width=.2\textwidth]{images/recluster/k8s_network.png}}
 \end{wrapfigure}
 
-% Overlay Network
+Premise: the purpose of this section is not to demonstrate how Kubernetes
+networking works or how it can be set and configured. Kubernetes networking is a
+vast and complex topic that necessitates a high degree of competence in a variety
+of fields. Furthermore, it is always evolving, providing new features and
+supporting newer technology. As a result, this section only contains fundamental
+and essential information regarding Kubernetes networking that is considered at
+its core and will not change in future releases.
+
+The Kubernetes orchestrator networking is represented by K8s Network. It is a virtual
+network, as opposed to the Internal and External networks, in the sense that there
+are no physical connections between the various K8s components, only logical
+ones. The communication between the various K8s components is coordinated and distributed
+over all active nodes. Unless properly configured via a particular K8s Service, in
+the cluster architecture represented by the Load Balancer component, by default
+the various deployed containers in the K8s environment are not allowed to
+communicate outside the K8s network. \\ %
+In contrast to the previous two network layers, K8s Network does not map to a single
+layer of the ISO/OSI communication model. Instead, it covers numerous ISO/OSI layers,
+starting from the Data Link Layer (L2) up to the Application Layer (L7), which is
+the highest. \\ %
+The Kubernetes networking stack, and, more generally, the Kubernetes ecosystem, is
+built following a set of standards and specifications. This is critical for two
+main reasons. It imposes an overall rigorous structure and design that must adhere
+to the standard's specifications, no more, no less. Finally, before a standard specification
+can be amended or introduced to the K8s ecosystem, it must go through a sequence
+of interactions and discussions involving various parties, spanning from Kubernetes
+developers to single users. As a result of this, the Kubernetes ecosystem is incredibly
+adaptable, and it can be customized and configured with several plugins and
+alternative implementations at various levels to represent the end purpose and
+intent of the organization in charge of the cluster. The latter capability has been
+employed in a real-world implementation to switch from one network backend to another.
+The first backend encapsulates and encrypts all packets transferred from one
+node to another. There is no need for such rigorous security measures in the cluster.
+Therefore, the backend has been modified to need just direct Layer 2 communication
+between the nodes without any encryption. Moreover, the latter not only needed fewer
+dependencies but also improved overall performance because the extra procedures were
+no longer required.
+
+The following information is essential for understanding the principles of K8s networking.
+They were collected from the official Kubernetes website, which can be found at \url{https://kubernetes.io}.
+
+% TODO Overlay Network
 
 \section{Cluster}
 \label{sec:architecture_cluster}
