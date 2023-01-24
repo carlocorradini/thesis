@@ -666,10 +666,10 @@ so that it cannot be installed as a top-level domain in the Internet's Domain
 Name System (DNS)\footnote{\url{https://wikipedia.org/wiki/Domain_Name_System}}.
 As a result, it is similar to the other special domain names. However, \texttt{.local}
 is intended for usage in link-local networking, allowing DNS service to be established
-without the need for local deployments of standard DNS infrastructure on LANs\cite{local_domain_name}.
-As a result, instead of an IP address or MAC address, a worker node may be recognized
-with the hostname \texttt{worker.recluster.local} and a controller node with the
-hostname \texttt{controller.recluster.local}.
+without the need for local deployments of standard DNS infrastructure on LANs\cite{local_domain_name}\cite{reserved_dns_names}.
+As a result, instead of an IP address or MAC address, a worker node may be
+recognized with the hostname \texttt{worker.recluster.local} and a controller node
+with the hostname \texttt{controller.recluster.local}.
 
 \subsection{K8s Network}
 \label{subsec:architecture_network_k8s_network}
@@ -680,13 +680,34 @@ hostname \texttt{controller.recluster.local}.
   \includegraphics[width=.2\textwidth]{images/recluster/k8s_network.png}}
 \end{wrapfigure}
 
-Premise: the purpose of this section is not to demonstrate how Kubernetes
-networking works or how it can be set and configured. Kubernetes networking is a
-vast and complex topic that necessitates a high degree of competence in a variety
-of fields. Furthermore, it is always evolving, providing new features and
-supporting newer technology. As a result, this section only contains fundamental
-and essential information regarding Kubernetes networking that is considered at
-its core and will not change in future releases.
+\textit{"Kubernetes is all about sharing machines between applications"}\cite{k8s_cluster_networking}
+\\ %
+
+Premise: the purpose of this section is not to demonstrate how Kubernetes networking
+works or how it can be set and configured. Kubernetes networking is a vast and
+complex topic that necessitates a high degree of competence in a variety of
+fields. Furthermore, it is always evolving, providing new features and supporting
+newer technology. As a result, this section only contains fundamental and essential
+information regarding Kubernetes networking that is considered at its core and will
+not change in future releases.
+
+\begin{wrapfigure}
+  {r}{.5\textwidth}
+  \centering
+  \includegraphics[width=.5\textwidth]{images/recluster/overlay_network.png}
+  \caption{Comparison
+  between
+  the
+  Physical
+  Network
+  and
+  the
+  virtual
+  K8s
+  Overlay
+  Network}
+  \label{fig:overlay_network}
+\end{wrapfigure}
 
 The Kubernetes orchestrator networking is represented by K8s Network. It is a virtual
 network, as opposed to the Internal and External networks, in the sense that there
@@ -698,30 +719,98 @@ the various deployed containers in the K8s environment are not allowed to
 communicate outside the K8s network. \\ %
 In contrast to the previous two network layers, K8s Network does not map to a single
 layer of the ISO/OSI communication model. Instead, it covers numerous ISO/OSI layers,
-starting from the Data Link Layer (L2) up to the Application Layer (L7), which is
-the highest. \\ %
-The Kubernetes networking stack, and, more generally, the Kubernetes ecosystem, is
-built following a set of standards and specifications. This is critical for two
-main reasons. It imposes an overall rigorous structure and design that must adhere
-to the standard's specifications, no more, no less. Finally, before a standard specification
-can be amended or introduced to the K8s ecosystem, it must go through a sequence
-of interactions and discussions involving various parties, spanning from Kubernetes
-developers to single users. As a result of this, the Kubernetes ecosystem is incredibly
-adaptable, and it can be customized and configured with several plugins and
-alternative implementations at various levels to represent the end purpose and
-intent of the organization in charge of the cluster. The latter capability has been
-employed in a real-world implementation to switch from one network backend to another.
-The first backend encapsulates and encrypts all packets transferred from one
-node to another. There is no need for such rigorous security measures in the cluster.
-Therefore, the backend has been modified to need just direct Layer 2 communication
-between the nodes without any encryption. Moreover, the latter not only needed fewer
-dependencies but also improved overall performance because the extra procedures were
-no longer required.
+starting from the Data Link Layer (Layer 2) up to the Application Layer (Layer 7),
+which is the highest. \\ %
+K8s Network is regarded as an overlay network. An overlay network is a network
+that is established on top of a physical network that already exists. Because the
+overlay creates the virtual network through encapsulation, it relies on the so-called
+underlay network for fundamental networking functions such as routing and
+forwarding. Most overlay networks are created in the ISO/OSI communication model's
+Application Layer (Layer 7) on top of the TCP/IP networking suite. Overlay
+technologies can also be utilized to overcome some of the underlay constraints
+while also providing additional routing and forwarding capabilities without
+modifying the physical networking infrastructure. An overlay network's nodes,
+represented as K8s instances, are linked together by logical connections that can
+span numerous physical links. A connection between two overlay nodes may require
+multiple hops in the underlying network. In the underlying network, a link
+between two overlay nodes may require multiple hops. Figure \ref{fig:overlay_network}
+compares the physical network to the virtual K8s overlay network that is created
+on top of it. Take note of the overall network simplicity and the lack of
+connection hops between each K8s instance. \\ %
+The Kubernetes networking stack, and, more generally, the Kubernetes ecosystem,
+is built following a set of standards and specifications. This is critical for two
+main reasons. It imposes an overall rigorous structure and design that must
+adhere to the standard's specifications, no more, no less. Finally, before a
+standard specification can be amended or introduced to the K8s ecosystem, it must
+go through a sequence of interactions and discussions involving various parties,
+spanning from Kubernetes developers to single users. As a result of this, the
+Kubernetes ecosystem is incredibly adaptable, and it can be customized and configured
+with several plugins and alternative implementations at various levels to represent
+the end purpose and intent of the organization in charge of the cluster. The
+latter capability has been employed in a real-world implementation to switch
+from one network backend to another. The first backend encapsulates and encrypts
+all packets transferred from one node to another. There is no need for such
+rigorous security measures in the cluster. Therefore, the backend has been
+modified to need just direct Layer 2 communication between the nodes without any
+encryption. Moreover, the latter not only needed fewer dependencies but also
+improved overall performance because the extra procedures were no longer
+required.
 
-The following information is essential for understanding the principles of K8s networking.
-They were collected from the official Kubernetes website, which can be found at \url{https://kubernetes.io}.
+The following information is essential for understanding the basic principles of
+K8s networking. They were collected from the official Kubernetes website, which
+can be found at \url{https://kubernetes.io}. \\ %
+Sharing computers often necessitates ensuring that two applications do not
+attempt to use the same ports. Port coordination, also known as dynamic port
+allocation, is extremely difficult to do at scale and exposes cluster-level issues.
+Kubernetes, on the other hand, takes a different approach. \\ %
+Every Pod, which are the smallest deployable units of computing that can be created
+and managed in a cluster\cite{k8s_pod}, is assigned its cluster-wide IP address.
+This eliminates the need to explicitly construct connections between Pods and
+deal with container ports mapping to node ports. As a result, Kubernetes
+enforces the following basic criteria for any networking implementation:
+\begin{itemize}
+  \item Pods can communicate with all other pods on any other node without the use
+    of NAT (Network Address Translation). NAT is a means of transparently
+    mapping an IP address space to another\cite{nat}.
 
-% TODO Overlay Network
+  \item Kubernetes agents (such as system daemons, kubelet, and so on) on a node
+    can communicate with all pods on that node.
+\end{itemize}
+Kubernetes IP addresses exist at the Pod scope; containers within a Pod share
+their network namespaces, including their IP address and MAC address. This
+implies that containers within a Pod may all contact each other's ports on
+\texttt{localhost}\footnote{\url{https://wikipedia.org/wiki/Localhost}};
+requiring port coordination. \\ %
+Four concerns are addressed by Kubernetes networking:
+\begin{enumerate}
+  \item \textit{Highly-coupled container-to-container communications}
+    \newline
+    Containers within a Pod interact through networking via loopback.
+
+  \item \textit{Pod-to-Pod communications}
+    \newline
+    Cluster networking provides connectivity among different Pods.
+
+  \item \textit{Pod-to-Service communications}
+    \newline
+    Use Service components to publish services that are only accessible within
+    the Kubernetes cluster.
+
+  \item \textit{External-to-Service communications}
+    \newline
+    Let an application running in Pods be accessible from outside the cluster by
+    exposing it as a Service. The Load Balancer Service component, mentioned in
+    the section \ref{subsec:architecture_components_load_balancer}, is one example.
+\end{enumerate}
+The container runtime on each node implements the Kubernetes network model.
+Container runtime software, such as containerd\footnote{\url{urlhttps://containerd.io}}
+or CRI-O\footnote{\url{https://cri-o.io}}, is responsible for operating the
+containers. Container runtimes handle their network and security capabilities via
+the Container Network Interface (CNI)\cite{k8s_cluster_networking}\cite{k8s_networking_model}.
+CNI is composed of a specification and libraries for designing plugins that
+configure network interfaces in Linux containers. CNI is only concerned with the
+network connectivity of containers and removing allocated resources when the container
+is destroyed\cite{cni}.
 
 \section{Cluster}
 \label{sec:architecture_cluster}
