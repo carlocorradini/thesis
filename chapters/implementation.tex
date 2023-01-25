@@ -3,10 +3,77 @@
 
 \epigraph{Ideas are easy, Implementation is hard.}{Guy Kawasaki}
 
+Most of the implementation details and general decisions made for developing a
+real-world functional project, based on the design architecture presented in chapter
+\ref{cha:architecture}, are discussed in this chapter. It is organized in such a
+way that it starts with the foundation and then progresses to the autoscaling of
+worker nodes before moving on to example deployments of various applications in the
+cluster. \\ %
+The technology and programming languages utilized in the implementation are heterogeneous.
+Nevertheless, according to a shared set of APIs and pre-defined structures, they
+interact as a distinct and homogenous entity that maintains the entire cluster
+in an active and healthy state. \\ %
+Furthermore, several of the components and/or technologies discussed in this chapter
+are interchangeable with other solutions. The latter is highly valuable for
+organizations since it provides more configuration freedom and final control
+over the cluster while continuously reflecting its ultimate goal.
+
 \section{Distributions}
 \label{sec:implementation_distributions}
 
 % TODO Reference introduction dependencies
+
+The foundation for almost every software relies on the need of a solid and
+consistent Operating System (OS).
+
+As written in section \ref{subsec:architecture_components_node}, the OS needs to
+be installed on every node in the cluster and must be based on the \texttt{Linux
+Kernel}. The latter is a fundamental requirement since most of the technologies used
+in the implementation relies on Linux primitives and core functionalities to be able
+to work flawlessly. As an example, all Kubernetes distributions requires the \texttt{cgroup
+v2}\footnote{\url{https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html}}
+kernel module to enforce resource management for pods and containers, which includes
+cpu/memory requests and limits for containerized workloads\footnote{\url{https://kubernetes.io/docs/concepts/architecture/cgroups}}.
+
+The section is named Distributions and not Operating System to reflect the possibility
+of the implementation architecture to be compatible with multiple Linux distributions.
+A Linux distribution, often shortened to Linux distro, is an operating system
+compiled from components developed by various open source projects and
+programmers. Each distribution includes the Linux kernel (foundation of the
+operating system), the GNU shell utilities (terminal interface and commands), the
+X server (for a graphical desktop), the desktop environment, a package management
+system, an installer and other services. Many components are developed independently
+from each other and are distributed in source code form. A single Linux
+distribution may contain thousands of software packages, utilities and applications.
+Linux distributions compile code from open source projects and combine it into a
+single operating system that can be installed and booted up. Linux distributions
+are available for a multitude of different use-case, such as desktop computers, servers
+without a graphical interface, super computers, mobile devices, and more\cite{https://www.suse.com/suse-defines/definition/linux-distribution}.
+
+A Linux Distribution, to be fully compatible with the implementation
+architecture, needs to satisfies three main requirements. They are described in
+the list below: 1. The version of the Linux Kernel must be compatible with the chosen
+Kubernetes version. To support newer functionalities and/or enhancing overall
+security, newer versions of K8s may require newer versions of the Linux Kernel.
+2. All required packages, described and listed in section \ref{subsec:implementation_distributions_packages},
+must be already installed and globally available in the system. Before the execution
+of the installation program, described in section
+\ref{sec:implementation_installer}, a check on every required packages is performed.
+If even a single package is missing from the current system, the installation fails
+with an error message describing what packages are missing. 3. A supported and
+compatible Init System, described in section \ref{subsec:implementation_distributions_init_system}.
+The implementation does supports OpenRC and Systemd. Currently, they are the two
+most widespread init sistems and most of the available distributions are based
+on one of them.
+
+Finally, two custom Linux Distributions, shown in section
+\ref{subsec:implementation_distributions_iso_image}, have been already prepared and
+configured. This is done to simplify the overall configuration, removing possible
+incompatibilities while also enhancing implementation and testing speed of the cluster.
+Both of them are based on preexisting Linux Distribution that are known to be
+stable, easy to configure and require minimal resources to work. Moreover, they are
+based on different init systems forcing the overall implementation to be compatible
+and tested with both of them.
 
 \subsection{Packages}
 \label{subsec:implementation_distributions_packages}
@@ -43,16 +110,15 @@
   \caption{Alpine Linux logo}
 \end{wrapfigure}
 
-Alpine Linux\footnote{\url{https://www.alpinelinux.org}} is a lightweight,
-security-focused, and resource-efficient distribution. In recent years, has grown
-in popularity as the foundation for the majority of Docker images. It is based
-on musl\footnote{\url{https://musl.libc.org}} (an implementation of the C standard
-library, an alternative to glibc), BusyBox\footnote{\url{https://busybox.net}} (a
-single, small executable that combines tiny versions of many common UNIX
-utilities), a custom package manager called APK\footnote{\url{https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper}}
+Alpine Linux\footnote{\url{https://www.alpinelinux.org}} is a lightweight, security-focused,
+and resource-efficient distribution. In recent years, has grown in popularity as
+the foundation for the majority of Docker images. It is based on musl\footnote{\url{https://musl.libc.org}}
+(an implementation of the C standard library, an alternative to glibc), BusyBox\footnote{\url{https://busybox.net}}
+(a single, small executable that combines tiny versions of many common UNIX utilities),
+a custom package manager called APK\footnote{\url{https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper}}
 and the OpenRC init system ()\cite{alpine_linux}. \\ % TODO OpenRC reference
-Alpine Linux is the preferred reCluster distribution. It has been utilized and tested
-during development and is now present in every cluster node.
+Alpine Linux is the preferred reCluster distribution. It has been utilized and
+tested during development and is now present in every cluster node.
 
 \subsubsection{Arch Linux}
 \label{subsubsec:implementation_distributions_iso_arch_linux}
@@ -64,15 +130,16 @@ during development and is now present in every cluster node.
   \caption{Arch Linux logo}
 \end{wrapfigure}
 
-Arch Linux\footnote{\url{https://archlinux.org}} is a general-purpose distribution
-that focuses on simplicity, minimalism, and code elegance. It is based on
-Systemd init system () % TODO Systemd reference
-and strives to stay bleeding edge, offering the latest stable versions of most software
-through Pacman\footnote{\url{https://wiki.archlinux.org/title/Pacman}} package manager.
-Uses a rolling release system that allows one-time installation and perpetual
-software upgrades, allowing to not reinstall or upgrade the system from one version
-to the next. Notably, Arch Linux is the foundation for several many popular enterprise-grade
-distributions, such as Manjaro\footnote{\url{https://manjaro.org}} and SteamOS\footnote{\url{https://store.steampowered.com/steamos}},
+Arch Linux\footnote{\url{https://archlinux.org}} is a general-purpose
+distribution that focuses on simplicity, minimalism, and code elegance. It is based
+on Systemd init system () % TODO Systemd reference
+and strives to stay bleeding edge, offering the latest stable versions of most
+software through Pacman\footnote{\url{https://wiki.archlinux.org/title/Pacman}}
+package manager. Uses a rolling release system that allows one-time installation
+and perpetual software upgrades, allowing to not reinstall or upgrade the system
+from one version to the next. Notably, Arch Linux is the foundation for several
+many popular enterprise-grade distributions, such as Manjaro\footnote{\url{https://manjaro.org}}
+and SteamOS\footnote{\url{https://store.steampowered.com/steamos}},
 demonstrating its customizability, power, and stability\cite{arch_linux}.
 
 \section{Dependencies}
