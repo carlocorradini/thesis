@@ -87,6 +87,72 @@ overall implementation to be compatible with and tested with both.
 \subsection{Packages}
 \label{subsec:implementation_distributions_packages}
 
+The packages used in the implementation that must be available in a Linux distribution
+are specified in this section. A package is a collection of files that have been
+bundled together and may be installed and uninstalled as a group\cite{package_manager}.
+\\ %
+All packages may be installed automatically using the package manager of the respective
+Linux distribution. A package manager's job is to provide an interface that
+assists the user in managing the collection of packages installed on the system.
+A package manager maintains track of what software is installed on the system and
+makes it simple to install new software, update software to newer versions, or delete
+previously installed software. A package is usually a single piece of software. However,
+it is typical for applications to be made up of numerous dependent packages. For
+example, the \texttt{jq} package includes not just the \texttt{jq} command-line
+JSON processor, but also the \texttt{oniguruma}\footnote{\url{https://github.com/kkos/oniguruma}}
+package, a regular expressions library. Furthermore, various optional add-on packages
+including extra data and documentation are available\cite{package_manager}. \\ %
+All packages are already included by default in the two custom Linux
+distributions. As a result, there is no need for any changes or the installation
+of extra packages. \\ %
+In the table \ref{tbl:packages}, each package has a brief overview taken from its
+official documentation, as well as a description of where and why it has been
+used. Furthermore, the required column indicates with symbols if the package is
+required (\textcolor{bulmagreen}{\faicon{check}}), optional (\textcolor{bulmablue}{\faicon{question}}),
+or not required (\textcolor{bulmared}{\faicon{times}}).
+
+\begin{xltabular}
+  {\textwidth} { >{\ttfamily}l | c | X | X }
+
+  \multicolumn{1}{ c |}{\large{\textbf{Name}}} &
+  \multicolumn{1}{ c |}{\large{\textbf{Required}}} &
+  \multicolumn{1}{ c }{\large{\textbf{Overview}}} &
+  \multicolumn{1}{ c }{\large{\textbf{Description}}} \\ \hline \hline
+
+  coreutils & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+
+  ethtool & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+
+  inotify-tools & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+
+  iproute2 & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+
+  jq & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+
+  ncurses & \textcolor{bulmared}{\faicon{times}} & & \\ \hline
+
+  nodejs & \textcolor{bulmablue}{\faicon{question}} & & \\ \hline
+
+  npm & \textcolor{bulmablue}{\faicon{question}} & & \\ \hline
+
+  postgresql & \textcolor{bulmablue}{\faicon{question}} & & \\ \hline
+
+  procps & \textcolor{bulmared}{\faicon{times}} & & \\ \hline
+
+  sudo & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+
+  sysbench & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+
+  tzdata & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+
+  util-linux & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+
+  yq & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+
+  \caption{Packages list}
+  \label{tbl:packages}
+\end{xltabular}
+
 \subsection{Init System}
 \label{subsec:implementation_distributions_init_system}
 
@@ -119,16 +185,15 @@ overall implementation to be compatible with and tested with both.
   \caption{Alpine Linux logo}
 \end{wrapfigure}
 
-Alpine Linux\footnote{\url{https://www.alpinelinux.org}} is a lightweight,
-security-focused, and resource-efficient distribution. In recent years, has grown
-in popularity as the foundation for the majority of Docker images. It is based
-on musl\footnote{\url{https://musl.libc.org}} (an implementation of the C standard
-library, an alternative to glibc), BusyBox\footnote{\url{https://busybox.net}} (a
-single, small executable that combines tiny versions of many common UNIX
-utilities), a custom package manager called APK\footnote{\url{https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper}}
+Alpine Linux\footnote{\url{https://www.alpinelinux.org}} is a lightweight, security-focused,
+and resource-efficient distribution. In recent years, has grown in popularity as
+the foundation for the majority of Docker images. It is based on musl\footnote{\url{https://musl.libc.org}}
+(an implementation of the C standard library, an alternative to glibc), BusyBox\footnote{\url{https://busybox.net}}
+(a single, small executable that combines tiny versions of many common UNIX utilities),
+a custom package manager called APK\footnote{\url{https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper}}
 and the OpenRC init system ()\cite{alpine_linux}. \\ % TODO OpenRC reference
-Alpine Linux is the preferred reCluster distribution. It has been utilized and tested
-during development and is now present in every cluster node.
+Alpine Linux is the preferred reCluster distribution. It has been utilized and
+tested during development and is now present in every cluster node.
 
 \subsubsection{Arch Linux}
 \label{subsubsec:implementation_distributions_iso_arch_linux}
@@ -140,15 +205,16 @@ during development and is now present in every cluster node.
   \caption{Arch Linux logo}
 \end{wrapfigure}
 
-Arch Linux\footnote{\url{https://archlinux.org}} is a general-purpose distribution
-that focuses on simplicity, minimalism, and code elegance. It is based on
-Systemd init system () % TODO Systemd reference
-and strives to stay bleeding edge, offering the latest stable versions of most software
-through Pacman\footnote{\url{https://wiki.archlinux.org/title/Pacman}} package manager.
-Uses a rolling release system that allows one-time installation and perpetual
-software upgrades, allowing to not reinstall or upgrade the system from one version
-to the next. Notably, Arch Linux is the foundation for several many popular enterprise-grade
-distributions, such as Manjaro\footnote{\url{https://manjaro.org}} and SteamOS\footnote{\url{https://store.steampowered.com/steamos}},
+Arch Linux\footnote{\url{https://archlinux.org}} is a general-purpose
+distribution that focuses on simplicity, minimalism, and code elegance. It is based
+on Systemd init system () % TODO Systemd reference
+and strives to stay bleeding edge, offering the latest stable versions of most
+software through Pacman\footnote{\url{https://wiki.archlinux.org/title/Pacman}}
+package manager. Uses a rolling release system that allows one-time installation
+and perpetual software upgrades, allowing to not reinstall or upgrade the system
+from one version to the next. Notably, Arch Linux is the foundation for several
+many popular enterprise-grade distributions, such as Manjaro\footnote{\url{https://manjaro.org}}
+and SteamOS\footnote{\url{https://store.steampowered.com/steamos}},
 demonstrating its customizability, power, and stability\cite{arch_linux}.
 
 \section{Dependencies}
