@@ -105,49 +105,79 @@ including extra data and documentation are available\cite{package_manager}. \\ %
 All packages are already included by default in the two custom Linux
 distributions. As a result, there is no need for any changes or the installation
 of extra packages. \\ %
-In the table \ref{tbl:packages}, each package has a brief overview taken from its
-official documentation, as well as a description of where and why it has been
-used. Furthermore, the required column indicates with symbols if the package is
-required (\textcolor{bulmagreen}{\faicon{check}}), optional (\textcolor{bulmablue}{\faicon{question}}),
-or not required (\textcolor{bulmared}{\faicon{times}}).
+Each package in table \ref{tbl:packages} contains a brief description extracted
+from its official documentation, as well as some notes on why it was utilized.
+Furthermore, the required column indicates with symbols if the package is required
+(\textcolor{bulmagreen}{\faicon{check}}), optional (\textcolor{bulmablue}{\faicon{question}}),
+or not required (\textcolor{bulmared}{\faicon{times}}). It should be noted that the
+name of some packages may differ based on the package manager employed by the Linux
+distribution.
 
 \begin{xltabular}
   {\textwidth} { >{\ttfamily}l | c | X | X }
 
   \multicolumn{1}{ c |}{\large{\textbf{Name}}} &
   \multicolumn{1}{ c |}{\large{\textbf{Required}}} &
-  \multicolumn{1}{ c }{\large{\textbf{Overview}}} &
-  \multicolumn{1}{ c }{\large{\textbf{Description}}} \\ \hline \hline
+  \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
+  \multicolumn{1}{ c }{\large{\textbf{Notes}}} \\ \hline \hline
 
-  coreutils & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+  coreutils\footnote{\url{www.gnu.org/software/coreutils}} & \textcolor{bulmagreen}{\faicon{check}}
+  & The GNU Core Utilities are the GNU\footnote{\url{https://www.gnu.org}}
+  operating system's essential file, shell, and text manipulation utilities. These
+  are the core utilities that are required to be included in any operating system.
+  & By default, minimal Linux distributions only include a portion of the massive
+  list of utilities provided in the standard \texttt{coreutils} package. As a result,
+  several of the applications utilized in the implementation are missing. Therefore,
+  the whole \texttt{coreutils} package is required. \\ \hline
 
-  ethtool & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+  ethtool\footnote{\url{https://www.kernel.org/pub/software/network/ethtool}} & \textcolor{bulmagreen}{\faicon{check}}
+  & \texttt{ethtool} is a standard Linux software for managing network drivers and
+  hardware by modifying Network Interface Controller (NIC) settings. & If the
+  node's NIC interface supports Wake-on-Lan (WoL), \texttt{ethtool} is used to
+  activate it.
+  \newline
+  It's worth noting that the NIC interface may reset to factory settings following
+  a reboot. As a result, \texttt{ethtool} is always run before the NIC interface
+  is activated. \\ \hline
 
-  inotify-tools & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+  inotify-tools\footnote{\url{https://github.com/inotify-tools/inotify-tools}} &
+  \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
 
-  iproute2 & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+  iproute2\footnote{\url{https://wiki.linuxfoundation.org/networking/iproute2}}
+  & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
 
-  jq & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+  jq\footnote{\url{https://stedolan.github.io/jq}} & \textcolor{bulmagreen}{\faicon{check}}
+  & & \\ \hline
 
-  ncurses & \textcolor{bulmared}{\faicon{times}} & & \\ \hline
+  ncurses\footnote{\url{https://invisible-island.net/ncurses}} & \textcolor{bulmared}{\faicon{times}}
+  & & \\ \hline
 
-  nodejs & \textcolor{bulmablue}{\faicon{question}} & & \\ \hline
+  nodejs\footnote{\url{https://nodejs.org/en}} & \textcolor{bulmablue}{\faicon{question}}
+  & & \\ \hline
 
-  npm & \textcolor{bulmablue}{\faicon{question}} & & \\ \hline
+  npm\footnote{\url{https://www.npmjs.com}} & \textcolor{bulmablue}{\faicon{question}}
+  & & \\ \hline
 
-  postgresql & \textcolor{bulmablue}{\faicon{question}} & & \\ \hline
+  postgresql\footnote{\url{https://www.postgresql.org}} & \textcolor{bulmablue}{\faicon{question}}
+  & & \\ \hline
 
-  procps & \textcolor{bulmared}{\faicon{times}} & & \\ \hline
+  procps-ng\footnote{\url{https://gitlab.com/procps-ng/procps}} & \textcolor{bulmared}{\faicon{times}}
+  & & \\ \hline
 
-  sudo & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+  sudo\footnote{\url{https://www.sudo.ws}} & \textcolor{bulmagreen}{\faicon{check}}
+  & & \\ \hline
 
-  sysbench & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+  sysbench\footnote{\url{https://github.com/akopytov/sysbench}} & \textcolor{bulmagreen}{\faicon{check}}
+  & & \\ \hline
 
-  tzdata & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+  tzdata\footnote{\url{https://www.iana.org/time-zones}} & \textcolor{bulmagreen}{\faicon{check}}
+  & & \\ \hline
 
-  util-linux & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+  util-linux\footnote{\url{https://github.com/util-linux/util-linux}} &
+  \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
 
-  yq & \textcolor{bulmagreen}{\faicon{check}} & & \\ \hline
+  yq\footnote{\url{https://mikefarah.gitbook.io/yq}} & \textcolor{bulmagreen}{\faicon{check}}
+  & & \\ \hline
 
   \caption{Packages list}
   \label{tbl:packages}
