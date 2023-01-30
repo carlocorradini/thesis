@@ -314,18 +314,140 @@ distribution.
 \subsection{Init System}
 \label{subsec:implementation_distributions_init_system}
 
+The Init System, short for Initialization System, is the first process that runs
+when a Unix-based computer operating system is bootstrapped. Init is a daemon
+process that is normally given Process IDentifier 1 (PID 1) and runs until the
+system is shut down. It is the direct or indirect ancestor of all other processes
+and adopts all orphaned processes automatically. The kernel starts Init during
+the boot process; if the kernel is unable to start it, a kernel panic occurs\cite{init_system}.
+\\ %
+The Init System is logically positioned above the Kernel and is an essential component
+of every modern system. It frequently integrates sophisticated features over
+simple ones and is very customizable. Furthermore, it offers active control and
+monitoring over the running processes, keeping the entire system healthy and active.
+The latter is critical because it enables automated and continuous monitoring of
+cluster implementation architecture-related processes operating in the node
+without the need for a custom solution. For example, if a K8s instance executing
+in a worker node crashes (i.e. exits with a code different than 0), the Init
+System detects it and restarts the process automatically, making the node active
+and able to receive workload again. \\ %
+When the node is bootstrapped, the Init System is set to start all cluster-related
+processes (i.e., K8s instance and Metric Server) and run a script that sends a
+message to the server component notifying it that the node is active and ready. Before
+the node is shut down, it automatically terminates all cluster-related processes
+and sends a message to the server component informing that the node is shutting
+down and will be inactive. As previously stated, the cluster performs these two
+operations automatically: bootstrap for upscaling and shutdown for downscaling.
+However, there are scenarios in which a node is manually bootstrapped and/or shut
+down by human action without involving the server component directly. Despite
+the possibility of the latter, the overall cluster state remains consistent, and
+all node statuses are correctly updated, thanks to the Init System and its monitoring
+and configuration capabilities. \\ %
+The implementation currently supports two init systems: OpenRC (described in section
+\ref{subsec:implementation_distributions_init_system_openrc}) and Systemd (described
+in section \ref{subsec:implementation_distributions_init_system_systemd}). They are
+the two most popular and widely used Init Systems, and the vast majority of
+Linux distributions support one or both of them. Their capabilities are nearly identical.
+However, configuration files and available application(s) that interact with the
+bare-metal Init System API, are different, necessitating double effort to
+achieve the same objective. \\ %
+It should be noted that if the Init System daemon process crashes due to an
+error, the entire system crashes and becomes inactive, necessitating a manual
+restart. Even though the likelihood of the latter is extremely low, it is never
+zero. As a result, as stated in section
+\ref{subsec:architecture_components_server}, a heartbeat mechanism has been established
+in the cluster to constantly monitor and identify the status and availability of
+all active nodes. If there are no configuration or networking issues and a node's
+heartbeat is not received within the predefined interval, it indicates that the heartbeat
+daemon executing in the node has crashed and has not yet been restarted, or that
+the entire node has crashed and is not automatically recoverable.
+
 \subsubsection{OpenRC}
 \label{subsec:implementation_distributions_init_system_openrc}
 
-\subsubsection{Systemd}
+OpenRC is a dependency-based init system for Unix-like systems that maintain compatibility
+with the system's init system, which is generally found in \texttt{/sbin/init}. \\ %
+At boot, OpenRC starts the appropriate system services in the right sequence,
+manages them while the system is running, and stops them at shutdown. It can
+manage installed daemons, optionally monitor the processes it launches, and
+start processes in parallel when possible to reduce boot time. \\ %
+OpenRC was developed for Gentoo\footnote{\url{https://www.gentoo.org}}, but it may
+be used in other Linux distributions and BSD\footnote{\url{https://www.bsd.org}}
+systems as well\cite{openrc}.
+
+\begin{lstlisting}[language=sh, xleftmargin=\parindent, caption=TODO]
+  #!/sbin/openrc-run
+
+  depend() {
+    after network-online
+    want cgroups
+  }
+
+  start_pre() {
+    rm -f /tmp/k3s.*
+  }
+
+  supervisor=supervise-daemon
+  name="k3s"
+  description="Lightweight Kubernetes"
+  command="/usr/local/bin/k3s"
+  command_args="server >> /var/log/k3s.log 2>&1"
+  output_log="/var/log/k3s.log"
+  error_log="/var/log/k3s.log"
+  pidfile="/var/run/k3s.pid"
+  respawn_delay=5
+  respawn_max=0
+
+  set -o allexport
+  if [ -f "/etc/environment" ]; then sourcex "/etc/environment"; fi
+  if [ -f "/etc/rancher/k3s/k3s.env" ]; then sourcex "/etc/rancher/k3s/k3s.env"; fi
+  set +o allexport
+\end{lstlisting}
+
+\subsubsection{systemd}
 \label{subsec:implementation_distributions_init_system_systemd}
 
 \begin{wrapfigure}
   {r}{.25\textwidth}
   \centering
   \includegraphics[width=.25\textwidth]{images/logos/systemd.png}
-  \caption{Systemd logo}
+  \caption{systemd logo}
 \end{wrapfigure}
+
+systemd is a collection of building blocks for a Linux system. It provides a
+system and service manager that runs as PID 1 and starts the rest of the system.
+\\ %
+systemd supports aggressive parallelization, on-demand daemon startup, process
+tracking through Linux control groups, mount and automount point management, and
+a complex transactional dependency-based service control logic. \\ %
+Other components include a logging daemon, tools to handle basic system configuration
+such as the hostname, date, and locale, a list of logged-in users and running
+containers and virtual machines, system accounts, runtime directories and
+settings, and daemons to manage simple network configuration, network time
+synchronization, log forwarding, and name resolution\cite{systemd}.
+
+\begin{lstlisting}[language=sh, xleftmargin=\parindent, caption=TODO]
+  [Unit]
+  Description=Lightweight Kubernetes
+  Documentation=https://k3s.io
+  Wants=network-online.target
+  After=network-online.target
+
+  [Install]
+  WantedBy=multi-user.target
+
+  [Service]
+  Type=notify
+  EnvironmentFile=-/etc/environment
+  EnvironmentFile=-/etc/systemd/system/k3s.service.env
+  KillMode=process
+  Delegate=yes
+  TimeoutStartSec=0
+  Restart=always
+  RestartSec=5s
+  ExecStartPre=/usr/bin/env sh -c 'rm -f /tmp/k3s.*'
+  ExecStart=/usr/local/bin/k3s server
+\end{lstlisting}
 
 \subsection{ISO image}
 \label{subsec:implementation_distributions_iso_image}
