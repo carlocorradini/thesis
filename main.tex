@@ -46,16 +46,14 @@
 \usepackage{listings}
 \usepackage{lstautogobble}
 \usepackage{xcolor}
-\definecolor{aquamarine}{RGB}{38,127,153}
-\definecolor{blue}{RGB}{0,0,255}
-\definecolor{bluedark}{RGB}{0,16,128}
-\definecolor{bulmablue}{RGB}{32,156,238}
-\definecolor{bulmagreen}{RGB}{72,199,116}
-\definecolor{bulmared}{RGB}{255,56,96}
-\definecolor{gold}{RGB}{121,94,38}
+\definecolor{bulmaBlue}{RGB}{32,156,238}
+\definecolor{bulmaGreen}{RGB}{72,199,116}
+\definecolor{bulmaRed}{RGB}{255,56,96}
 \definecolor{gray}{RGB}{102,102,102}
 \definecolor{green}{RGB}{0,153,0}
 \definecolor{red}{RGB}{196,122,91}
+
+
 \lstset{ %
 basicstyle=\ttfamily\footnotesize, %
 columns=fullflexible, %
@@ -81,20 +79,55 @@ autogobble=true, %
 keywordstyle=\bfseries %
 }
 
+\definecolor{shellGray}{RGB}{160,161,167}
+\definecolor{shellBlue}{RGB}{64,120,242}
+\definecolor{shellRed}{RGB}{228,86,73}
+\definecolor{shellOrange}{RGB}{209,154,102}
+\definecolor{shellGreen}{RGB}{80,161,79}
+\definecolor{shellPurple}{RGB}{166,38,164}
+\lstdefinelanguage{shell}
+{ %
+language=sh, %
+alsoletter={-, +}, %
+deletekeywords={set}, %
+keywordstyle=\color{shellPurple}, %
+morekeywords=[2]{set, rm, curl, sh, source, printf}, %
+keywordstyle=[2]\color{shellRed}, %
+morekeywords=[3]{-o, +o, -f}, %
+keywordstyle=[3]\color{shellOrange}, %
+keywordstyle=[4]\color{shellBlue}, %
+stringstyle=\color{shellGreen}, %
+commentstyle=\color{shellGray}\upshape %
+}
+
+\definecolor{iniOrange}{RGB}{209,154,102}
+\definecolor{iniBlue}{RGB}{64,120,242}
+\definecolor{iniGray}{RGB}{56,58,66}
+\lstdefinelanguage{ini}
+{ %
+literate={{=}{{\textcolor{iniGray}{=}}}1}, %
+keywordstyle=\color{iniBlue}, %
+morecomment=[s][\color{iniOrange}]{[}{]}, %
+morecomment=[l]{;} %
+}
+
+\definecolor{graphqlPurple}{RGB}{166,38,164}
+\definecolor{graphqlGreen}{RGB}{80,161,79}
+\definecolor{graphqlOrange}{RGB}{209,154,102}
+\definecolor{graphqlGray}{RGB}{160,161,167}
+\definecolor{graphqlBlue}{RGB}{64,120,242}
 \lstdefinelanguage{graphql}
 { %
-literate={{[}{{\textcolor{gray}{[}}}1{]}{{\textcolor{gray}{]}}}1}, %
-morekeywords={directive, on, enum, type, ADMIN, SIMPLE, VIEW, EDIT}, %
-keywordstyle=\color{blue}, %
-morekeywords=[2]{@auth}, %
-keywordstyle=[2]\color{gold}, %
-morekeywords=[3]{String, Int, Float, Boolean, Role, Permission, ExampleType, Query, FIELD, FIELD\_DEFINITION, OBJECT}, %
-keywordstyle=[3]\color{aquamarine}, %
-morekeywords=[4]{roles, permissions, protected, unprotected, secret, arg}, %
-keywordstyle=[4]\color{bluedark}, %
-morekeywords=[5]{[, ]}, %
-keywordstyle=[5]\color{green}, %
-morecomment=[s]{"""}{"""} %
+morekeywords={directive, on, enum, type}, %
+keywordstyle=\color{graphqlPurple}, %
+morekeywords=[2]{String, Int, Float, Boolean, Query, Mutation, Subscription}, %
+keywordstyle=[2]\color{graphqlOrange}, %
+morekeywords=[3]{FIELD, FIELD_DEFINITION, OBJECT}, %
+keywordstyle=[3]\color{graphqlGreen}, %
+keywordstyle=[4]\color{graphqlBlue}, %
+morecomment=[l]{\#}, %
+morecomment=[s]{"""}{"""}, %
+commentstyle=\color{graphqlGray}\upshape %
 }
 
 % Document

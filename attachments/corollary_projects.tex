@@ -107,7 +107,7 @@ for execution.
 Install Node exporter using the default configuration parameters for both
 installer and binary.
 
-\begin{lstlisting}[language=sh, morekeywords={curl, sh}, morestring={[s]{.sh}}, xleftmargin=\parindent, caption=Basic installation with default configuration parameters]
+\begin{lstlisting}[language=shell, morekeywords={[3]{--silent, --show-error, --fail, --location, -}}, xleftmargin=\parindent, caption=Basic installation with default configuration parameters]
   curl \
     --silent \      # Do not show progress meter or error messages
     --show-error \  # Show an error message if it fails
@@ -123,7 +123,7 @@ installer and binary.
 Install Node exporter v1.5.0 without starting the service automatically. Disable
 all default collectors, leaving only CPU and memory statistics enabled.
 
-\begin{lstlisting}[language=sh, morekeywords={curl, sh}, xleftmargin=\parindent, caption=Advanced installation with custom configuration parameters]
+\begin{lstlisting}[language=shell, alsoletter={-, .}, morekeywords={[3]{..., --collector.disable-defaults, --collector.cpu, --collector.meminfo, -}}, morekeywords={[4]{INSTALL_NODE_EXPORTER_VERSION, INSTALL_NODE_EXPORTER_SKIP_START}}, xleftmargin=\parindent, caption=Advanced installation with custom configuration parameters]
   curl \
     ... \
     | INSTALL_NODE_EXPORTER_VERSION="v1.5.0" \   # Download and install Node exporter v1.5.0
@@ -171,7 +171,7 @@ Many helpful features of Inline are described below.
     \newline
     This is considered a hint to Inline and is used only if the source path is invalid.
     \newline
-    \begin{lstlisting}[language=sh, morekeywords={., source}, numbers=none, aboveskip=0pt, belowskip=0pt, abovecaptionskip=0pt, belowcaptionskip=0pt]
+    \begin{lstlisting}[language=shell, alsoletter={.}, morekeywords={[2]{.}}, numbers=none, aboveskip=0pt, belowskip=0pt, abovecaptionskip=0pt, belowcaptionskip=0pt]
       # shellcheck source=path/to/script.sh
       . "$DIR/path/to/script.sh"
 
@@ -212,7 +212,7 @@ Many helpful features of Inline are described below.
     requirement is that there are no blank lines between the directives and the source
     command.
     \newline
-    \begin{lstlisting}[language=sh, morekeywords={., source}, numbers=none, aboveskip=0pt, belowskip=0pt, abovecaptionskip=0pt, belowcaptionskip=0pt]
+    \begin{lstlisting}[language=shell, alsoletter={.}, morekeywords={[2]{.}}, numbers=none, aboveskip=0pt, belowskip=0pt, abovecaptionskip=0pt, belowcaptionskip=0pt]
     # inline skip
     # shellcheck source=path/to/script.sh
     . "$DIR/path/to/script.sh"
@@ -311,7 +311,7 @@ The following two listings show the contents of the two files:
 \noindent
 \hspace{.775\parindent}
 \begin{minipage}[t]{.45\textwidth}
-  \begin{lstlisting}[language=sh, morekeywords={., printf}, caption=Input script \texttt{hello.sh}]
+  \begin{lstlisting}[language=shell, alsoletter={.}, morekeywords={[2]{.}}, caption=Input script \texttt{hello.sh}]
     #!/usr/bin/env sh
 
     printf "Hello "
@@ -321,7 +321,7 @@ The following two listings show the contents of the two files:
 \end{minipage}
 \hfill
 \begin{minipage}[t]{.45\textwidth}
-  \begin{lstlisting}[language=sh, morekeywords={., printf}, caption=Sourced script \texttt{world.sh}]
+  \begin{lstlisting}[language=shell, alsoletter={.}, morekeywords={[2]{.}}, caption=Sourced script \texttt{world.sh}]
     #!/usr/bin/env sh
 
     printf "World!\n"
@@ -329,12 +329,10 @@ The following two listings show the contents of the two files:
 \end{minipage}
 
 The goal is to inline the script file \texttt{hello.sh} and produce an output
-file that has no source commands. When the command %
-\lstinline[language=sh, basicstyle=\ttfamily, deletekeywords={in}, alsoletter={.},
-morekeywords={inline.sh}]{./inline.sh --in-file "hello.sh"} %
-is executed, the following result is obtained:
+file that has no source commands. When the command \texttt{./inline.sh --in-file
+"hello.sh"} is executed, the following result is obtained:
 
-\begin{lstlisting}[language=sh, morekeywords={., printf}, xleftmargin=\parindent, caption=Inlined script \texttt{hello.inlined.sh}]
+\begin{lstlisting}[language=shell, alsoletter={.}, morekeywords={[2]{.}}, xleftmargin=\parindent, caption=Inlined script \texttt{hello.inlined.sh}]
   #!/usr/bin/env sh
 
   printf "Hello "
@@ -344,10 +342,10 @@ is executed, the following result is obtained:
   printf "World!\n"
 \end{lstlisting}
 
-Note the unique shebang as well as the source command that has been commented out
-with the symbol \texttt{\#}. Furthermore, because no \texttt{--out-file} option is
-used, the final output file is named \texttt{hello.inlined.sh}, which does not
-override the original input file.
+Note the unique shebang as well as the source command that has been commented
+out with the symbol \texttt{\#}. Furthermore, because no \texttt{--out-file}
+option is used, the final output file is named \texttt{hello.inlined.sh}, which does
+not override the original input file.
 
 \section{GraphQL Auth Directive}
 \label{sec:corollary_projects_graphql_auth_diretive}
@@ -357,29 +355,29 @@ override the original input file.
 Available at \url{https://github.com/carlocorradini/graphql-auth-directive} \\ %
 Used in the \texttt{GraphQL} API. \\ %
 A custom \texttt{GraphQL} directive that protects resources from unauthenticated
-and unauthorized access in high-security contexts. It is available in all major \texttt{Node.js}
-registries as \texttt{graphql-auth-directive}. \\ %
-A directive is an identifier preceded by a \texttt{@} character, optionally followed
-by a list of named arguments, which can appear after almost any form of syntax
-in the \texttt{GraphQL} query or schema languages\cite{graphql_directive}. \\ %
-The \texttt{GraphQL} context holds all important information about the current request.
-A \texttt{GraphQL} context is an object that is shared by all resolvers in a given
-execution. It helps store data such as authentication information, the current user,
-database connections, data sources, and other information required to operate
-the business logic\cite{graphql_context}. It is important to note that the
-context does not have to follow a predefined structure; rather, it is highly
+and unauthorized access in high-security contexts. It is available in all major
+\texttt{Node.js} registries as \texttt{graphql-auth-directive}. \\ %
+A directive is an identifier preceded by a \texttt{@} character, optionally
+followed by a list of named arguments, which can appear after almost any form of
+syntax in the \texttt{GraphQL} query or schema languages\cite{graphql_directive}.
+\\ %
+The \texttt{GraphQL} context holds all important information about the current
+request. A \texttt{GraphQL} context is an object that is shared by all resolvers
+in a given execution. It helps store data such as authentication information,
+the current user, database connections, data sources, and other information required
+to operate the business logic\cite{graphql_context}. It is important to note that
+the context does not have to follow a predefined structure; rather, it is highly
 flexible to the user's implementation.
 
 \subsection{Configuration}
 \label{subsec:corollary_projects_graphql_auth_diretive_configuration}
 
 Before applying the directive to the \texttt{GraphQL} schema, it must be built/configured.
-The library exposes a utility function called \texttt{buildAuthDirective} that accepts
-a configuration object with the values provided in the table below and returns the
-type definition (see section
-\ref{subsec:corollary_projects_graphql_auth_diretive_type_definition}) as well as
-a transformer function that applies the auth logic to the executable \texttt{GraphQL}
-schema.
+The library exposes a utility function called \texttt{buildAuthDirective} that
+accepts a configuration object with the values provided in the table below and
+returns the type definition (see section \ref{subsec:corollary_projects_graphql_auth_diretive_type_definition})
+as well as a transformer function that applies the auth logic to the executable
+\texttt{GraphQL} schema.
 
 \begin{xltabular}
   {\textwidth} { >{\ttfamily}l | X | >{\ttfamily}c }
@@ -474,16 +472,16 @@ schema.
 \label{subsec:corollary_projects_graphql_auth_diretive_type_definition}
 
 % TODO GraphQL reference
-GraphQL has its language for writing GraphQL Schemas: the GraphQL Schema Definition
-Language (SDL). SDL is incredibly powerful and expressive while being simple and
-intuitive to use. The syntax is well-defined and is included in the official GraphQL
-specification\footnote{\url{https://spec.graphql.org}}. Schema Definitions are
-also known as IDL (Interface Definition Language) or SDL (Schema Definition Language)\cite{graphql_sdl}.
-\\ %
-The Type Definition of the GraphQL auth directive generated with default settings
-is shown below:
+GraphQL has its language for writing GraphQL Schemas: the GraphQL Schema
+Definition Language (SDL). SDL is incredibly powerful and expressive while being
+simple and intuitive to use. The syntax is well-defined and is included in the
+official GraphQL specification\footnote{\url{https://spec.graphql.org}}. Schema Definitions
+are also known as IDL (Interface Definition Language) or SDL (Schema Definition
+Language)\cite{graphql_sdl}. \\ %
+The Type Definition of the GraphQL auth directive generated with default
+settings is shown below:
 
-\begin{lstlisting}[language=graphql, xleftmargin=\parindent, caption=GraphQL auth directive Type Definition]
+\begin{lstlisting}[language=graphql, morekeywords={[2]{@auth}}, morekeywords={[4]{roles, permissions}}, xleftmargin=\parindent, caption=GraphQL auth directive Type Definition]
   """
   Protect the resource from unauthenticated and unauthorized access.
   """
@@ -499,25 +497,24 @@ is shown below:
   ) on FIELD | FIELD_DEFINITION | OBJECT
 \end{lstlisting}
 
-The above definition must be available in every \texttt{GraphQL} schema that utilizes
-the directive, otherwise an error is thrown during the server bootstrap
+The above definition must be available in every \texttt{GraphQL} schema that
+utilizes the directive, otherwise an error is thrown during the server bootstrap
 operation. \\ %
-As stated in section
-\ref{subsec:corollary_projects_graphql_auth_diretive_configuration}, the definition
-is generated dynamically by a set of configuration options or their default value.
-The name (\texttt{@auth}), \texttt{roles} and \texttt{permissions} type (non-nullable
-\texttt{String} array), and default value (an empty array \texttt{[]}) are
-easily distinguishable.
+As stated in section \ref{subsec:corollary_projects_graphql_auth_diretive_configuration},
+the definition is generated dynamically by a set of configuration options or
+their default value. The name (\texttt{@auth}), \texttt{roles} and \texttt{permissions}
+type (non-nullable \texttt{String} array), and default value (an empty array
+\texttt{[]}) are easily distinguishable.
 
 \subsection{Example}
 \label{subsec:corollary_projects_graphql_auth_diretive_example}
 
 Consider a \texttt{GraphQL} backend application that requires authentication and
-authorization. The sections of the \texttt{GraphQL} schema where the auth
-directive is used, as well as the enums that compose the different roles and permissions
+authorization. The sections of the \texttt{GraphQL} schema where the auth directive
+is used, as well as the enums that compose the different roles and permissions
 mappings are listed below:
 
-\begin{lstlisting}[language=graphql, xleftmargin=\parindent, caption=\texttt{GraphQL} schema with auth directive and mappings]
+\begin{lstlisting}[language=graphql, morekeywords={[2]{@auth, Role, Permission}}, morekeywords={[3]{ADMIN, SIMPLE, VIEW, EDIT}}, morekeywords={[4]{roles, permissions, unprotected, protected, secret, arg}}, xleftmargin=\parindent, caption=\texttt{GraphQL} schema with auth directive and mappings]
   enum Role {
     ADMIN
     SIMPLE
@@ -540,24 +537,25 @@ mappings are listed below:
   }
 \end{lstlisting}
 
-The available roles are represented by the enum \texttt{Role}: \texttt{ADMIN} for
-administrators and \texttt{BASIC} for simple users. The supported permissions are
-represented by the enum \texttt{Permission}: \texttt{VIEW} to allow resource
-visualization and \texttt{EDIT} to allow resource modification. \\ %
+The available roles are represented by the enum \texttt{Role}: \texttt{ADMIN}
+for administrators and \texttt{BASIC} for simple users. The supported
+permissions are represented by the enum \texttt{Permission}: \texttt{VIEW} to allow
+resource visualization and \texttt{EDIT} to allow resource modification. \\ %
 The definition of \texttt{@auth} directive accepts as roles an array of \texttt{Role}
-whose default value is empty and as permissions an array of \texttt{Permission}
-whose default value is empty. Notice the difference from the default type definition
-shown in section \ref{subsec:corollary_projects_graphql_auth_diretive_type_definition}.
-\\ %
+whose default value is empty and as permissions an array of \texttt{Permission} whose
+default value is empty. Notice the difference from the default type definition
+shown in section
+\ref{subsec:corollary_projects_graphql_auth_diretive_type_definition}. \\ %
 Three queries are supported:
 \begin{enumerate}
-  \item \lstinline[language=graphql, basicstyle=\ttfamily]{unprotected: String!}
+  \item \lstinline[language=graphql, basicstyle=\ttfamily, morekeywords={[4]{unprotected}}]{unprotected: String!}
     \newline
     \texttt{unprotected} does not accept any arguments and returns a non-nullable
-    string. Does not require any authentication or authorization. As a result,
-    it may be called by anyone.
+    string. Does not require any authentication or authorization. As a result, it
+    may be called by anyone.
 
-  \item \lstinline[language=graphql, basicstyle=\ttfamily]{protected(arg: Boolean): Int! @auth}
+  \item \lstinline[language=graphql, basicstyle=\ttfamily, morekeywords={[2]{@auth}},
+    morekeywords={[4]{protected, arg}}]{protected(arg: Boolean): Int! @auth}
     \newline
     \texttt{unprotected} accepts a boolean optional parameter named \texttt{arg}
     and returns a non-nullable integer number. Because no roles or permissions are
@@ -565,11 +563,12 @@ Three queries are supported:
     authorization. As a consequence, everyone who has been authenticated is
     allowed to call this query.
 
-  \item \lstinline[language=graphql, basicstyle=\ttfamily]{secret: Float! @auth(roles: [ADMIN], permissions: [VIEW])}
+  \item \lstinline[language=graphql, basicstyle=\ttfamily, morekeywords={[2]{@auth}},
+    morekeywords={[3]{ADMIN, VIEW}}, morekeywords={[4]{roles, permissions, secret}}]{secret: Float! @auth(roles: [ADMIN], permissions: [VIEW])}
     \newline
-    The most secure of the three, \texttt{secret}, does not take any parameters and
-    returns a non-nullable float integer. The caller must have an admin role
-    with view permission to use this query. As a consequence, the query is
-    secured by both authentication and authorization, resulting in higher requirements
+    The most secure of the three, \texttt{secret}, does not take any parameters
+    and returns a non-nullable float integer. The caller must have an admin role
+    with view permission to use this query. As a consequence, the query is secured
+    by both authentication and authorization, resulting in higher requirements
     to perform the desired action on the resource.
 \end{enumerate}
