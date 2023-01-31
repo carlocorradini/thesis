@@ -15,6 +15,8 @@
     "./thesis.drawio"
   ],
   "words": [
+    "abovecaptionskip",
+    "aboveskip",
     "aleksi",
     "allexport",
     "angeli",
@@ -24,6 +26,8 @@
     "automount",
     "autoscaler",
     "backgroundcolor",
+    "belowcaptionskip",
+    "belowskip",
     "bluedark",
     "breakatwhitespace",
     "breaklines",
