@@ -531,6 +531,39 @@ portion of all the commands and capabilities provided by systemd.
 \subsection{ISO image}
 \label{subsec:implementation_distributions_iso_image}
 
+A Linux distribution, including the two custom one, is packaged as a single ISO image
+file. An optical disc image (or ISO image) is a disk image that contains
+everything that would be written to an optical disc including the optical disc
+file system. ISO images are expected to contain the binary image of an optical media
+file system, including the data in its files in binary format, copied exactly as
+they were stored on the disc. The data inside the ISO image will be structured
+according to the file system that was used on the optical disc from which it was
+created\cite{https://wikipedia.org/wiki/Optical_disc_image}.
+
+The ISO image can be burned into physical media such as a CD, a USB flash drive
+or can be mounted as an ISO file. The latter, shows the high level of
+flexibility and overall compatibility that an ISO file has. Moreover, it is
+extremely portable since it is intrinsecally only a single file making the
+perfect format for a release bundle and very useful in an Air-Gap environment.
+
+After a Linux Distribution's ISO image has been burned to the media it can be
+installed on multiple systems with ease: attach the media to the system and select
+it as default boot device. A live (volatile) system that is currently not
+installed on the main disk starts. Then, the live Linux distribution can be
+direclty installed into the main disk making it persistenlty available on the
+system without the need of the removable media. The latter operation can be done
+manually but it is more difficult than it sounds since requires knowledge on disk
+formatting, partitioning and more. Fortunatly, most of the Linux distributions, including
+the two custom ones, offers simple tools that automate the installation
+procedure asking only a few simple questions.
+
+In this section are briefly described the two original Linux distributions, respectively
+Alpine Linux and Arch Linux, that has been used as the basis for the two custom
+Linux distributions. Both of them have been used and tested toghether in the implementation
+cluster. Moreover, it is shown how the two custom ISO image files are customized
+and generated from a variaty of different configuration files merged together by
+simple scripts.
+
 \subsubsection{Generation}
 \label{subsubsec:implementation_distributions_iso_generation}
 
