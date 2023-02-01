@@ -412,18 +412,33 @@ configuration file.
 \subsubsection{OpenRC}
 \label{subsec:implementation_distributions_init_system_openrc}
 
-OpenRC is a dependency-based init system for Unix-like systems that maintain compatibility
-with the system's init system, which is generally found in \texttt{/sbin/init}. \\ %
-At boot, OpenRC starts the appropriate system services in the right sequence,
-manages them while the system is running, and stops them at shutdown. It can
-manage installed daemons, optionally monitor the processes it launches, and
-start processes in parallel when possible to reduce boot time. \\ %
-OpenRC was developed for Gentoo\footnote{\url{https://www.gentoo.org}}, but it may
-be used in other Linux distributions and BSD\footnote{\url{https://www.bsd.org}}
+\begin{wrapfigure}
+  {r}{.25\textwidth}
+  \centering
+  \includegraphics[width=.25\textwidth]{images/logos/gentoo.png}
+  \caption{Gentoo logo}
+\end{wrapfigure}
+
+OpenRC is a dependency-based init system for Unix-like systems that maintain
+compatibility with the system's init system, which is generally found in \texttt{/sbin/init}.
+\\ %
+At boot, OpenRC starts the appropriate system services in the right sequence, manages
+them while the system is running, and stops them at shutdown. It can manage installed
+daemons, optionally monitor the processes it launches, and start processes in parallel
+when possible to reduce boot time. \\ %
+OpenRC was developed for Gentoo\footnote{\url{https://www.gentoo.org}}, but it
+may be used in other Linux distributions and BSD\footnote{\url{https://www.bsd.org}}
 systems as well\cite{openrc}. \\ %
-% TODO Write how to start and stop the service also in systemd
-Listing \ref{lst:openrc} shows the example of the OpenRC service configuration
-file for K3s.
+Listing \ref{lst:openrc} illustrates the example of the OpenRC service configuration
+file for K3s saved in \texttt{/etc/init.d/k3s}. Manual control of the service is
+possible using the \texttt{rc-service} command, which locates and runs the
+OpenRC service with the specified arguments: \texttt{rc-service k3s <CMD> [...]}.
+\texttt{<CMD>} can be substituted by \texttt{start} to start the service,
+\texttt{stop} to stop the service, \texttt{restart} to restart the service, and
+\texttt{status} to acquire the service status. Furthermore, with the command \texttt{rc-update
+add k3s default}, the service may be set to start automatically when the system boots
+up. The latter examples are merely a very small subset of all the available
+commands/capabilities that OpenRC is capable of.
 
 \begin{lstlisting}[language=shell, escapeinside={(*@}{@*)}, morekeywords={[2]{depend, start_pre, want, after, sourcex}}, morekeywords={[4]{name, description, supervisor, command, command_args, output_log, error_log, pidfile, respawn_delay, respawn_max}}, xleftmargin=\parindent, label={lst:openrc}, caption=\texttt{OpenRC} service configuration file for K3s]
   #!/sbin/openrc-run
@@ -476,8 +491,16 @@ such as the hostname, date, and locale, a list of logged-in users and running
 containers and virtual machines, system accounts, runtime directories and
 settings, and daemons to manage simple network configuration, network time
 synchronization, log forwarding, and name resolution\cite{systemd}. \\ %
-Listing \ref{lst:systemd} shows the example of the systemd service configuration
-file for K3s.
+Listing \ref{lst:systemd} illustrates the example of the systemd service configuration
+file for K3s saved in \texttt{/etc/systemd/system/k3s.service}. The \texttt{systemctl}
+command, which manages the systemd system and the service manager, may be used to
+manually control the service: \texttt{systemd <CMD> k3s [...]}. \texttt{<CMD>} can
+be replaced with \texttt{start} to start the service, \texttt{stop} to stop it, \texttt{restart}
+to restart it, and \texttt{status} to obtain the service status. Furthermore,
+the service may be enabled to start automatically when the system boots up by
+using the commands \texttt{systemctl enable k3s} followed by \texttt{systemctl daemon-reload}
+to reload the systemd management configuration. The latter examples are only a small
+portion of all the commands and capabilities provided by systemd.
 
 \begin{lstlisting}[language=ini, escapeinside={(*@}{@*)}, morekeywords={Description, Documentation, Wants, After, StartLimitBurst, WantedBy, Type, ExecStartPre, ExecStart, EnvironmentFile, KillMode, Delegate, TimeoutStartSec, Restart, RestartSec}, xleftmargin=\parindent, label={lst:systemd}, caption=\texttt{systemd} service configuration file for K3s]
   [Unit]
@@ -495,7 +518,7 @@ file for K3s.
   ExecStartPre=/usr/bin/env sh -c 'rm -f "/tmp/k3s.*"'                                            (*@ \circled{\texttt{\tiny{3}}} @*)
   ExecStart=/usr/local/bin/k3s server                                                         (*@ \hspace*{1.375pt} \circled{\texttt{\tiny{5}}} \circled{\texttt{\tiny{6}}} @*)
   EnvironmentFile=-/etc/environment                                                               (*@ \circled{\texttt{\tiny{9}}} @*)
-  EnvironmentFile=-/etc/systemd/system/k3s.service.env                                            (*@ \circled{\texttt{\tiny{9}}} @*)
+  EnvironmentFile=-/etc/rancher/k3s/k3s.env                                                       (*@ \circled{\texttt{\tiny{9}}} @*)
   KillMode=process
   Delegate=yes
   TimeoutStartSec=0
