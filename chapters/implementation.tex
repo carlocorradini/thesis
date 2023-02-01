@@ -360,7 +360,54 @@ in the cluster to constantly monitor and identify the status and availability of
 all active nodes. If there are no configuration or networking issues and a node's
 heartbeat is not received within the predefined interval, it indicates that the heartbeat
 daemon executing in the node has crashed and has not yet been restarted, or that
-the entire node has crashed and is not automatically recoverable.
+the entire node has crashed and is not automatically recoverable. \\ %
+In each of the following sections, where an Init System distribution is described,
+an example of the related service configuration file is presented to illustrate
+its differences. A service configuration file contains information about a process
+that the Init System controls and monitors. The application used as a reference
+in this example is K3s, a lightweight Kubernetes distribution explained in further
+detail in section \ref{subsec:implementation_dependencies_k3s}. Before starting,
+it must clear any temporary files in the \texttt{tmp} directory and load
+environment variables from two distinct directories. Furthermore, anytime the
+application process crashes, the Init System must restart it within 5 seconds after
+detection. Even though each Init System has a unique service configuration file,
+the result is nearly identical. The list below highlights some of the most
+significant configuration requirements. To aid comprehension, the identification
+number for each requirement is also provided in the Init System's service
+configuration file.
+\begin{enumerate}[label=\protect\circled{\arabic{*}}]
+  \item General information about the service.
+    \newline
+    Useful for users and/or administrators.
+
+  \item Services on which the service is dependent.
+    \newline
+    The listed services must be activated before the current service may start.
+
+  \item Remove any temporary files that begin with the name \texttt{k3s} and are
+    placed in the temporary (\texttt{tmp}) directory before launching the application.
+
+  \item Type of service. Different types correspond to various service behaviors
+    as well as how the application is monitored and regulated.
+    \newline
+    In this case, monitor the application process and restart it if there is a
+    crash or an anomaly.
+
+  \item Absolute path to the application's binary file.
+
+  \item Application arguments.
+
+  \item Waiting time in seconds before restarting the crashed application.
+
+  \item The maximum number of restarts permitted. When the threshold is met, the
+    program is no longer restarted.
+    \newline
+    A value of 0 indicates that no threshold exists and that the application has
+    no restart limit.
+
+  \item Load \texttt{/etc/environment} and \texttt{/etc/rancher/k3s/k3s.env} environment
+    variables files before starting the application.
+\end{enumerate}
 
 \subsubsection{OpenRC}
 \label{subsec:implementation_distributions_init_system_openrc}
@@ -373,35 +420,38 @@ manage installed daemons, optionally monitor the processes it launches, and
 start processes in parallel when possible to reduce boot time. \\ %
 OpenRC was developed for Gentoo\footnote{\url{https://www.gentoo.org}}, but it may
 be used in other Linux distributions and BSD\footnote{\url{https://www.bsd.org}}
-systems as well\cite{openrc}.
+systems as well\cite{openrc}. \\ %
+% TODO Write how to start and stop the service also in systemd
+Listing \ref{lst:openrc} shows the example of the OpenRC service configuration
+file for K3s.
 
-\begin{lstlisting}[language=shell, morekeywords={[2]{depend, start_pre, want, after, sourcex}}, morekeywords={[4]{name, description, supervisor, command, command_args, output_log, error_log, pidfile, respawn_delay, respawn_max}}, xleftmargin=\parindent, caption=TODO]
+\begin{lstlisting}[language=shell, escapeinside={(*@}{@*)}, morekeywords={[2]{depend, start_pre, want, after, sourcex}}, morekeywords={[4]{name, description, supervisor, command, command_args, output_log, error_log, pidfile, respawn_delay, respawn_max}}, xleftmargin=\parindent, label={lst:openrc}, caption=\texttt{OpenRC} service configuration file for K3s]
   #!/sbin/openrc-run
 
-  name="k3s"
-  description="Lightweight Kubernetes"
+  name="k3s"                                                                                      (*@ \circled{\texttt{\tiny{1}}} @*)
+  description="Lightweight Kubernetes"                                                            (*@ \circled{\texttt{\tiny{1}}} @*)
 
   depend() {
-    want cgroups
-    after network-online
+    want cgroups                                                                                  (*@ \circled{\texttt{\tiny{2}}} @*)
+    after network-online                                                                          (*@ \circled{\texttt{\tiny{2}}} @*)
   }
 
   start_pre() {
-    rm -f "/tmp/k3s.*"
+    rm -f "/tmp/k3s.*"                                                                            (*@ \circled{\texttt{\tiny{3}}} @*)
   }
 
-  supervisor="supervise-daemon"
-  command="/usr/local/bin/k3s"
-  command_args="server >> /var/log/k3s.log 2>&1"
+  supervisor="supervise-daemon"                                                                   (*@ \circled{\texttt{\tiny{4}}} @*)
+  command="/usr/local/bin/k3s"                                                                    (*@ \circled{\texttt{\tiny{5}}} @*)
+  command_args="server"                                                                           (*@ \circled{\texttt{\tiny{6}}} @*)
   output_log="/var/log/k3s.log"
   error_log="/var/log/k3s.log"
   pidfile="/var/run/k3s.pid"
-  respawn_delay=5
-  respawn_max=0
+  respawn_delay=5                                                                                 (*@ \circled{\texttt{\tiny{7}}} @*)
+  respawn_max=0                                                                                   (*@ \circled{\texttt{\tiny{8}}} @*)
 
   set -o allexport
-  if [ -f "/etc/environment" ]; then sourcex "/etc/environment"; fi
-  if [ -f "/etc/rancher/k3s/k3s.env" ]; then sourcex "/etc/rancher/k3s/k3s.env"; fi
+  if [ -f "/etc/environment" ]; then sourcex "/etc/environment"; fi                               (*@ \circled{\texttt{\tiny{9}}} @*)
+  if [ -f "/etc/rancher/k3s/k3s.env" ]; then sourcex "/etc/rancher/k3s/k3s.env"; fi               (*@ \circled{\texttt{\tiny{9}}} @*)
   set +o allexport
 \end{lstlisting}
 
@@ -425,29 +475,32 @@ Other components include a logging daemon, tools to handle basic system configur
 such as the hostname, date, and locale, a list of logged-in users and running
 containers and virtual machines, system accounts, runtime directories and
 settings, and daemons to manage simple network configuration, network time
-synchronization, log forwarding, and name resolution\cite{systemd}.
+synchronization, log forwarding, and name resolution\cite{systemd}. \\ %
+Listing \ref{lst:systemd} shows the example of the systemd service configuration
+file for K3s.
 
-\begin{lstlisting}[language=ini, morekeywords={Description, Documentation, Wants, After, WantedBy, Type, ExecStartPre, ExecStart, EnvironmentFile, KillMode, Delegate, TimeoutStartSec, Restart, RestartSec}, xleftmargin=\parindent, caption=TODO]
+\begin{lstlisting}[language=ini, escapeinside={(*@}{@*)}, morekeywords={Description, Documentation, Wants, After, StartLimitBurst, WantedBy, Type, ExecStartPre, ExecStart, EnvironmentFile, KillMode, Delegate, TimeoutStartSec, Restart, RestartSec}, xleftmargin=\parindent, label={lst:systemd}, caption=\texttt{systemd} service configuration file for K3s]
   [Unit]
-  Description=Lightweight Kubernetes
-  Documentation=https://k3s.io
-  Wants=network-online.target
-  After=network-online.target
+  Description=Lightweight Kubernetes                                                              (*@ \circled{\texttt{\tiny{1}}} @*)
+  Documentation=https://k3s.io                                                                    (*@ \circled{\texttt{\tiny{1}}} @*)
+  Wants=network-online.target                                                                     (*@ \circled{\texttt{\tiny{2}}} @*)
+  After=network-online.target                                                                     (*@ \circled{\texttt{\tiny{2}}} @*)
+  StartLimitBurst=0                                                                               (*@ \circled{\texttt{\tiny{8}}} @*)
 
   [Install]
   WantedBy=multi-user.target
 
   [Service]
-  Type=notify
-  ExecStartPre=/usr/bin/env sh -c 'rm -f "/tmp/k3s.*"'
-  ExecStart=/usr/local/bin/k3s server
-  EnvironmentFile=-/etc/environment
-  EnvironmentFile=-/etc/systemd/system/k3s.service.env
+  Type=notify                                                                                     (*@ \circled{\texttt{\tiny{4}}} @*)
+  ExecStartPre=/usr/bin/env sh -c 'rm -f "/tmp/k3s.*"'                                            (*@ \circled{\texttt{\tiny{3}}} @*)
+  ExecStart=/usr/local/bin/k3s server                                                         (*@ \hspace*{1.375pt} \circled{\texttt{\tiny{5}}} \circled{\texttt{\tiny{6}}} @*)
+  EnvironmentFile=-/etc/environment                                                               (*@ \circled{\texttt{\tiny{9}}} @*)
+  EnvironmentFile=-/etc/systemd/system/k3s.service.env                                            (*@ \circled{\texttt{\tiny{9}}} @*)
   KillMode=process
   Delegate=yes
   TimeoutStartSec=0
-  Restart=always
-  RestartSec=5s
+  Restart=always                                                                                  (*@ \circled{\texttt{\tiny{4}}} @*)
+  RestartSec=5s                                                                                   (*@ \circled{\texttt{\tiny{7}}} @*)
 \end{lstlisting}
 
 \subsection{ISO image}
