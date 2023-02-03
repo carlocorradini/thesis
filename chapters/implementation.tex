@@ -583,6 +583,59 @@ and the OpenRC Init System (see section
 Alpine Linux is the preferred reCluster distribution since it has been widely
 used and tested throughout the development process.
 
+The official documentation\footnote{\url{https://wiki.alpinelinux.org/wiki/How_to_make_a_custom_ISO_image_with_mkimage}}
+provides a brief guideline on how to build a custom Alpine Linux ISO image. Unfortunately,
+it is not exhaustive, and it assumes a lot of information and configurations. A
+simpler, easy-to-use, and portable solution is required for cluster
+implementation. This resulted in the creation of a POSIX script that handles all
+of the burdens, as explained below. \\ %
+Building a custom Alpine Linux ISO image involves three prerequisites: an Alpine
+Linux system, specific tools/packages to configure and build the image, and a general
+configuration with a special administrator user and the generation of signing keys.
+These requirements remain constant over time and can be regarded as essentially
+static. Furthermore, having a physical Alpine Linux system dedicated just to
+generating custom images is a waste of resources. As a result, a custom
+Dockerfile based on Alpine Linux has been created to allow building the image in
+different environments without the need for a physical machine and with all of
+the previous requirements already fulfilled\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/alpine/Dockerfile}}.
+A Dockerfile is a text document that contains all of the commands needed to compile
+a container image\cite{dockerfile}. \\ %
+The ISO image is customized using the \texttt{mkimg.recluster.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/alpine/mkimg.recluster.sh}}
+file, which defines and integrates a custom recluster profile, based on the basic
+Alpine Linux profile. This file, whose content is shown in listing \ref{lst:alpine},
+is not included in the Dockerfile because it is considered dynamic, in the sense
+that it could be updated and customized over time to meet potential new cluster specifications.
+\\ %
+Finally, to create the ISO image, the container image must be launched in detached
+mode, a local volume mounted to the container, the \texttt{mkimg.recluster.sh}
+file loaded, and the official \texttt{mkimage.sh} script executed with extra
+configuration parameters. When performed manually, the latter tasks are
+extremely difficult and prone to human error. As a result, all operations have
+been included in a POSIX script, simply named \texttt{build.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/alpine/build.sh}},
+that does everything automatically, including cleanup procedures when the image(s)
+has been generated or an error occurs. Moreover, all ISO images created are saved
+in the current working directory under the directory \texttt{iso}. As an example,
+a custom image based on Alpine Linux version 3.17 and generated with the
+recluster profile for architecture \texttt{x86\_64} is saved as \texttt{alpine-recluster-v3.17-x86\_64.iso}
+and is just \texttt{190MiB} in size. \\ %
+To configure and install Alpine Linux permanently on the primary disk, simply
+run the \texttt{setup-alpine}\footnote{\url{https://docs.alpinelinux.org/user-handbook/0.1a/Installing/setup_alpine.html}}
+program and answer a few easy questions.
+
+\begin{lstlisting}[language=shell, morekeywords={[2]{profile_recluster, profile_base}}, morekeywords={[4]{title, desc, profile_abbrev, image_ext, arch, output_format, apks, apkovl}}, xleftmargin=\parindent, label={lst:alpine}, caption=Contents of \texttt{mkimg.recluster.sh} file which shows the reCluster profile definition]
+  profile_recluster() {
+    profile_base
+    title="reCluster"
+    desc="reCluster Alpine Linux"
+    profile_abbrev="recluster"
+    image_ext="iso"
+    arch="x86_64 aarch64"
+    output_format="iso"
+    apks="$apks coreutils ethtool inotify-tools iproute2 jq ncurses nodejs npm postgresql procps sudo sysbench tzdata util-linux yq"
+    apkovl="genapkovl-recluster.sh"
+  }
+\end{lstlisting}
+
 \subsubsection{Arch Linux}
 \label{subsubsec:implementation_distributions_iso_arch_linux}
 
@@ -606,6 +659,58 @@ the next. Notably, Arch Linux is the foundation for several many popular
 enterprise-grade distributions, such as Manjaro\footnote{\url{https://manjaro.org}}
 and SteamOS\footnote{\url{https://store.steampowered.com/steamos}},
 demonstrating its customizability, power, and stability\cite{arch_linux}.
+
+The official documentation\footnote{\url{https://wiki.archlinux.org/title/archiso}}
+includes precise guidelines for building a custom Arch Linux ISO image. For
+cluster implementation, there is a need for only a basic/minimal image with a simple
+and easy-to-use procedure. As a result, a POSIX script has been written to handle
+all of the difficulties and configurations (described below). Some techniques
+are quite similar to those outlined in Alpine Linux. However, the files and
+overall configurations differ significantly. \\ %
+Building a custom Arch Linux ISO image requires three prerequisites: an Arch Linux
+system, specific tools/packages to configure and build the image, and a general configuration
+with a baseline profile. As with Alpine Linux, these requirements remain constant
+over time, resulting in the same possible problems. As a result, a custom
+Dockerfile based on Arch Linux has been developed\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/arch/Dockerfile}}.
+\\ %
+The ISO image is customized with the \texttt{profiledef.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/arch/profiledef.sh}}
+file, the content of which is displayed in listing \ref{lst:arch}, that defines and
+integrates a custom profile based on the baseline Arch Linux profile already included
+in the container image. For the same reasons as in Alpine Linux, this file is not
+available in the Dockerfile container image. \\ %
+Finally, similar to the Alpine Linux approach, the container image must be launched,
+a local volume mounted, the \texttt{profiledef.sh} file loaded, and the official
+\texttt{mkarchiso} program executed with extra configuration parameters to
+generate the ISO image. Because of its inherent difficulties, the latter exposes
+the same issues as in Alpine Linux. Therefore, a similar POSIX script, also named
+\texttt{build.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/arch/build.sh}},
+has been created with similar features but adapted to Arch Linux. As an example,
+a custom Arch Linux image based on the reCluster profile and built on March 23rd
+2023 for architecture \texttt{x86\_64} is saved as \texttt{reCluster-2023.03.23-x86\_64.iso}
+and is \texttt{731MiB} in size. \\ %
+To configure and install Arch Linux permanently on the primary disk, simply run the
+\texttt{archinstall}\footnote{\url{https://wiki.archlinux.org/title/archinstall}}
+program and answer a few easy questions.
+
+\begin{lstlisting}[language=shell, morekeywords={[4]{iso_name, iso_label, iso_publisher, iso_application, iso_version, install_dir, buildmodes, bootmodes, arh, pacman_conf, airootfs_image, airootfs_image_tool_options, file_permissions}}, xleftmargin=\parindent, label={lst:arch}, caption=Contents of \texttt{profiledef.sh} file which shows the reCluster profile definition]
+  iso_name="reCluster"
+  iso_label="ARCH_$(date +%Y%m)"
+  iso_publisher="reCluster"
+  iso_application="reCluster Arch Linux"
+  iso_version="$(date +%Y.%m.%d)"
+  install_dir="arch"
+  buildmodes=('iso')
+  bootmodes=('bios.syslinux.mbr' 'bios.syslinux.eltorito'
+    'uefi-ia32.grub.esp' 'uefi-x64.grub.esp'
+    'uefi-ia32.grub.eltorito' 'uefi-x64.grub.eltorito')
+  arch="x86_64"
+  pacman_conf="pacman.conf"
+  airootfs_image_type="erofs"
+  airootfs_image_tool_options=('-zlz4hc,12' -E ztailpacking)
+  file_permissions=(
+    ["/etc/shadow"]="0:0:400"
+  )
+\end{lstlisting}
 
 \section{Dependencies}
 \label{sec:implementation_dependencies}
