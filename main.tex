@@ -62,6 +62,10 @@
 \definecolor{iniOrange}{RGB}{209,154,102}
 \definecolor{iniBlue}{RGB}{64,120,242}
 \definecolor{iniGray}{RGB}{56,58,66}
+\definecolor{yamlPurple}{RGB}{166,38,164}
+\definecolor{yamlBlue}{RGB}{64,120,242}
+\definecolor{yamlGreen}{RGB}{80,161,79}
+\definecolor{yamlGray}{RGB}{160,161,167}
 \definecolor{graphqlPurple}{RGB}{166,38,164}
 \definecolor{graphqlGreen}{RGB}{80,161,79}
 \definecolor{graphqlOrange}{RGB}{209,154,102}
@@ -118,6 +122,19 @@ literate={{=}{{\textcolor{iniGray}{=}}}1}, %
 keywordstyle=\color{iniBlue}, %
 morecomment=[s][\color{iniOrange}]{[}{]}, %
 morecomment=[l]{;} %
+}
+
+\lstdefinelanguage{yaml}
+{ %
+keywords={true, false, null}, %
+keywordstyle=\color{yamlPurple}, %
+keywordstyle=[2]\color{yamlBlue}, %
+morestring=[b]', %
+morestring=[b]", %
+stringstyle=\color{yamlGreen}, %
+comment=[l]{\#}, %
+morecomment=[s]{/*}{*/}, %
+commentstyle=\color{yamlGray}\upshape %
 }
 
 \lstdefinelanguage{graphql}

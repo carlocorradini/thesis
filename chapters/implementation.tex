@@ -692,21 +692,21 @@ To configure and install Arch Linux permanently on the primary disk, simply run 
 \texttt{archinstall}\footnote{\url{https://wiki.archlinux.org/title/archinstall}}
 program and answer a few easy questions.
 
-\begin{lstlisting}[language=shell, morekeywords={[4]{iso_name, iso_label, iso_publisher, iso_application, iso_version, install_dir, buildmodes, bootmodes, arh, pacman_conf, airootfs_image, airootfs_image_tool_options, file_permissions}}, xleftmargin=\parindent, label={lst:arch}, caption=Contents of \texttt{profiledef.sh} file which shows the reCluster profile definition]
+\begin{lstlisting}[language=shell, morekeywords={[4]{iso_name, iso_label, iso_publisher, iso_application, iso_version, install_dir, buildmodes, bootmodes, arch, pacman_conf, airootfs_image_type, airootfs_image_tool_options, file_permissions}}, xleftmargin=\parindent, label={lst:arch}, caption=Contents of \texttt{profiledef.sh} file which shows the reCluster profile definition]
   iso_name="reCluster"
   iso_label="ARCH_$(date +%Y%m)"
   iso_publisher="reCluster"
   iso_application="reCluster Arch Linux"
   iso_version="$(date +%Y.%m.%d)"
   install_dir="arch"
-  buildmodes=('iso')
-  bootmodes=('bios.syslinux.mbr' 'bios.syslinux.eltorito'
-    'uefi-ia32.grub.esp' 'uefi-x64.grub.esp'
-    'uefi-ia32.grub.eltorito' 'uefi-x64.grub.eltorito')
+  buildmodes=("iso")
+  bootmodes=("bios.syslinux.mbr" "bios.syslinux.eltorito"
+             "uefi-ia32.grub.esp" "uefi-x64.grub.esp"
+             "uefi-ia32.grub.eltorito" "uefi-x64.grub.eltorito")
   arch="x86_64"
   pacman_conf="pacman.conf"
   airootfs_image_type="erofs"
-  airootfs_image_tool_options=('-zlz4hc,12' -E ztailpacking)
+  airootfs_image_tool_options=("-zlz4hc,12 -E ztailpacking")
   file_permissions=(
     ["/etc/shadow"]="0:0:400"
   )
@@ -726,8 +726,72 @@ program and answer a few easy questions.
 \subsubsection{Configuration}
 \label{subsec:implementation_dependencies_management_configuration}
 
+\begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{autoscaler, k3s, node_exporter, prometheus, url, assets, releases, files, LICENSE, install.sh}}, xleftmargin=\parindent, caption=TODO]
+  autoscaler:
+    url: "https://github.com/carlocorradini/autoscaler"
+    assets:
+      - "cluster-autoscaler.amd64.tar.gz"
+      - "cluster-autoscaler.arm64.tar.gz"
+    releases:
+      - "latest"
+    files:
+      LICENSE: "https://raw.githubusercontent.com/carlocorradini/autoscaler/master/LICENSE"
+
+  k3s:
+    url: "https://github.com/k3s-io/k3s"
+    assets:
+      - "k3s"
+      - "k3s-arm64"
+      - "k3s-airgap-images-amd64.tar.gz"
+      - "k3s-airgap-images-arm64.tar.gz"
+    releases:
+      - "latest"
+    files:
+      LICENSE: "https://raw.githubusercontent.com/k3s-io/k3s/master/LICENSE"
+      install.sh: "https://raw.githubusercontent.com/k3s-io/k3s/master/install.sh"
+
+  node_exporter:
+    url: "https://github.com/prometheus/node_exporter"
+    assets:
+      - "node_exporter-[0-9]+.[0-9]+.[0-9]+.linux-amd64.tar.gz"
+      - "node_exporter-[0-9]+.[0-9]+.[0-9]+.linux-arm64.tar.gz"
+    releases:
+      - "latest"
+    files:
+      LICENSE: "https://raw.githubusercontent.com/prometheus/node_exporter/master/LICENSE"
+      install.sh: "https://raw.githubusercontent.com/carlocorradini/node_exporter_installer/main/install.sh"
+
+  prometheus:
+    url: "https://github.com/prometheus/prometheus"
+    assets:
+      - "prometheus-[0-9]+.[0-9]+.[0-9]+.linux-amd64.tar.gz"
+      - "prometheus-[0-9]+.[0-9]+.[0-9]+.linux-arm64.tar.gz"
+    releases:
+      - "latest"
+    files:
+      LICENSE: "https://raw.githubusercontent.com/prometheus/prometheus/main/LICENSE"
+\end{lstlisting}
+
 \subsubsection{Script}
 \label{subsec:implementation_dependencies_management_script}
+
+\begin{xltabular}
+  {\textwidth} { >{\ttfamily}l | X | >{\ttfamily}c }
+
+  \multicolumn{1}{ c |}{\large{\textbf{Name}}} &
+  \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
+  \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hline \hline
+
+  --config-file <FILE> & & dependencies.config.yaml \\ \hline
+
+  --help & & \\ \hline
+
+  --log-level <LEVEL> & & info \\ \hline
+
+  --sync & & \\ \hline
+
+  --sync-force & & \\ \hline
+\end{xltabular}
 
 \subsection{K3s}
 \label{subsec:implementation_dependencies_k3s}
