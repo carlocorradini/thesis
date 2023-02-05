@@ -48,7 +48,7 @@ table below.
 
   \multicolumn{1}{ c |}{\large{\textbf{Name}}} &
   \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
-  \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hline \hline
+  \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hhline{===}
 
   INSTALL\_NODE\_EXPORTER\_SKIP\_DOWNLOAD & Skip downloading Node exporter.
   \newline
@@ -57,14 +57,14 @@ table below.
   Useful in an Air-Gapped environment. % TODO Air-Gap environment reference
   & false \\ \hline
 
-  INSTALL\_NODE\_EXPORTER\_FORCE\_RESTART & Force restarting Node exporter
-  service. & false \\ \hline
+  INSTALL\_NODE\_EXPORTER\_FORCE\_RESTART & Force restarting Node exporter service.
+  & false \\ \hline
 
   INSTALL\_NODE\_EXPORTER\_SKIP\_ENABLE & Do not enable Node exporter service at
   startup. & false \\ \hline
 
-  INSTALL\_NODE\_EXPORTER\_SKIP\_START & Do not start Node exporter service. & false
-  \\ \hline
+  INSTALL\_NODE\_EXPORTER\_SKIP\_START & Do not start Node exporter service. &
+  false \\ \hline
 
   INSTALL\_NODE\_EXPORTER\_SKIP\_FIREWALL & Do not apply any firewall rules.
   \newline
@@ -78,12 +78,12 @@ table below.
   INSTALL\_NODE\_EXPORTER\_VERSION & Node exporter version to download. & latest
   \\ \hline
 
-  INSTALL\_NODE\_EXPORTER\_BIN\_DIR & Directory where to install Node exporter binary
-  and uninstall script. & \makecell[Xt]{\centering{/usr/local/bin \\ or \\ /opt/bin}}
+  INSTALL\_NODE\_EXPORTER\_BIN\_DIR & Directory where to install Node exporter
+  binary and uninstall script. & \makecell[Xt]{\centering{/usr/local/bin \\ or \\ /opt/bin}}
   \\ \hline
 
-  INSTALL\_NODE\_EXPORTER\_SYSTEMD\_DIR & Directory where to install Systemd service
-  files. & /etc/systemd/system \\ \hline
+  INSTALL\_NODE\_EXPORTER\_SYSTEMD\_DIR & Directory where to install Systemd
+  service files. & /etc/systemd/system \\ \hline
 
   INSTALL\_NODE\_EXPORTER\_EXEC & Node exporter configuration flags. & \\
 
@@ -236,7 +236,7 @@ The accepted configuration parameters are listed in the table below.
 
   \multicolumn{1}{ c |}{\large{\textbf{Name}}} &
   \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
-  \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hline \hline
+  \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hhline{===}
 
   --in-file <FILE> & Input script file (\texttt{<FILE>}).
   \newline
@@ -244,25 +244,25 @@ The accepted configuration parameters are listed in the table below.
 
   --out-file <FILE> & Output script file (\texttt{<FILE>}).
   \newline
-  If a file with the same name and path already exists, an error is thrown.
-  Unless the \texttt{--overwrite} argument is given, the latter is always true (see
+  If a file with the same name and path already exists, an error is thrown. Unless
+  the \texttt{--overwrite} argument is given, the latter is always true (see
   option below).
   \newline
-  If no value is specified, the name of the output file is determined by
-  examining the original input file. The first portion is the original name,
-  followed by a \texttt{.inlined} string, and finally, if present, the extension
-  (usually \texttt{.sh}). & <NAME>.inlined[EXTENSION] \\ \hline
+  If no value is specified, the name of the output file is determined by examining
+  the original input file. The first portion is the original name, followed by a
+  \texttt{.inlined} string, and finally, if present, the extension (usually \texttt{.sh}).
+  & <NAME>.inlined[EXTENSION] \\ \hline
 
   --overwrite & Replace the input file.
   \newline
-  The inlined result replaces the original file content. This is the same as
-  setting the output file's value as the original input file, except that the existence
+  The inlined result replaces the original file content. This is the same as setting
+  the output file's value as the original input file, except that the existence
   check is bypassed (see option above). & false \\ \hline
 
   --log-level <LEVEL> & Logging level (\texttt{<LEVEL>}).
   \newline
-  A level is chosen from the list below (in descending order of priority), with
-  the expectation that lower levels are ignored in favor of the higher ones.
+  A level is chosen from the list below (in descending order of priority), with the
+  expectation that lower levels are ignored in favor of the higher ones.
   \begin{itemize}[noitemsep]
     \item \texttt{fatal}
       \newline
@@ -289,7 +289,8 @@ The accepted configuration parameters are listed in the table below.
   \end{itemize}
   & info \\ \hline
 
-  --disable-color & Disable terminal colors (enabled by default). & false \\ \hline
+  --disable-color & Disable terminal colors (enabled by default). & false \\
+  \hline
 
   --help & Display a help message and terminate (successfully). & \\
 
@@ -384,36 +385,35 @@ as well as a transformer function that applies the auth logic to the executable
 
   \multicolumn{1}{ c |}{\large{\textbf{Name}}} &
   \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
-  \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hline \hline
+  \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hhline{===}
 
   name & Directive name.
   \newline
   If a name different from the default is specified, it must be reflected in the
-  schema where the directive is used, otherwise, an error is thrown. & auth \\
-  \hline
+  schema where the directive is used, otherwise, an error is thrown. & auth \\ \hline
 
   auth & A function or class that handles authentication and authorization.
   \newline
   The current context (which contains information about the current request) and
-  the roles and permissions required by the requested resource must be accepted
-  as arguments by the implementation. If access to the requested resource is granted,
-  the boolean value \texttt{true} is returned; otherwise, \texttt{false} is
-  returned if access is denied.
+  the roles and permissions required by the requested resource must be accepted as
+  arguments by the implementation. If access to the requested resource is
+  granted, the boolean value \texttt{true} is returned; otherwise, \texttt{false}
+  is returned if access is denied.
   \newline
-  A default basic auth function is already implemented and checks for the existence
-  of an authorized applicant and that its roles and permissions overlap with those
-  of the requested resource. & \\ \hline
+  A default basic auth function is already implemented and checks for the
+  existence of an authorized applicant and that its roles and permissions
+  overlap with those of the requested resource. & \\ \hline
 
   authMode & Auth mode if access is not granted.
   \newline
-  Methodology for informing the requestor that access to the resource has been
-  denied. It is often desirable to hide the important information that the request
-  is failing due to an auth check and instead deliver an error/informational response
-  stating that the requested resource simply does not exist.
+  Methodology for informing the requestor that access to the resource has been denied.
+  It is often desirable to hide the important information that the request is
+  failing due to an auth check and instead deliver an error/informational
+  response stating that the requested resource simply does not exist.
   \newline
-  The first mode, \texttt{ERROR}, throws an authentication or authorization error
-  (see below), whereas the second mode, \texttt{NULL}, returns the value \texttt{null}
-  (empty). & ERROR \\ \hline
+  The first mode, \texttt{ERROR}, throws an authentication or authorization
+  error (see below), whereas the second mode, \texttt{NULL}, returns the value
+  \texttt{null} (empty). & ERROR \\ \hline
 
   roles & Roles configuration.
   \newline
@@ -443,24 +443,24 @@ as well as a transformer function that applies the auth logic to the executable
 
   permissions & Permissions configuration.
   \newline
-  An object with the same properties as roles configuration (see above). & \makecell[Xt]{\centering{enumName: String \\ default: []}}
-  \\ \hline
+  An object with the same properties as roles configuration (see above). &
+  \makecell[Xt]{\centering{enumName: String \\ default: []}} \\ \hline
 
   authenticationError & Authentication error class. The error is thrown if there
-  is no authenticated requestor in the current context. By default, a generic error
-  is thrown. The class must extend the \texttt{Error} class. &
-  AuthenticationError \\ \hline
+  is no authenticated requestor in the current context. By default, a generic
+  error is thrown. The class must extend the \texttt{Error} class. & AuthenticationError
+  \\ \hline
 
-  authorizationError & Authorization error class. The error is thrown if the
-  roles and/or permissions of the requestor do not overlap with those of the
-  requested resource. By default, a generic error is thrown. The class must extend
-  the \texttt{Error} class. & AuthorizationError \\ \hline
+  authorizationError & Authorization error class. The error is thrown if the roles
+  and/or permissions of the requestor do not overlap with those of the requested
+  resource. By default, a generic error is thrown. The class must extend the
+  \texttt{Error} class. & AuthorizationError \\ \hline
 
   container & Dependency Injection Container.
   \newline
-  Dependency injection is a design pattern that shifts the responsibility of resolving
-  dependencies to a dedicated dependency injector that knows which dependent objects
-  to inject into application code\cite{dependency_injection}.
+  Dependency injection is a design pattern that shifts the responsibility of
+  resolving dependencies to a dedicated dependency injector that knows which
+  dependent objects to inject into application code\cite{dependency_injection}.
   \newline
   It should be noted that dependency injection is only available if \texttt{auth}
   is a class type. & IOCContainer \\

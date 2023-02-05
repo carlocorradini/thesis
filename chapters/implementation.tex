@@ -119,193 +119,194 @@ distribution.
   \multicolumn{1}{ c |}{\large{\textbf{Name}}} &
   \multicolumn{1}{ c |}{\large{\textbf{Required}}} &
   \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
-  \multicolumn{1}{ c }{\large{\textbf{Notes}}} \\ \hline \hline
+  \multicolumn{1}{ c }{\large{\textbf{Notes}}} \\ \hhline{====}
 
   bc & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{bc}, also known as basic
-  calculator, is a language that allows for arbitrary precision numbers with interactive
-  statement execution\cite{bc}. & The Linux terminal does not support complicated
-  math operations or number comparisons. As a result, the \texttt{bc} program is
-  used throughout the installation procedure to guarantee that computed data, such
-  as the node's mean power consumption and Simple Standard Deviation\footnote{\url{https://wikipedia.org/wiki/Standard_deviation}},
+  calculator, is a language that allows for arbitrary precision numbers with
+  interactive statement execution\cite{bc}. & The Linux terminal does not
+  support complicated math operations or number comparisons. As a result, the
+  \texttt{bc} program is used throughout the installation procedure to guarantee
+  that computed data, such as the node's mean power consumption and Simple
+  Standard Deviation\footnote{\url{https://wikipedia.org/wiki/Standard_deviation}},
   is neither less than nor more than a predefined threshold. \\ \hline
 
-  coreutils & \textcolor{bulmaGreen}{\faicon{check}} & The GNU Core Utilities are
-  the GNU\footnote{\url{https://www.gnu.org}} operating system's essential file,
-  shell, and text manipulation utilities. These are the core utilities that are
-  required to be included in any operating system\cite{coreutils}. & By default,
-  minimal Linux distributions only include a portion of the massive list of utilities
-  provided in the standard \texttt{coreutils} package. As a result, several of
-  the applications utilized in the implementation are missing. Therefore, the
+  coreutils & \textcolor{bulmaGreen}{\faicon{check}} & The GNU Core Utilities
+  are the GNU\footnote{\url{https://www.gnu.org}} operating system's essential
+  file, shell, and text manipulation utilities. These are the core utilities that
+  are required to be included in any operating system\cite{coreutils}. & By default,
+  minimal Linux distributions only include a portion of the massive list of
+  utilities provided in the standard \texttt{coreutils} package. As a result, several
+  of the applications utilized in the implementation are missing. Therefore, the
   whole \texttt{coreutils} package is required. \\ \hline
 
-  ethtool & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{ethtool} is a standard
-  Linux software for managing network drivers and hardware by modifying Network Interface
-  Controller (NIC) settings\cite{ethtool}. & If the node's NIC interface supports
-  Wake-on-Lan (WoL), \texttt{ethtool} is used to activate it.
+  ethtool & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{ethtool} is a
+  standard Linux software for managing network drivers and hardware by modifying
+  Network Interface Controller (NIC) settings\cite{ethtool}. & If the node's NIC
+  interface supports Wake-on-Lan (WoL), \texttt{ethtool} is used to activate it.
   \newline
-  It's worth noting that the NIC interface may reset to factory settings
-  following a reboot. As a result, \texttt{ethtool} is always run before the NIC
-  interface is activated. \\ \hline
+  It's worth noting that the NIC interface may reset to factory settings following
+  a reboot. As a result, \texttt{ethtool} is always run before the NIC interface
+  is activated. \\ \hline
 
-  grep & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{grep} prints lines from
-  input files or standard input that match one or more patterns\cite{grep}. & \texttt{grep}
-  is an essential utility in all Linux systems. It is widely utilized in all scripts
-  for matching predetermined patterns and executing arbitrary actions based on the
-  latter's results. \\ \hline
+  grep & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{grep} prints lines
+  from input files or standard input that match one or more patterns\cite{grep}.
+  & \texttt{grep} is an essential utility in all Linux systems. It is widely
+  utilized in all scripts for matching predetermined patterns and executing
+  arbitrary actions based on the latter's results. \\ \hline
 
-  inotify-tools & \textcolor{bulmaGreen}{\faicon{check}} & Monitor one or more
-  files or directories for a predefined set of events, such as open, close, move/rename,
+  inotify-tools & \textcolor{bulmaGreen}{\faicon{check}} & Monitor one or more files
+  or directories for a predefined set of events, such as open, close, move/rename,
   delete or create. Under the hood, to be more efficient, it makes use of Linux's
   \texttt{inotify}\footnote{\url{https://docs.kernel.org/filesystems/inotify.html}}
-  interface\cite{inotify_tools}. & Obtaining access information to the
-  underlying Kubernetes cluster is required during the cluster initialization
-  phase. This information is only available in an automatically generated configuration
-  file saved in a specific and well-known directory. As a result, before proceeding
-  to the next phase, the installation script uses the \texttt{inotifywait} program
-  to wait for the file to be created. \\ \hline
+  interface\cite{inotify_tools}. & Obtaining access information to the underlying
+  Kubernetes cluster is required during the cluster initialization phase. This
+  information is only available in an automatically generated configuration file
+  saved in a specific and well-known directory. As a result, before proceeding
+  to the next phase, the installation script uses the \texttt{inotifywait}
+  program to wait for the file to be created. \\ \hline
 
-  iproute2 & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{iproute2} is a collection
-  of utilities for managing TCP/IP\footnote{\url{https://wikipedia.org/wiki/Internet_protocol_suite}}
+  iproute2 & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{iproute2} is a
+  collection of utilities for managing TCP/IP\footnote{\url{https://wikipedia.org/wiki/Internet_protocol_suite}}
   networking and traffic control in Linux\cite{iproute2}.
   \newline
-  The most essential tools are \texttt{ip} and \texttt{tc}. IPv4 and IPv6
-  configuration is handled by \texttt{ip}, whereas \texttt{tc} stands for traffic
-  control. & During the installation phase, the command \texttt{ip} is used to
-  gather information about physical network interfaces that are not \texttt{loopback}\footnote{\url{https://wikipedia.org/wiki/Loopback}},
+  The most essential tools are \texttt{ip} and \texttt{tc}. IPv4 and IPv6 configuration
+  is handled by \texttt{ip}, whereas \texttt{tc} stands for traffic control. & During
+  the installation phase, the command \texttt{ip} is used to gather information about
+  physical network interfaces that are not \texttt{loopback}\footnote{\url{https://wikipedia.org/wiki/Loopback}},
   such as name and MAC address. \\ \hline
 
   jq & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{jq} is a lightweight and
   flexible command-line JSON\footnote{\url{https://www.json.org}} processor\cite{jq}.
-  & To manipulate JSON data, all scripts make extensive use of \texttt{jq}. \\ \hline
+  & To manipulate JSON data, all scripts make extensive use of \texttt{jq}. \\
+  \hline
 
-  ncurses & \textcolor{bulmaRed}{\faicon{times}} & The \texttt{ncurses} (new curses)
-  library is a free software emulation of curses in System V\footnote{\url{https://wikipedia.org/wiki/UNIX_System_V}}.
+  ncurses & \textcolor{bulmaRed}{\faicon{times}} & The \texttt{ncurses} (new
+  curses) library is a free software emulation of curses in System V\footnote{\url{https://wikipedia.org/wiki/UNIX_System_V}}.
   It supports pads, color, multiple highlights, forms characters, and function-key
   mapping, as well as all of the other SVr4-curses improvements over BSD curses\cite{ncurses}.
   & The \texttt{ncurses} package includes the \texttt{tput} software, which is a
   utility for retrieving terminal capabilities in shell scripts.
   \newline
-  When the spinner process is spawned in a script, \texttt{tput} is used to
-  update its symbols at regular intervals, replacing the old one with the new one
-  and updating the cursor position. Because a spinner is only a decorative
-  element, the package is not required and can be omitted. \\ \hline
+  When the spinner process is spawned in a script, \texttt{tput} is used to update
+  its symbols at regular intervals, replacing the old one with the new one and
+  updating the cursor position. Because a spinner is only a decorative element,
+  the package is not required and can be omitted. \\ \hline
 
   nodejs & \textcolor{bulmaBlue}{\faicon{question}} & Node.js is an open-source,
   cross-platform JavaScript\footnote{\url{https://developer.mozilla.org/docs/Web/JavaScript}}
-  runtime environment\cite{nodejs}. & This package is optional since the Server component,
-  see section \ref{subsec:architecture_components_server}, may be bundled as a single
-  binary or in a container, removing the need for the \texttt{nodejs} package to
-  be installed. Because the present implementation does not provide any of the
-  aforementioned alternatives, \texttt{nodejs} is included in both of the two
-  custom Linux distributions. \\ \hline
+  runtime environment\cite{nodejs}. & This package is optional since the Server
+  component, see section \ref{subsec:architecture_components_server}, may be
+  bundled as a single binary or in a container, removing the need for the \texttt{nodejs}
+  package to be installed. Because the present implementation does not provide any
+  of the aforementioned alternatives, \texttt{nodejs} is included in both of the
+  two custom Linux distributions. \\ \hline
 
-  npm & \textcolor{bulmaBlue}{\faicon{question}} & The package manager for the Node.js
-  JavaScript platform. It installs modules so that Node.js can locate them and
-  intelligently resolves dependency conflicts. It is highly adaptable to serve a
-  wide range of use cases. It is often used to publish, find, install, and build
-  node applications\cite{npm}. & This package is optional since the Server component
-  may be bundled as a single binary or in a container, removing the need for the
-  \texttt{npm} package to be installed. Because the present implementation does
-  not provide any of the aforementioned alternatives, \texttt{npm} is included
+  npm & \textcolor{bulmaBlue}{\faicon{question}} & The package manager for the
+  Node.js JavaScript platform. It installs modules so that Node.js can locate them
+  and intelligently resolves dependency conflicts. It is highly adaptable to
+  serve a wide range of use cases. It is often used to publish, find, install,
+  and build node applications\cite{npm}. & This package is optional since the
+  Server component may be bundled as a single binary or in a container, removing
+  the need for the \texttt{npm} package to be installed. Because the present implementation
+  does not provide any of the aforementioned alternatives, \texttt{npm} is included
   in both of the two custom Linux distributions. \\ \hline
 
-  openssh & \textcolor{bulmaGreen}{\faicon{check}} & The OpenSSH software suite includes
-  tools for managing secure tunneling capabilities, various authentication
+  openssh & \textcolor{bulmaGreen}{\faicon{check}} & The OpenSSH software suite
+  includes tools for managing secure tunneling capabilities, various authentication
   methods, and advanced configuration options.
   \newline
   OpenSSH is the most popular remote login tool for the SSH protocol\footnote{\url{https://wikipedia.org/wiki/Secure_Shell}}.
-  It encrypts all traffic to prevent eavesdropping, connection hijacking, and other
-  types of attacks\cite{openssh}. & OpenSSH is critical in the cluster for protecting
-  remote operations, key management, and other tasks. All operations are
-  inherently unsafe without its software and can pose serious security issues, especially
-  if the cluster is accessible from external networks. \\ \hline
+  It encrypts all traffic to prevent eavesdropping, connection hijacking, and
+  other types of attacks\cite{openssh}. & OpenSSH is critical in the cluster for
+  protecting remote operations, key management, and other tasks. All operations are
+  inherently unsafe without its software and can pose serious security issues,
+  especially if the cluster is accessible from external networks. \\ \hline
 
   postgresql & \textcolor{bulmaBlue}{\faicon{question}} & \texttt{PostgreSQL} is
-  a powerful, open-source object-relational database system with a high
-  reputation for reliability, feature robustness, and performance\cite{postgresql}.
-  & \texttt{PostgreSQL} is the database implementation used for the Database component
-  (see section \ref{subsec:architecture_components_database}).
+  a powerful, open-source object-relational database system with a high reputation
+  for reliability, feature robustness, and performance\cite{postgresql}. & \texttt{PostgreSQL}
+  is the database implementation used for the Database component (see section \ref{subsec:architecture_components_database}).
   \newline
-  This package is optional since the database may be implemented outside of the
-  cluster using other solutions. It is up to the organization in charge of the cluster
-  to decide whether or not the database package should be included in the Linux distribution.
-  \\ \hline
+  This package is optional since the database may be implemented outside of the cluster
+  using other solutions. It is up to the organization in charge of the cluster
+  to decide whether or not the database package should be included in the Linux
+  distribution. \\ \hline
 
-  procps-ng & \textcolor{bulmaRed}{\faicon{times}} & \texttt{procps} is a collection
-  of command-line and full-screen programs that offer information from the \texttt{/proc}\footnote{\url{https://docs.kernel.org/filesystems/proc.html}}
-  pseudo-filesystem. \texttt{procps} programs often concentrate on the structures
-  that describe the processes operating on the system\cite{procps_ng}. & The \texttt{procps-ng}
-  package includes the \texttt{ps} software, which displays information about
-  the system's active processes.
+  procps-ng & \textcolor{bulmaRed}{\faicon{times}} & \texttt{procps} is a
+  collection of command-line and full-screen programs that offer information
+  from the \texttt{/proc}\footnote{\url{https://docs.kernel.org/filesystems/proc.html}}
+  pseudo-filesystem. \texttt{procps} programs often concentrate on the
+  structures that describe the processes operating on the system\cite{procps_ng}.
+  & The \texttt{procps-ng} package includes the \texttt{ps} software, which displays
+  information about the system's active processes.
   \newline
   When the spinner process is spawned in a script, \texttt{ps} is used to obtain
-  the PID\footnote{\url{https://wikipedia.org/wiki/Process_identifier}} of the parent
-  process. Because a spinner is only a decorative element, the package is not required
-  and can be omitted. \\ \hline
+  the PID\footnote{\url{https://wikipedia.org/wiki/Process_identifier}} of the
+  parent process. Because a spinner is only a decorative element, the package is
+  not required and can be omitted. \\ \hline
 
   sed & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{sed} is a stream editor.
   A stream editor is used on an input stream (file or standard input) to perform
-  simple filtering and text transformations. While comparable to an editor that allows
-  scripted edits, \texttt{sed} operates by making only one pass through the input(s)
-  and is thus more efficient\cite{sed}. & \texttt{sed} is an essential utility in
-  all Linux systems. It is widely utilized in all scripts for extracting well-defined
-  portions and/or filtering data from its input(s). \\ \hline
+  simple filtering and text transformations. While comparable to an editor that
+  allows scripted edits, \texttt{sed} operates by making only one pass through
+  the input(s) and is thus more efficient\cite{sed}. & \texttt{sed} is an
+  essential utility in all Linux systems. It is widely utilized in all scripts for
+  extracting well-defined portions and/or filtering data from its input(s). \\ \hline
 
   sudo & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{sudo} (su\footnote{\url{https://wikipedia.org/wiki/Su_(Unix)}}
-  "do") enables a system administrator to delegate authority to allow specific users
-  (or groups of users) to run certain (or all) commands as root or another user while
-  providing an audit record of the commands and their arguments. \texttt{sudo} works
-  on a per-command basis; it is not a shell replacement\cite{sudo}. & The
-  installation phase involves actions that need administrative authorization. Before
-  performing any processing, the script checks to see whether the current user
-  already has root\footnote{\url{https://wikipedia.org/wiki/Superuser}}
-  privileges; if not, it requests them with \texttt{sudo}. \\ \hline
+  "do") enables a system administrator to delegate authority to allow specific
+  users (or groups of users) to run certain (or all) commands as root or another
+  user while providing an audit record of the commands and their arguments. \texttt{sudo}
+  works on a per-command basis; it is not a shell replacement\cite{sudo}. & The installation
+  phase involves actions that need administrative authorization. Before
+  performing any processing, the script checks to see whether the current user already
+  has root\footnote{\url{https://wikipedia.org/wiki/Superuser}} privileges; if
+  not, it requests them with \texttt{sudo}. \\ \hline
 
-  sysbench & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{sysbench} is a multithreaded
-  scriptable benchmark tool for measuring CPU, memory, file I/O, mutex
-  performance, and database performance\cite{sysbench}. & During the installation
-  phase, \texttt{sysbench} is extensively used to analyze a cluster node's performance
-  and, in conjunction with other tools, its power consumption. \\ \hline
+  sysbench & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{sysbench} is a
+  multithreaded scriptable benchmark tool for measuring CPU, memory, file I/O, mutex
+  performance, and database performance\cite{sysbench}. & During the
+  installation phase, \texttt{sysbench} is extensively used to analyze a cluster
+  node's performance and, in conjunction with other tools, its power consumption.
+  \\ \hline
 
-  tar & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{tar} is an archiving application
-  that can store and manipulate numerous files in a single file (an archive).
-  The archive can be either a standard file or a device, which can be placed on a
-  local or remote system\cite{tar}. & \texttt{tar} is primarily used in
-  production during the installation process to extract and manipulate various
-  archive files.
+  tar & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{tar} is an archiving
+  application that can store and manipulate numerous files in a single file (an archive).
+  The archive can be either a standard file or a device, which can be placed on
+  a local or remote system\cite{tar}. & \texttt{tar} is primarily used in production
+  during the installation process to extract and manipulate various archive files.
   \newline
-  \texttt{tar} is used in development to create the bundle archive for
-  distribution, which contains all files and applications. \\ \hline
+  \texttt{tar} is used in development to create the bundle archive for distribution,
+  which contains all files and applications. \\ \hline
 
-  tzdata & \textcolor{bulmaGreen}{\faicon{check}} & The Time Zone Database is a
-  collection of code and data that represents the history of local time for
-  several representative locations all over the world. It is updated regularly to
-  reflect changes in time zone boundaries, UTC offsets, and daylight-saving laws
-  enacted by legislative entities\cite{tzdata}. & To avoid date and time inconsistencies,
-  all nodes in the cluster must be configured to the same timezone. By default,
-  all nodes are configured to the Etc/UTC timezone. \\ \hline
+  tzdata & \textcolor{bulmaGreen}{\faicon{check}} & The Time Zone Database is a collection
+  of code and data that represents the history of local time for several representative
+  locations all over the world. It is updated regularly to reflect changes in
+  time zone boundaries, UTC offsets, and daylight-saving laws enacted by
+  legislative entities\cite{tzdata}. & To avoid date and time inconsistencies, all
+  nodes in the cluster must be configured to the same timezone. By default, all nodes
+  are configured to the Etc/UTC timezone. \\ \hline
 
   util-linux & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{util-linux} is a
-  random collection of Linux utilities\cite{util_linux}. & The installation
-  script makes use of two \texttt{util-linux} utility programs: \texttt{lscpu} to
-  display information about the CPU architecture and \texttt{lsblk} to list
-  block devices. \\ \hline
+  random collection of Linux utilities\cite{util_linux}. & The installation script
+  makes use of two \texttt{util-linux} utility programs: \texttt{lscpu} to
+  display information about the CPU architecture and \texttt{lsblk} to list block
+  devices. \\ \hline
 
-  yq & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{yq} is a portable and
-  lightweight command-line YAML\footnote{\url{https://yaml.org}}, JSON, and XML\footnote{\url{https://www.w3.org/XML}}
+  yq & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{yq} is a portable and lightweight
+  command-line YAML\footnote{\url{https://yaml.org}}, JSON, and XML\footnote{\url{https://www.w3.org/XML}}
   processor.
   \newline
-  \texttt{yq} has a syntax similar to \texttt{jq}. It does not cover all that
-  \texttt{jq} supports, but it does support the majority of the most common
-  operations and functions\cite{yq}. & To manipulate YAML data, all scripts make
-  extensive use of \texttt{yq}.
+  \texttt{yq} has a syntax similar to \texttt{jq}. It does not cover all that \texttt{jq}
+  supports, but it does support the majority of the most common operations and functions\cite{yq}.
+  & To manipulate YAML data, all scripts make extensive use of \texttt{yq}.
   \newline
   \texttt{yq} is primarily used to read and save YAML files. However, because of
-  its more advanced functions and solutions, \texttt{jq} is used for the
-  majority of complex data processing, at the expense of \texttt{yq}. As a result,
-  YAML structures are first transformed to/from JSON, then processed with \texttt{jq},
-  and then converted back to/from YAML. The double conversion should be
-  eliminated and/or simplified in future implementations. \\ \hline
+  its more advanced functions and solutions, \texttt{jq} is used for the majority
+  of complex data processing, at the expense of \texttt{yq}. As a result, YAML structures
+  are first transformed to/from JSON, then processed with \texttt{jq}, and then
+  converted back to/from YAML. The double conversion should be eliminated and/or
+  simplified in future implementations. \\ \hline
 
   \caption{Packages list}
   \label{tbl:packages}
@@ -780,7 +781,7 @@ program and answer a few easy questions.
 
   \multicolumn{1}{ c |}{\large{\textbf{Name}}} &
   \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
-  \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hline \hline
+  \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hhline{===}
 
   --config-file <FILE> & & dependencies.config.yaml \\ \hline
 
