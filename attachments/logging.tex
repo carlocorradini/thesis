@@ -1,0 +1,126 @@
+\chapter{Logging}
+\label{cha:logging}
+
+Logging is the process of preserving a record of events that occur in a computer
+system, such as issues, errors, or just information on current operations. These
+events might happen in the operating system or other applications. For each such
+event, a message or log entry is recorded. These log messages may subsequently
+be used to monitor and understand the system's operation, troubleshoot problems,
+or during an audit. Logging is very crucial in multi-user applications to provide
+a centralized view of the system's functionality\cite{logging}. \\ %
+It is critical in the architecture implementation to log the numerous operations
+that occur in each component of the cluster. The latter not only assists in understanding
+how the general architecture performs and its status, but also the potential
+causes of an incident. During the cluster's development, if any components
+failed or did not behave as they should (e.g., no autonomous upscaling or downscaling),
+monitoring and analyzing the numerous log files created was the only method to solve
+the problems and understanding what and why happened. Furthermore, a logging system
+is available for the multitude of utility scripts and applications that are not directly
+employed with the cluster but rather during its general development. \\ %
+Log interpretation is a challenging process. Log management system collects data
+from a variety of sources with varying forms, purposes, and granularities. Maintaining
+defined log levels helps give each entry meaning and better understand the significance
+of the related log message\cite{logging_levels}. Section \ref{sec:logging_levels}
+describes common logging levels that are also employed in cluster development and
+implementation.
+
+\section{Levels}
+\label{sec:logging_levels}
+
+A log level is a piece of information that indicates the importance of a log
+message. It is a basic yet effective method of identifying log events from one another.
+Furthermore, it is utilized to filter crucial information regarding the system state
+to only those that are solely informational\cite{logging_levels}. \\ %
+During the initialization phase, a level is chosen from the list below (sorted
+in descending order of importance), with the expectation that the lower levels
+are ignored in favor of the higher ones.
+
+\begin{enumerate}
+  \item[\protect\icircled{\texttt{7}}] \texttt{SILENT}
+    \newline
+    The highest possible logging level is meant to completely disable logging.
+
+  \item[\protect\icircled{\texttt{6}}] \texttt{FATAL}
+    \newline
+    The system experienced a very severe error, which caused the system to abort.
+
+  \item[\protect\icircled{\texttt{5}}] \texttt{ERROR}
+    \newline
+    Employed when the system encounters a problem that prevents one or more operations
+    from functioning properly but allows it to continue operating.
+
+  \item[\protect\icircled{\texttt{4}}] \texttt{WARN}
+    \newline
+    Designates potentially dangerous conditions that do not cause the system to crash.
+
+  \item[\protect\icircled{\texttt{3}}] \texttt{INFO}
+    \newline
+    The standard log level indicates informational messages about the progress at
+    a coarse-grained level. The information reported using the \texttt{INFO} log
+    level should be strictly informative, without the need for any essential
+    information to be lost.
+
+  \item[\protect\icircled{\texttt{2}}] \texttt{DEBUG}
+    \newline
+    Used for information that may be required for diagnosing and debugging issues,
+    or for running in a test environment to ensure that everything is working
+    properly.
+
+  \item[\protect\icircled{\texttt{1}}] \texttt{TRACE}
+    \newline
+    The most fine-grained level of information is only employed in rare circumstances
+    where full visibility of what is occurring is required. \texttt{TRACE}'s logging
+    level is quite verbose.
+\end{enumerate}
+
+Table \ref{tbl:logging_levels}, shows the correlation between the logging level
+and the related logging message. The default logging level in various implementations
+is often set to \texttt{INFO} level.
+
+\begin{xltabular}
+  {\textwidth} { >{\ttfamily}c | >{\large\ttfamily}c | >{\large\ttfamily}c | >{\large\ttfamily}c | >{\large\ttfamily}c | >{\large\ttfamily}c | >{\large\ttfamily}c }
+
+  \multicolumn{1}{
+  c
+  |}{\backslashbox{\large{\textbf{Logging Level}}}{\large{\textbf{Logging Message}}}}
+  & FATAL & ERROR & WARN & INFO & DEBUG & TRACE \\ \hhline{=======}
+
+  \protect\icircled{\texttt{7}} SILENT & \cellcolor{bulmaRed}\hphantom{......} &
+  \cellcolor{bulmaRed}\hphantom{......} & \cellcolor{bulmaRed}\hphantom{......}
+  & \cellcolor{bulmaRed}\hphantom{......} & \cellcolor{bulmaRed}\hphantom{......}
+  &\cellcolor{bulmaRed}\hphantom{......} \\ \hline
+
+  \protect\icircled{\texttt{6}} FATAL\leavevmode\hphantom{.} & \cellcolor{bulmaGreen}
+  & \cellcolor{bulmaRed} & \cellcolor{bulmaRed} & \cellcolor{bulmaRed} &
+  \cellcolor{bulmaRed} & \cellcolor{bulmaRed} \\ \hline
+
+  \protect\icircled{\texttt{5}} ERROR\leavevmode\hphantom{.} & \cellcolor{bulmaGreen}
+  & \cellcolor{bulmaGreen} & \cellcolor{bulmaRed} & \cellcolor{bulmaRed} & \cellcolor{bulmaRed}
+  & \cellcolor{bulmaRed} \\ \hline
+
+  \protect\icircled{\texttt{4}} WARN\leavevmode\hphantom{..} & \cellcolor{bulmaGreen}
+  & \cellcolor{bulmaGreen} & \cellcolor{bulmaGreen} & \cellcolor{bulmaRed} &
+  \cellcolor{bulmaRed} & \cellcolor{bulmaRed}\\ \hline
+
+  \protect\icircled{\texttt{3}} INFO\leavevmode\hphantom{..} & \cellcolor{bulmaGreen}
+  & \cellcolor{bulmaGreen} & \cellcolor{bulmaGreen} & \cellcolor{bulmaGreen} &
+  \cellcolor{bulmaRed} & \cellcolor{bulmaRed} \\ \hline
+
+  \protect\icircled{\texttt{2}} DEBUG\leavevmode\hphantom{.} & \cellcolor{bulmaGreen}
+  & \cellcolor{bulmaGreen} & \cellcolor{bulmaGreen} & \cellcolor{bulmaGreen} & \cellcolor{bulmaGreen}
+  & \cellcolor{bulmaRed} \\ \hline
+
+  \protect\icircled{\texttt{1}} TRACE\leavevmode\hphantom{.} & \cellcolor{bulmaGreen}
+  & \cellcolor{bulmaGreen} & \cellcolor{bulmaGreen} & \cellcolor{bulmaGreen} &
+  \cellcolor{bulmaGreen} & \cellcolor{bulmaGreen}\\ \hline
+
+  \caption{
+  \centering
+  Correlation between logging level and logging message
+  \newline
+  \begin{tabular}{l}
+    \fcolorbox{black}{bulmaGreen}{\rule{0pt}{6pt}\rule{6pt}{0pt}}\quad Logging message is recorded and saved \\
+    \fcolorbox{black}{bulmaRed}{\rule{0pt}{6pt}\rule{6pt}{0pt}}\quad Logging message is completely ignored   \\
+  \end{tabular}}
+  \label{tbl:logging_levels}
+\end{xltabular}

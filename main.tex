@@ -48,7 +48,6 @@
 \captionsetup[table]{position=bottom}
 % List
 \usepackage{enumitem}
-\usepackage{etaremune}
 % Color
 \usepackage{xcolor}
 \definecolor{gray}{RGB}{102,102,102}
@@ -80,6 +79,7 @@
 \usepackage{lstautogobble}
 \usepackage{tikz}
 \newcommand*{\circled}[1]{\tikz[baseline=(char.base)]{ \node[draw, shape=circle, inner sep=1pt, fill=black, text=white] (char) {#1};}}
+\newcommand*{\icircled}[1]{\tikz[baseline=(char.base)]{ \node[draw, shape=circle, inner sep=1pt, line width=0.2pt] (char) {#1};}}
 
 
 \lstset{ %
@@ -223,5 +223,5 @@ commentstyle=\color{graphqlGray}\upshape %
   \input{attachments/good_practices.tex}
   \input{attachments/corollary_projects.tex}
   \input{attachments/upstream_contributions.tex}
-  \input{attachments/logger.tex}
+  \input{attachments/logging.tex}
 \end{document}

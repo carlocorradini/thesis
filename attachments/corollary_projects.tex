@@ -261,31 +261,21 @@ The accepted configuration parameters are listed in the table below.
 
   --log-level <LEVEL> & Logging level (\texttt{<LEVEL>}).
   \newline
-  A level is chosen from the list below (in descending order of priority), with the
-  expectation that lower levels are ignored in favor of the higher ones.
+  Attachment \ref{cha:logging} provides additional information regarding logging
+  and logging levels.
+  \newline
+  The following logging levels are supported (listed in descending order of
+  importance):
   \begin{itemize}[noitemsep]
-    \item \texttt{fatal}
-      \newline
-      Extremely serious error events that most likely cause the program to
-      terminate.
+    \item[\protect\icircled{\texttt{5}}] \texttt{silent}
 
-    \item \texttt{warn}
-      \newline
-      Potentially dangerous conditions.
+    \item[\protect\icircled{\texttt{4}}] \texttt{fatal}
 
-    \item \texttt{info}
-      \newline
-      Informational messages that emphasize the application's progress at a
-      coarse-grained level.
+    \item[\protect\icircled{\texttt{3}}] \texttt{warn}
 
-    \item \texttt{debug}
-      \newline
-      Fine-grained informative events are most helpful when debugging an
-      application.
+    \item[\protect\icircled{\texttt{2}}] \texttt{info}
 
-    \item \texttt{silent}
-      \newline
-      Disable logging.
+    \item[\protect\icircled{\texttt{1}}] \texttt{debug}
   \end{itemize}
   & info \\ \hline
 
