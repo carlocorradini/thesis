@@ -716,10 +716,77 @@ program and answer a few easy questions.
 \section{Dependencies}
 \label{sec:implementation_dependencies}
 
-% TODO Dependencies presentation
+This section is split into three segments, each of which is dependent on the preceding
+one's knowledge. \\ %
+The first segment defines an Air-Gap environment and why it is critical for overall
+implementation, and more broadly for specific cluster use cases, to allow scenarios
+where internet access is highly limited or even non-existent. \\ %
+The second segment illustrates and explains the most important third-party applications
+on which the overall architectural implementation is based. Each one is tailored
+to a distinct function in the cluster and has a direct logical mapping to a
+component in the architecture depicted in chapter \ref{cha:architecture}. The majority,
+but not all, of the specified applications are interchangeable with other implementations/distributions.
+As a result, any application-specific configuration and/or capability must be adjusted
+and/or reconfigured to be compatible with the new one. \\ %
+The Server and Autoscaler components are missing because, due to their
+importance and implementation, they have their dedicated sections, section
+\ref{sec:implementation_server} and section \ref{sec:implementation_autoscaling},
+where they are explained in greater detail. Nevertheless, the name of the related
+component's implementation appears in various portions of this section. It
+should be noted that the Server implementation is cloud/cluster provider-specific,
+and therefore it is completely built from scratch, whereas Autoscaler has an
+official Kubernetes implementation that is only compatible with a limited number
+of particular and large cloud providers. As a result, a custom solution has been
+created that is derived from the original and has been appropriately changed to
+support the cluster implementation, Server API, and overall use case. \\ %
+Finally, the last segment discusses how to manage all dependencies and how they are
+downloaded for a cluster release and to be functional in an Air-Gap scenario,
+among other things. The latter relies on an intuitive configuration file and a user-friendly
+POSIX script.
 
 \subsection{Air-Gap Environment}
 \label{subsec:implementation_dependencies_air_gap_environment}
+
+\subsection{K3s}
+\label{subsec:implementation_dependencies_k3s}
+
+\begin{wrapfigure}
+  {r}{.25\textwidth} %
+  \centering
+  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/logos/k3s.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://k3s.io}} }
+  \caption{K3s logo}
+\end{wrapfigure}
+
+\subsection{Node Exporter}
+\label{subsec:implementation_dependencies_node_exporter}
+
+\subsection{Docker Registry}
+\label{subsec:implementation_dependencies_docker_registry}
+
+\begin{wrapfigure}
+  {r}{.25\textwidth} %
+  \centering
+  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/logos/docker.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://www.docker.com/company/newsroom/media-resources}} }
+  \caption{Docker logo}
+\end{wrapfigure}
+
+\subsection{MetalLB}
+\label{subsec:implementation_dependencies_metallb}
+
+% TODO Logo
+
+\subsection{Prometheus}
+\label{subsec:implementation_dependencies_prometheus}
+
+\begin{wrapfigure}
+  {r}{.25\textwidth} %
+  \centering
+  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/logos/prometheus.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://prometheus.io}} }
+  \caption{Prometheus logo}
+\end{wrapfigure}
 
 \subsection{Management}
 \label{subsec:implementation_dependencies_management}
@@ -793,37 +860,6 @@ program and answer a few easy questions.
 
   --sync-force & & \\ \hline
 \end{xltabular}
-
-\subsection{K3s}
-\label{subsec:implementation_dependencies_k3s}
-
-\begin{wrapfigure}
-  {r}{.25\textwidth} %
-  \centering
-  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/logos/k3s.png} } %
-  {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://k3s.io}} }
-  \caption{K3s logo}
-\end{wrapfigure}
-
-\subsection{Node Exporter}
-\label{subsec:implementation_dependencies_node_exporter}
-
-\subsection{Prometheus}
-\label{subsec:implementation_dependencies_prometheus}
-
-\begin{wrapfigure}
-  {r}{.25\textwidth} %
-  \centering
-  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/logos/prometheus.png} } %
-  {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://prometheus.io}} }
-  \caption{Prometheus logo}
-\end{wrapfigure}
-
-\subsection{Autoscaler}
-\label{subsec:implementation_dependencies_autoscaler}
-
-\subsubsection{Cluster Autoscaler}
-\label{subsec:implementation_dependencies_autoscaler_cluster_autoscaler}
 
 \section{Installer}
 \label{sec:implementation_installer}
@@ -975,6 +1011,9 @@ program and answer a few easy questions.
 
 \section{Autoscaling}
 \label{sec:implementation_autoscaling}
+
+\subsection{Autoscaler}
+\label{subsec:implementation_autoscaling_autoscaler}
 
 \subsection{Vertical Pod Autoscaler}
 \label{subsec:implementation_autoscaling_vertical_pod_autoscaler}
