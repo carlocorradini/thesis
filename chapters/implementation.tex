@@ -747,6 +747,43 @@ POSIX script.
 \subsection{Air-Gap Environment}
 \label{subsec:implementation_dependencies_air_gap_environment}
 
+All devices in an Air-Gap environment have no physical connectivity to the
+public internet or any other Local Area Network (LAN) that is not itself in an
+Air-Gap environment. Email clients, browsers, SSH, and other communication
+applications are all physically and logically isolated from the outside world. \\ %
+Systems in an Air-Gap environment are permanently separated from the outside
+world by default. However, if possible, the network can communicate with other physically
+isolated devices. Any data transfer outside of the network must take place via
+external hardware that is temporarily connected to the network. USB flash drives,
+Hotspot devices and other removable media are examples of such hardware. Importantly,
+these external devices must be physically connected to and disconnected from the
+Air-Gap environment network by human intervention. \\ %
+Air-Gap environments are frequently employed in Network Security scenarios where
+security is a top priority. In an Air-Gap scenario, a correctly designed network
+mandates that devices within the network be invisible to and successfully
+isolated from remote threat actors, who often scan the public internet for vulnerable
+devices. Similarly, an attacker outside of the Air-Gap environment network cannot
+directly execute Remote Code Execution\footnote{\url{https://tuxcare.com/remote-code-execution-attack-what-it-is-how-to-protect-your-systems}}
+(RCE) attacks on potential software vulnerabilities within the environment\cite{airgap}.
+\\ %
+Although Air-Gap environments are extensively employed in the security branch, high-security
+scenarios are not the only ones for which the cluster implementation is designed.
+In reality, there are situations in which the internet connection, and thus the
+connectivity to the external global network is either too expensive to maintain
+or not available at all in the location where the cluster is deployed. \\ %
+To be fully compatible with an Air-Gap environment in various possible scenarios,
+the cluster implementation is designed to have all external dependencies,
+including custom Linux Distributions, pre-packaged with each cluster release and
+without the need, by default, for possible external requests during its utilization.
+As a result, all that is required is the unique archive file, which is
+automatically created with each new release and contains all of the files
+required to bootstrap a functioning cluster instance. Furthermore, even if not
+in an Air-Gap environment, during the installation procedure, the organization
+in charge of the cluster's administration can choose to either download all
+external dependencies from the internet (every time for every node) or to
+directly use the already available pre-packaged dependencies, reducing network usage
+as well as overall installation time.
+
 \subsection{K3s}
 \label{subsec:implementation_dependencies_k3s}
 
@@ -767,15 +804,21 @@ POSIX script.
 \begin{wrapfigure}
   {r}{.25\textwidth} %
   \centering
-  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/logos/docker.png} } %
-  {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://www.docker.com/company/newsroom/media-resources}} }
-  \caption{Docker logo}
+  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/logos/docker_registry.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://github.com/distribution/distribution}} }
+  \caption{Docker Registry logo}
 \end{wrapfigure}
 
 \subsection{MetalLB}
 \label{subsec:implementation_dependencies_metallb}
 
-% TODO Logo
+\begin{wrapfigure}
+  {r}{.25\textwidth} %
+  \centering
+  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/logos/metallb.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://metallb.universe.tf}} }
+  \caption{MetalLB logo}
+\end{wrapfigure}
 
 \subsection{Prometheus}
 \label{subsec:implementation_dependencies_prometheus}
