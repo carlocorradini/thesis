@@ -16,41 +16,46 @@ in an active and healthy state. \\ %
 Furthermore, several of the components and/or technologies discussed in this chapter
 are interchangeable with other solutions. The latter is highly valuable for
 organizations since it provides more configuration freedom and final control
-over the cluster while continuously reflecting its ultimate goal.
+over the cluster while continuously reflecting its ultimate goal. \\ %
+The main implementation of the cluster and its related applications currently
+supports the \texttt{Linux} platform (see section
+\ref{subsec:architecture_components_node}) together with the architectures \texttt{amd64}\footnote{\url{https://wikipedia.org/wiki/X86-64}}
+and \texttt{arm64}\footnote{\url{https://wikipedia.org/wiki/AArch64}}.
 
 \section{Distributions}
 \label{sec:implementation_distributions}
 
 % TODO Reference introduction dependencies
 
-Almost all software relies on the necessity for a stable and consistent
-operating system (OS). \\ %
-The OS, as specified in section \ref{subsec:architecture_components_node}, is
-installed on every node in the cluster and must be based on the \texttt{Linux
-Kernel}. The latter is a critical requirement because most of the technologies
-employed in the implementation rely on Linux primitives and core functionality
-to operate properly. To enforce resource management for pods and containers, for
-example, all Kubernetes distributions require the \texttt{cgroup v2}\footnote{\url{https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html}}
+Almost all software relies on the necessity for a stable and consistent operating
+system (OS). \\ %
+The OS, as specified in section \ref{subsec:architecture_components_node}, is installed
+on every node in the cluster and must be based on the \texttt{Linux Kernel}. The
+latter is a critical requirement because most of the technologies employed in the
+implementation rely on Linux primitives and core functionality to operate properly.
+To enforce resource management for pods and containers, for example, all
+Kubernetes distributions require the \texttt{cgroup v2}\footnote{\url{https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html}}
 kernel module\footnote{\url{https://kubernetes.io/docs/concepts/architecture/cgroups}}.
-Furthermore, the Linux Kernel is an Open Source project to which everyone can
-contribute and get access, representing one fundamental objective of the entire project.
+Furthermore, the Linux Kernel is an Open Source project to which everyone can contribute
+and get access, representing one fundamental objective of the entire project. \\ %
+To represent the potential of the implementation architecture being compatible
+with several Linux distributions, the section is titled Distributions rather than
+Operating System. A Linux distribution, often known as a Linux distro, is an
+operating system that is built from components developed by various open-source
+projects and programmers. The Linux kernel (the operating system's core), the
+GNU shell utilities (terminal interface and commands), the X server (for a
+graphical desktop), the desktop environment, a package management system, an
+installer, and other services are all included in each distribution. Many
+components are created independently and released in source code format. Thousands
+of software packages, utilities, and applications can be found in a single Linux
+distribution. Linux distributions combine code from open-source projects into a
+single operating system that can be installed and booted. Linux distributions are
+available for a wide range of specialized use cases, including desktop computers,
+servers without a graphical interface, supercomputers, mobile devices, and more\cite{linux_distro}.
 \\ %
-To represent the potential of the implementation architecture being compatible with
-several Linux distributions, the section is titled Distributions rather than
-Operating System. A Linux distribution, often known as a Linux distro, is an operating
-system that is built from components developed by various open-source projects and
-programmers. The Linux kernel (the operating system's core), the GNU shell utilities
-(terminal interface and commands), the X server (for a graphical desktop), the desktop
-environment, a package management system, an installer, and other services are
-all included in each distribution. Many components are created independently and
-released in source code format. Thousands of software packages, utilities, and
-applications can be found in a single Linux distribution. Linux distributions combine
-code from open-source projects into a single operating system that can be installed
-and booted. Linux distributions are available for a wide range of specialized
-use cases, including desktop computers, servers without a graphical interface, supercomputers,
-mobile devices, and more\cite{linux_distro}. \\ %
-To be completely compatible with the implementation architecture, a Linux distribution
-must meet three major requirements. They are described in the following list:
+To be completely compatible with the implementation architecture, a Linux
+distribution must meet three major requirements. They are described in the following
+list:
 \begin{enumerate}
   \item The Linux Kernel version must be compatible with the Kubernetes version.
     \newline
@@ -73,45 +78,46 @@ must meet three major requirements. They are described in the following list:
     the two most used init systems, and the majority of available distributions are
     based on one of them.
 \end{enumerate}
-Finally, two custom Linux distributions are already configured, built, and
-packaged as ISO files, as shown in section \ref{subsec:implementation_distributions_iso_image}.
-They are based on a simple command line with no graphical interface and contain
-only what is required to start a node. This is done to simplify the overall setup
-by eliminating unnecessary software and technologies, addressing any
-incompatibilities, and increasing the cluster's implementation and testing efficiency.
-Both are derived from pre-existing Linux distributions that are known to be
-stable, easy to configure, and lightweight, requiring just the bare minimum of resources
-to operate. Furthermore, they are built on separate init systems, requiring the
-overall implementation to be compatible with and tested with both.
+Finally, two custom Linux distributions are already configured, built, and packaged
+as ISO files, as shown in section
+\ref{subsec:implementation_distributions_iso_image}. They are based on a simple command
+line with no graphical interface and contain only what is required to start a node.
+This is done to simplify the overall setup by eliminating unnecessary software
+and technologies, addressing any incompatibilities, and increasing the cluster's
+implementation and testing efficiency. Both are derived from pre-existing Linux distributions
+that are known to be stable, easy to configure, and lightweight, requiring just
+the bare minimum of resources to operate. Furthermore, they are built on
+separate init systems, requiring the overall implementation to be compatible with
+and tested with both.
 
 \subsection{Packages}
 \label{subsec:implementation_distributions_packages}
 
-The packages used in the implementation that must be available in a Linux distribution
-are specified in this section. A package is a collection of files that have been
-bundled together and may be installed and uninstalled as a group\cite{package_manager}.
+The packages used in the implementation that must be available in a Linux
+distribution are specified in this section. A package is a collection of files that
+have been bundled together and may be installed and uninstalled as a group\cite{package_manager}.
 \\ %
-All packages may be installed automatically using the package manager of the respective
-Linux distribution. A package manager's job is to provide an interface that
-assists the user in managing the collection of packages installed on the system.
-A package manager maintains track of what software is installed on the system and
-makes it simple to install new software, update software to newer versions, or delete
-previously installed software. A package is usually a single piece of software. However,
-it is typical for applications to be made up of numerous dependent packages. For
-example, the \texttt{jq} package includes not just the \texttt{jq} command-line
+All packages may be installed automatically using the package manager of the
+respective Linux distribution. A package manager's job is to provide an interface
+that assists the user in managing the collection of packages installed on the system.
+A package manager maintains track of what software is installed on the system
+and makes it simple to install new software, update software to newer versions,
+or delete previously installed software. A package is usually a single piece of software.
+However, it is typical for applications to be made up of numerous dependent packages.
+For example, the \texttt{jq} package includes not just the \texttt{jq} command-line
 JSON processor, but also the \texttt{oniguruma}\footnote{\url{https://github.com/kkos/oniguruma}}
-package, a regular expressions library. Furthermore, various optional add-on packages
-including extra data and documentation are available\cite{package_manager}. \\ %
-All packages are already included by default in the two custom Linux
-distributions. As a result, there is no need for any changes or the installation
-of extra packages. \\ %
-Each package in table \ref{tbl:packages} contains a brief description extracted
-from its official documentation, as well as some notes on why it was utilized.
-Furthermore, the required column indicates with symbols if the package is required
-(\textcolor{bulmaGreen}{\faicon{check}}), optional (\textcolor{bulmaBlue}{\faicon{question}}),
-or not required (\textcolor{bulmaRed}{\faicon{times}}). It should be noted that the
-name of some packages may differ based on the package manager employed by the Linux
-distribution.
+package, a regular expressions library. Furthermore, various optional add-on
+packages including extra data and documentation are available\cite{package_manager}.
+\\ %
+All packages are already included by default in the two custom Linux distributions.
+As a result, there is no need for any changes or the installation of extra packages.
+\\ %
+Each package in table \ref{tbl:packages} contains a brief description extracted from
+its official documentation, as well as some notes on why it was utilized. Furthermore,
+the required column indicates with symbols if the package is required (\textcolor{bulmaGreen}{\faicon{check}}),
+optional (\textcolor{bulmaBlue}{\faicon{question}}), or not required (\textcolor{bulmaRed}{\faicon{times}}).
+It should be noted that the name of some packages may differ based on the
+package manager employed by the Linux distribution.
 
 \begin{xltabular}
   {\textwidth} { >{\ttfamily}l | c | X | X }
@@ -316,66 +322,66 @@ distribution.
 \label{subsec:implementation_distributions_init_system}
 
 The Init System, short for Initialization System, is the first process that runs
-when a Unix-based computer operating system is bootstrapped. Init is a daemon
-process that is normally given Process IDentifier 1 (PID 1) and runs until the
-system is shut down. It is the direct or indirect ancestor of all other processes
-and adopts all orphaned processes automatically. The kernel starts Init during
-the boot process; if the kernel is unable to start it, a kernel panic occurs\cite{init_system}.
+when a Unix-based computer operating system is bootstrapped. Init is a daemon process
+that is normally given Process IDentifier 1 (PID 1) and runs until the system is
+shut down. It is the direct or indirect ancestor of all other processes and
+adopts all orphaned processes automatically. The kernel starts Init during the boot
+process; if the kernel is unable to start it, a kernel panic occurs\cite{init_system}.
 \\ %
-The Init System is logically positioned above the Kernel and is an essential component
-of every modern system. It frequently integrates sophisticated features over
-simple ones and is very customizable. Furthermore, it offers active control and
-monitoring over the running processes, keeping the entire system healthy and active.
-The latter is critical because it enables automated and continuous monitoring of
-cluster implementation architecture-related processes operating in the node
-without the need for a custom solution. For example, if a K8s instance executing
-in a worker node crashes (i.e. exits with a code different than 0), the Init
-System detects it and restarts the process automatically, making the node active
-and able to receive workload again. \\ %
+The Init System is logically positioned above the Kernel and is an essential
+component of every modern system. It frequently integrates sophisticated features
+over simple ones and is very customizable. Furthermore, it offers active control
+and monitoring over the running processes, keeping the entire system healthy and
+active. The latter is critical because it enables automated and continuous monitoring
+of cluster implementation architecture-related processes operating in the node without
+the need for a custom solution. For example, if a K8s instance executing in a worker
+node crashes (i.e. exits with a code different than 0), the Init System detects it
+and restarts the process automatically, making the node active and able to
+receive workload again. \\ %
 When the node is bootstrapped, the Init System is set to start all cluster-related
-processes (i.e., K8s instance and Metric Server) and run a script that sends a
-message to the server component notifying it that the node is active and ready. Before
+processes (i.e., K8s instance and Metric Server) and run a script that sends a message
+to the server component notifying it that the node is active and ready. Before
 the node is shut down, it automatically terminates all cluster-related processes
-and sends a message to the server component informing that the node is shutting
-down and will be inactive. As previously stated, the cluster performs these two
-operations automatically: bootstrap for upscaling and shutdown for downscaling.
-However, there are scenarios in which a node is manually bootstrapped and/or shut
-down by human action without involving the server component directly. Despite
-the possibility of the latter, the overall cluster state remains consistent, and
-all node statuses are correctly updated, thanks to the Init System and its monitoring
-and configuration capabilities. \\ %
-The implementation currently supports two init systems: OpenRC (described in section
-\ref{subsec:implementation_distributions_init_system_openrc}) and Systemd (described
-in section \ref{subsec:implementation_distributions_init_system_systemd}). They are
-the two most popular and widely used Init Systems, and the vast majority of
-Linux distributions support one or both of them. Their capabilities are nearly identical.
-However, configuration files and available application(s) that interact with the
-bare-metal Init System API, are different, necessitating double effort to
-achieve the same objective. \\ %
-It should be noted that if the Init System daemon process crashes due to an
-error, the entire system crashes and becomes inactive, necessitating a manual
-restart. Even though the likelihood of the latter is extremely low, it is never
-zero. As a result, as stated in section
-\ref{subsec:architecture_components_server}, a heartbeat mechanism has been established
-in the cluster to constantly monitor and identify the status and availability of
-all active nodes. If there are no configuration or networking issues and a node's
-heartbeat is not received within the predefined interval, it indicates that the heartbeat
-daemon executing in the node has crashed and has not yet been restarted, or that
-the entire node has crashed and is not automatically recoverable. \\ %
-In each of the following sections, where an Init System distribution is described,
-an example of the related service configuration file is presented to illustrate
-its differences. A service configuration file contains information about a process
-that the Init System controls and monitors. The application used as a reference
-in this example is K3s, a lightweight Kubernetes distribution explained in further
-detail in section \ref{subsec:implementation_dependencies_k3s}. Before starting,
-it must clear any temporary files in the \texttt{tmp} directory and load
-environment variables from two distinct directories. Furthermore, anytime the
-application process crashes, the Init System must restart it within 5 seconds after
-detection. Even though each Init System has a unique service configuration file,
-the result is nearly identical. The list below highlights some of the most
-significant configuration requirements. To aid comprehension, the identification
-number for each requirement is also provided in the Init System's service
-configuration file.
+and sends a message to the server component informing that the node is shutting down
+and will be inactive. As previously stated, the cluster performs these two operations
+automatically: bootstrap for upscaling and shutdown for downscaling. However,
+there are scenarios in which a node is manually bootstrapped and/or shut down by
+human action without involving the server component directly. Despite the possibility
+of the latter, the overall cluster state remains consistent, and all node statuses
+are correctly updated, thanks to the Init System and its monitoring and
+configuration capabilities. \\ %
+The implementation currently supports two init systems: OpenRC (described in
+section \ref{subsec:implementation_distributions_init_system_openrc}) and Systemd
+(described in section
+\ref{subsec:implementation_distributions_init_system_systemd}). They are the two
+most popular and widely used Init Systems, and the vast majority of Linux distributions
+support one or both of them. Their capabilities are nearly identical. However,
+configuration files and available application(s) that interact with the bare-metal
+Init System API, are different, necessitating double effort to achieve the same objective.
+\\ %
+It should be noted that if the Init System daemon process crashes due to an error,
+the entire system crashes and becomes inactive, necessitating a manual restart.
+Even though the likelihood of the latter is extremely low, it is never zero. As
+a result, as stated in section \ref{subsec:architecture_components_server}, a
+heartbeat mechanism has been established in the cluster to constantly monitor
+and identify the status and availability of all active nodes. If there are no configuration
+or networking issues and a node's heartbeat is not received within the predefined
+interval, it indicates that the heartbeat daemon executing in the node has
+crashed and has not yet been restarted, or that the entire node has crashed and is
+not automatically recoverable. \\ %
+In each of the following sections, where an Init System distribution is
+described, an example of the related service configuration file is presented to illustrate
+its differences. A service configuration file contains information about a
+process that the Init System controls and monitors. The application used as a reference
+in this example is K3s, a lightweight Kubernetes distribution explained in
+further detail in section \ref{subsec:implementation_dependencies_k3s}. Before starting,
+it must clear any temporary files in the \texttt{tmp} directory and load environment
+variables from two distinct directories. Furthermore, anytime the application process
+crashes, the Init System must restart it within 5 seconds after detection. Even though
+each Init System has a unique service configuration file, the result is nearly
+identical. The list below highlights some of the most significant configuration requirements.
+To aid comprehension, the identification number for each requirement is also provided
+in the Init System's service configuration file.
 \begin{enumerate}[label=\protect\circled{\arabic{*}}]
   \item General information about the service.
     \newline
@@ -421,25 +427,24 @@ configuration file.
   \caption{Gentoo Linux logo}
 \end{wrapfigure}
 
-OpenRC is a dependency-based init system for Unix-like systems that maintain
-compatibility with the system's init system, which is generally found in \texttt{/sbin/init}.
-\\ %
-At boot, OpenRC starts the appropriate system services in the right sequence, manages
-them while the system is running, and stops them at shutdown. It can manage installed
-daemons, optionally monitor the processes it launches, and start processes in parallel
-when possible to reduce boot time. \\ %
-OpenRC was developed for Gentoo\footnote{\url{https://www.gentoo.org}}, but it
-may be used in other Linux distributions and BSD\footnote{\url{https://www.bsd.org}}
+OpenRC is a dependency-based init system for Unix-like systems that maintain compatibility
+with the system's init system, which is generally found in \texttt{/sbin/init}. \\ %
+At boot, OpenRC starts the appropriate system services in the right sequence,
+manages them while the system is running, and stops them at shutdown. It can
+manage installed daemons, optionally monitor the processes it launches, and
+start processes in parallel when possible to reduce boot time. \\ %
+OpenRC was developed for Gentoo\footnote{\url{https://www.gentoo.org}}, but it may
+be used in other Linux distributions and BSD\footnote{\url{https://www.bsd.org}}
 systems as well\cite{openrc}. \\ %
-Listing \ref{lst:openrc} illustrates the example of the OpenRC service configuration
-file for K3s saved in \texttt{/etc/init.d/k3s}. Manual control of the service is
-possible using the \texttt{rc-service} command, which locates and runs the
-OpenRC service with the specified arguments: \texttt{rc-service k3s <CMD> [...]}.
-\texttt{<CMD>} can be substituted by \texttt{start} to start the service,
-\texttt{stop} to stop the service, \texttt{restart} to restart the service, and
-\texttt{status} to acquire the service status. Furthermore, with the command \texttt{rc-update
-add k3s default}, the service may be set to start automatically when the system boots
-up. The latter examples are merely a very small subset of all the available
+Listing \ref{lst:openrc} illustrates the example of the OpenRC service
+configuration file for K3s saved in \texttt{/etc/init.d/k3s}. Manual control of the
+service is possible using the \texttt{rc-service} command, which locates and runs
+the OpenRC service with the specified arguments: \texttt{rc-service k3s <CMD> [...]}.
+\texttt{<CMD>} can be substituted by \texttt{start} to start the service, \texttt{stop}
+to stop the service, \texttt{restart} to restart the service, and \texttt{status}
+to acquire the service status. Furthermore, with the command \texttt{rc-update
+add k3s default}, the service may be set to start automatically when the system
+boots up. The latter examples are merely a very small subset of all the available
 commands/capabilities that OpenRC is capable of.
 
 \begin{lstlisting}[language=shell, escapeinside={(*@}{@*)}, morekeywords={[2]{depend, start_pre, want, after, sourcex}}, morekeywords={[4]{name, description, supervisor, command, command_args, output_log, error_log, pidfile, respawn_delay, respawn_max}}, xleftmargin=\parindent, label={lst:openrc}, caption=\texttt{OpenRC} service configuration file for K3s]
@@ -483,27 +488,27 @@ commands/capabilities that OpenRC is capable of.
   \caption{systemd logo}
 \end{wrapfigure}
 
-systemd is a collection of building blocks for a Linux system. It provides a
-system and service manager that runs as PID 1 and starts the rest of the system.
-\\ %
-systemd supports aggressive parallelization, on-demand daemon startup, process
-tracking through Linux control groups, mount and automount point management, and
-a complex transactional dependency-based service control logic. \\ %
-Other components include a logging daemon, tools to handle basic system configuration
-such as the hostname, date, and locale, a list of logged-in users and running
-containers and virtual machines, system accounts, runtime directories and
-settings, and daemons to manage simple network configuration, network time
-synchronization, log forwarding, and name resolution\cite{systemd}. \\ %
-Listing \ref{lst:systemd} illustrates the example of the systemd service configuration
-file for K3s saved in \texttt{/etc/systemd/system/k3s.service}. The \texttt{systemctl}
-command, which manages the systemd system and the service manager, may be used to
-manually control the service: \texttt{systemd <CMD> k3s [...]}. \texttt{<CMD>} can
-be replaced with \texttt{start} to start the service, \texttt{stop} to stop it, \texttt{restart}
-to restart it, and \texttt{status} to obtain the service status. Furthermore,
-the service may be enabled to start automatically when the system boots up by
-using the commands \texttt{systemctl enable k3s} followed by \texttt{systemctl daemon-reload}
-to reload the systemd management configuration. The latter examples are only a small
-portion of all the commands and capabilities provided by systemd.
+systemd is a collection of building blocks for a Linux system. It provides a system
+and service manager that runs as PID 1 and starts the rest of the system. \\ %
+systemd supports aggressive parallelization, on-demand daemon startup, process tracking
+through Linux control groups, mount and automount point management, and a complex
+transactional dependency-based service control logic. \\ %
+Other components include a logging daemon, tools to handle basic system
+configuration such as the hostname, date, and locale, a list of logged-in users and
+running containers and virtual machines, system accounts, runtime directories and
+settings, and daemons to manage simple network configuration, network time synchronization,
+log forwarding, and name resolution\cite{systemd}. \\ %
+Listing \ref{lst:systemd} illustrates the example of the systemd service
+configuration file for K3s saved in \texttt{/etc/systemd/system/k3s.service}. The
+\texttt{systemctl} command, which manages the systemd system and the service manager,
+may be used to manually control the service: \texttt{systemd <CMD> k3s [...]}. \texttt{<CMD>}
+can be replaced with \texttt{start} to start the service, \texttt{stop} to stop it,
+\texttt{restart} to restart it, and \texttt{status} to obtain the service status.
+Furthermore, the service may be enabled to start automatically when the system boots
+up by using the commands \texttt{systemctl enable k3s} followed by \texttt{systemctl
+daemon-reload} to reload the systemd management configuration. The latter
+examples are only a small portion of all the commands and capabilities provided
+by systemd.
 
 \begin{lstlisting}[language=ini, escapeinside={(*@}{@*)}, morekeywords={Description, Documentation, Wants, After, StartLimitBurst, WantedBy, Type, ExecStartPre, ExecStart, EnvironmentFile, KillMode, Delegate, TimeoutStartSec, Restart, RestartSec}, xleftmargin=\parindent, label={lst:systemd}, caption=\texttt{systemd} service configuration file for K3s]
   [Unit]
@@ -532,34 +537,34 @@ portion of all the commands and capabilities provided by systemd.
 \subsection{ISO Image}
 \label{subsec:implementation_distributions_iso_image}
 
-This section briefly describes the two original Linux distributions, Alpine
-Linux and Arch Linux, which served as the foundation for the two custom Linux distributions.
-They were both utilized and tested together in the implementation cluster. Furthermore,
-it is shown how the two custom ISO image files are customized and generated by
-the use of a simple script. \\ %
+This section briefly describes the two original Linux distributions, Alpine Linux
+and Arch Linux, which served as the foundation for the two custom Linux
+distributions. They were both utilized and tested together in the implementation
+cluster. Furthermore, it is shown how the two custom ISO image files are customized
+and generated by the use of a simple script. \\ %
 Each customized Linux distribution comes in the form of a single ISO image file.
-A disk image that contains everything that would be written on an optical disc,
-including the optical disc file system, is known as an optical disc image (or
-ISO image). ISO images are intended to include the binary image of an optical
-media file system, as well as the data in its binary files, replicated exactly
-as they were saved on the disc. The data included within the ISO image will be structured
-in accordance with the file system used on the optical disc from which it was produced\cite{iso}.
-\\ %
-The ISO image can be burned into physical media such as a CD, or a USB flash drive
-or can be mounted as an ISO file. The latter shows the high level of flexibility
-and overall compatibility that an ISO file has. Moreover, it is extremely
-portable since it is intrinsically only a single file making it the perfect
-format for a release bundle and very useful in an Air-Gap environment. \\ %
-After an ISO image of a Linux distribution has been burned to media, it can be easily
-installed on multiple systems by attaching the media to the system and selecting
-it as the default boot. It starts a live (volatile) OS that is not currently
+A disk image that contains everything that would be written on an optical disc, including
+the optical disc file system, is known as an optical disc image (or ISO image). ISO
+images are intended to include the binary image of an optical media file system,
+as well as the data in its binary files, replicated exactly as they were saved on
+the disc. The data included within the ISO image will be structured in
+accordance with the file system used on the optical disc from which it was
+produced\cite{iso}. \\ %
+The ISO image can be burned into physical media such as a CD, or a USB flash
+drive or can be mounted as an ISO file. The latter shows the high level of flexibility
+and overall compatibility that an ISO file has. Moreover, it is extremely portable
+since it is intrinsically only a single file making it the perfect format for a release
+bundle and very useful in an Air-Gap environment. \\ %
+After an ISO image of a Linux distribution has been burned to media, it can be
+easily installed on multiple systems by attaching the media to the system and
+selecting it as the default boot. It starts a live (volatile) OS that is not currently
 installed on the primary disk. The live Linux distribution may then be installed
-directly into the primary disk, making it permanently available on the system
-without the need for removable media. The latter step may be performed manually,
-but it is more complex than it appears since it necessitates an understanding of
-disk formatting, partitioning, as well as other topics. Fortunately, most Linux
-distributions, including the two custom ones, have simple tools that automate
-the installation procedure by asking only a few simple questions to the user/administrator.
+directly into the primary disk, making it permanently available on the system without
+the need for removable media. The latter step may be performed manually, but it is
+more complex than it appears since it necessitates an understanding of disk formatting,
+partitioning, as well as other topics. Fortunately, most Linux distributions,
+including the two custom ones, have simple tools that automate the installation procedure
+by asking only a few simple questions to the user/administrator.
 
 \subsubsection{Alpine Linux}
 \label{subsubsec:implementation_distributions_iso_alpine_linux}
@@ -572,55 +577,56 @@ the installation procedure by asking only a few simple questions to the user/adm
   \caption{Alpine Linux logo}
 \end{wrapfigure}
 
-Alpine Linux\footnote{\url{https://www.alpinelinux.org}} is a lightweight, security-focused,
-and resource-efficient distribution. In recent years, has grown in popularity as
-the foundation for the majority of Docker images. It is based on musl\footnote{\url{https://musl.libc.org}}
-(an implementation of the C standard library, an alternative to glibc\footnote{\url{https://www.gnu.org/software/libc}}),
-BusyBox\footnote{\url{https://busybox.net}} (a single, small executable that combines
-tiny versions of many common UNIX utilities), a custom package manager called APK\footnote{\url{https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper}}
-and the OpenRC Init System (see section
-\ref{subsec:implementation_distributions_init_system_openrc})\cite{alpine_linux}.
+Alpine Linux\footnote{\url{https://www.alpinelinux.org}} is a lightweight,
+security-focused, and resource-efficient distribution. In recent years, has grown
+in popularity as the foundation for the majority of Docker images. It is based
+on musl\footnote{\url{https://musl.libc.org}} (an implementation of the C standard
+library, an alternative to glibc\footnote{\url{https://www.gnu.org/software/libc}}),
+BusyBox\footnote{\url{https://busybox.net}} (a single, small executable that
+combines tiny versions of many common UNIX utilities), a custom package manager
+called APK\footnote{\url{https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper}}
+and the OpenRC Init System (see section \ref{subsec:implementation_distributions_init_system_openrc})\cite{alpine_linux}.
 \\ %
-Alpine Linux is the preferred reCluster distribution since it has been widely
-used and tested throughout the development process.
+Alpine Linux is the preferred reCluster distribution since it has been widely used
+and tested throughout the development process.
 
 The official documentation\footnote{\url{https://wiki.alpinelinux.org/wiki/How_to_make_a_custom_ISO_image_with_mkimage}}
-provides a brief guideline on how to build a custom Alpine Linux ISO image. Unfortunately,
-it is not exhaustive, and it assumes a lot of information and configurations. A
-simpler, easy-to-use, and portable solution is required for cluster
+provides a brief guideline on how to build a custom Alpine Linux ISO image.
+Unfortunately, it is not exhaustive, and it assumes a lot of information and
+configurations. A simpler, easy-to-use, and portable solution is required for cluster
 implementation. This resulted in the creation of a POSIX script that handles all
 of the burdens, as explained below. \\ %
 Building a custom Alpine Linux ISO image involves three prerequisites: an Alpine
-Linux system, specific tools/packages to configure and build the image, and a general
-configuration with a special administrator user and the generation of signing keys.
-These requirements remain constant over time and can be regarded as essentially
-static. Furthermore, having a physical Alpine Linux system dedicated just to
-generating custom images is a waste of resources. As a result, a custom
-Dockerfile based on Alpine Linux has been created to allow building the image in
-different environments without the need for a physical machine and with all of
-the previous requirements already fulfilled\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/alpine/Dockerfile}}.
-A Dockerfile is a text document that contains all of the commands needed to compile
-a container image\cite{dockerfile}. \\ %
+Linux system, specific tools/packages to configure and build the image, and a
+general configuration with a special administrator user and the generation of
+signing keys. These requirements remain constant over time and can be regarded as
+essentially static. Furthermore, having a physical Alpine Linux system dedicated
+just to generating custom images is a waste of resources. As a result, a custom Dockerfile
+based on Alpine Linux has been created to allow building the image in different environments
+without the need for a physical machine and with all of the previous requirements
+already fulfilled\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/alpine/Dockerfile}}.
+A Dockerfile is a text document that contains all of the commands needed to
+compile a container image\cite{dockerfile}. \\ %
 The ISO image is customized using the \texttt{mkimg.recluster.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/alpine/mkimg.recluster.sh}}
-file, which defines and integrates a custom recluster profile, based on the basic
-Alpine Linux profile. This file, whose content is shown in listing \ref{lst:alpine},
-is not included in the Dockerfile because it is considered dynamic, in the sense
-that it could be updated and customized over time to meet potential new cluster specifications.
-\\ %
-Finally, to create the ISO image, the container image must be launched in detached
-mode, a local volume mounted to the container, the \texttt{mkimg.recluster.sh}
-file loaded, and the official \texttt{mkimage.sh} script executed with extra
-configuration parameters. When performed manually, the latter tasks are
-extremely difficult and prone to human error. As a result, all operations have
-been included in a POSIX script, simply named \texttt{build.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/alpine/build.sh}},
+file, which defines and integrates a custom recluster profile, based on the
+basic Alpine Linux profile. This file, whose content is shown in listing
+\ref{lst:alpine}, is not included in the Dockerfile because it is considered dynamic,
+in the sense that it could be updated and customized over time to meet potential
+new cluster specifications. \\ %
+Finally, to create the ISO image, the container image must be launched in
+detached mode, a local volume mounted to the container, the \texttt{mkimg.recluster.sh}
+file loaded, and the official \texttt{mkimage.sh} script executed with extra configuration
+parameters. When performed manually, the latter tasks are extremely difficult and
+prone to human error. As a result, all operations have been included in a POSIX script,
+simply named \texttt{build.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/alpine/build.sh}},
 that does everything automatically, including cleanup procedures when the image(s)
-has been generated or an error occurs. Moreover, all ISO images created are saved
-in the current working directory under the directory \texttt{iso}. As an example,
-a custom image based on Alpine Linux version 3.17 and generated with the
+has been generated or an error occurs. Moreover, all ISO images created are
+saved in the current working directory under the directory \texttt{iso}. As an
+example, a custom image based on Alpine Linux version 3.17 and generated with the
 recluster profile for architecture \texttt{x86\_64} is saved as \texttt{alpine-recluster-v3.17-x86\_64.iso}
 and is just \texttt{190MiB} in size. \\ %
-To configure and install Alpine Linux permanently on the primary disk, simply
-run the \texttt{setup-alpine}\footnote{\url{https://docs.alpinelinux.org/user-handbook/0.1a/Installing/setup_alpine.html}}
+To configure and install Alpine Linux permanently on the primary disk, simply run
+the \texttt{setup-alpine}\footnote{\url{https://docs.alpinelinux.org/user-handbook/0.1a/Installing/setup_alpine.html}}
 program and answer a few easy questions.
 
 \begin{lstlisting}[language=shell, morekeywords={[2]{profile_recluster, profile_base}}, morekeywords={[4]{title, desc, profile_abbrev, image_ext, arch, output_format, apks, apkovl}}, xleftmargin=\parindent, label={lst:alpine}, caption=Contents of \texttt{mkimg.recluster.sh} file which shows the reCluster profile definition]
@@ -648,49 +654,47 @@ program and answer a few easy questions.
   \caption{Arch Linux logo}
 \end{wrapfigure}
 
-Arch Linux\footnote{\url{https://archlinux.org}} is a general-purpose
-distribution that focuses on simplicity, minimalism, and code elegance. It is based
-on Systemd Init System (see section
-\ref{subsec:implementation_distributions_init_system_systemd}) and strives to stay
-bleeding edge, offering the latest stable versions of most software through
-Pacman\footnote{\url{https://wiki.archlinux.org/title/Pacman}} package manager. Uses
-a rolling release system that allows one-time installation and perpetual software
-upgrades, allowing to not reinstall or upgrade the system from one version to
-the next. Notably, Arch Linux is the foundation for several many popular
-enterprise-grade distributions, such as Manjaro\footnote{\url{https://manjaro.org}}
-and SteamOS\footnote{\url{https://store.steampowered.com/steamos}},
+Arch Linux\footnote{\url{https://archlinux.org}} is a general-purpose distribution
+that focuses on simplicity, minimalism, and code elegance. It is based on
+Systemd Init System (see section \ref{subsec:implementation_distributions_init_system_systemd})
+and strives to stay bleeding edge, offering the latest stable versions of most software
+through Pacman\footnote{\url{https://wiki.archlinux.org/title/Pacman}} package manager.
+Uses a rolling release system that allows one-time installation and perpetual
+software upgrades, allowing to not reinstall or upgrade the system from one version
+to the next. Notably, Arch Linux is the foundation for several many popular enterprise-grade
+distributions, such as Manjaro\footnote{\url{https://manjaro.org}} and SteamOS\footnote{\url{https://store.steampowered.com/steamos}},
 demonstrating its customizability, power, and stability\cite{arch_linux}.
 
 The official documentation\footnote{\url{https://wiki.archlinux.org/title/archiso}}
-includes precise guidelines for building a custom Arch Linux ISO image. For
-cluster implementation, there is a need for only a basic/minimal image with a simple
-and easy-to-use procedure. As a result, a POSIX script has been written to handle
-all of the difficulties and configurations (described below). Some techniques
-are quite similar to those outlined in Alpine Linux. However, the files and
-overall configurations differ significantly. \\ %
-Building a custom Arch Linux ISO image requires three prerequisites: an Arch Linux
-system, specific tools/packages to configure and build the image, and a general configuration
-with a baseline profile. As with Alpine Linux, these requirements remain constant
-over time, resulting in the same possible problems. As a result, a custom
-Dockerfile based on Arch Linux has been developed\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/arch/Dockerfile}}.
+includes precise guidelines for building a custom Arch Linux ISO image. For cluster
+implementation, there is a need for only a basic/minimal image with a simple and
+easy-to-use procedure. As a result, a POSIX script has been written to handle
+all of the difficulties and configurations (described below). Some techniques are
+quite similar to those outlined in Alpine Linux. However, the files and overall configurations
+differ significantly. \\ %
+Building a custom Arch Linux ISO image requires three prerequisites: an Arch
+Linux system, specific tools/packages to configure and build the image, and a
+general configuration with a baseline profile. As with Alpine Linux, these
+requirements remain constant over time, resulting in the same possible problems.
+As a result, a custom Dockerfile based on Arch Linux has been developed\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/arch/Dockerfile}}.
 \\ %
 The ISO image is customized with the \texttt{profiledef.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/arch/profiledef.sh}}
-file, the content of which is displayed in listing \ref{lst:arch}, that defines and
-integrates a custom profile based on the baseline Arch Linux profile already included
-in the container image. For the same reasons as in Alpine Linux, this file is not
-available in the Dockerfile container image. \\ %
-Finally, similar to the Alpine Linux approach, the container image must be launched,
-a local volume mounted, the \texttt{profiledef.sh} file loaded, and the official
-\texttt{mkarchiso} program executed with extra configuration parameters to
-generate the ISO image. Because of its inherent difficulties, the latter exposes
-the same issues as in Alpine Linux. Therefore, a similar POSIX script, also named
-\texttt{build.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/arch/build.sh}},
+file, the content of which is displayed in listing \ref{lst:arch}, that defines
+and integrates a custom profile based on the baseline Arch Linux profile already
+included in the container image. For the same reasons as in Alpine Linux, this
+file is not available in the Dockerfile container image. \\ %
+Finally, similar to the Alpine Linux approach, the container image must be
+launched, a local volume mounted, the \texttt{profiledef.sh} file loaded, and
+the official \texttt{mkarchiso} program executed with extra configuration parameters
+to generate the ISO image. Because of its inherent difficulties, the latter exposes
+the same issues as in Alpine Linux. Therefore, a similar POSIX script, also
+named \texttt{build.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/arch/build.sh}},
 has been created with similar features but adapted to Arch Linux. As an example,
 a custom Arch Linux image based on the reCluster profile and built on March 23rd
 2023 for architecture \texttt{x86\_64} is saved as \texttt{reCluster-2023.03.23-x86\_64.iso}
 and is \texttt{731MiB} in size. \\ %
-To configure and install Arch Linux permanently on the primary disk, simply run the
-\texttt{archinstall}\footnote{\url{https://wiki.archlinux.org/title/archinstall}}
+To configure and install Arch Linux permanently on the primary disk, simply run
+the \texttt{archinstall}\footnote{\url{https://wiki.archlinux.org/title/archinstall}}
 program and answer a few easy questions.
 
 \begin{lstlisting}[language=shell, morekeywords={[4]{iso_name, iso_label, iso_publisher, iso_application, iso_version, install_dir, buildmodes, bootmodes, arch, pacman_conf, airootfs_image_type, airootfs_image_tool_options, file_permissions}}, xleftmargin=\parindent, label={lst:arch}, caption=Contents of \texttt{profiledef.sh} file which shows the reCluster profile definition]
@@ -716,33 +720,34 @@ program and answer a few easy questions.
 \section{Dependencies}
 \label{sec:implementation_dependencies}
 
-This section is split into three segments, each of which is dependent on the preceding
-one's knowledge. \\ %
-The first segment defines an Air-Gap environment and why it is critical for overall
-implementation, and more broadly for specific cluster use cases, to allow scenarios
-where internet access is highly limited or even non-existent. \\ %
-The second segment illustrates and explains the most important third-party applications
-on which the overall architectural implementation is based. Each one is tailored
-to a distinct function in the cluster and has a direct logical mapping to a
-component in the architecture depicted in chapter \ref{cha:architecture}. The majority,
-but not all, of the specified applications are interchangeable with other implementations/distributions.
-As a result, any application-specific configuration and/or capability must be adjusted
-and/or reconfigured to be compatible with the new one. \\ %
-The Server and Autoscaler components are missing because, due to their
-importance and implementation, they have their dedicated sections, section
-\ref{sec:implementation_server} and section \ref{sec:implementation_autoscaling},
-where they are explained in greater detail. Nevertheless, the name of the related
-component's implementation appears in various portions of this section. It
-should be noted that the Server implementation is cloud/cluster provider-specific,
-and therefore it is completely built from scratch, whereas Autoscaler has an
-official Kubernetes implementation that is only compatible with a limited number
-of particular and large cloud providers. As a result, a custom solution has been
-created that is derived from the original and has been appropriately changed to
-support the cluster implementation, Server API, and overall use case. \\ %
-Finally, the last segment discusses how to manage all dependencies and how they are
-downloaded for a cluster release and to be functional in an Air-Gap scenario,
-among other things. The latter relies on an intuitive configuration file and a user-friendly
-POSIX script.
+This section is split into three segments, each of which is dependent on the
+preceding one's knowledge. \\ %
+The first segment defines an Air-Gap environment and why it is critical for
+overall implementation, and more broadly for specific cluster use cases, to
+allow scenarios where internet access is highly limited or even non-existent. \\ %
+The second segment illustrates and explains the most important third-party
+applications on which the overall architectural implementation is based. Each one
+is tailored to a distinct function in the cluster and has a direct logical mapping
+to a component in the architecture depicted in chapter \ref{cha:architecture}.
+The majority, but not all, of the specified applications are interchangeable
+with other implementations/distributions. As a result, any application-specific
+configuration and/or capability must be adjusted and/or reconfigured to be
+compatible with the new one. \\ %
+The Server and Autoscaler components are missing because, due to their importance
+and implementation, they have their dedicated sections, section \ref{sec:implementation_server}
+and section \ref{sec:implementation_autoscaling}, where they are explained in
+greater detail. Nevertheless, the name of the related component's implementation
+appears in various portions of this section. It should be noted that the Server implementation
+is cloud/cluster provider-specific, and therefore it is completely built from
+scratch, whereas Autoscaler has an official Kubernetes implementation that is only
+compatible with a limited number of particular and large cloud providers. As a
+result, a custom solution has been created that is derived from the original and
+has been appropriately changed to support the cluster implementation, Server API,
+and overall use case. \\ %
+Finally, the last segment discusses how to manage all dependencies and how they
+are downloaded for a cluster release and to be functional in an Air-Gap scenario,
+among other things. The latter relies on an intuitive configuration file and a
+user-friendly POSIX script.
 
 \subsection{Air-Gap Environment}
 \label{subsec:implementation_dependencies_air_gap_environment}
@@ -775,54 +780,54 @@ POSIX script.
   \label{fig:airgap}
 \end{wrapfigure}
 
-All devices in an Air-Gap environment have no physical connectivity to the public
-internet or any other Local Area Network (LAN) that is not itself in an Air-Gap environment.
-Email clients, browsers, SSH, and other communication applications are all physically
-and logically isolated from the outside world. \\ %
-Systems in an Air-Gap environment are permanently separated from the outside world
-by default. However, if possible, the network can communicate with other
-physically isolated devices. Any data transfer outside of the network must take place
-via external hardware that is temporarily connected to the network. USB flash
-drives, Hotspot devices and other removable media are examples of such hardware.
-Importantly, these external devices must be physically connected to and disconnected
-from the Air-Gap environment network by human intervention. \\ %
-Figure \ref{fig:airgap} depicts an example overview of an Air-Gap environment consisting
-of two distinct Air-Gap networks that can connect with one another. Because they
-are on separate networks, each network resembles a hypothetical cluster implementation
-where communication between the two does not directly involve cluster operations
-and administration (see section
-\ref{subsec:architecture_network_internal_network}). Every machine in the
-environment is unable to exchange data, connect to any external network, or
-connect to the internet in general. The only mechanism to move data between the Air-Gap
-environment and the outside world is through the use of a USB flash drive, and
-the only way to connect the Air-Gap networks to an external network and/or the
-internet is through the use of a personal hotspot. Because no automated mechanisms
-are involved, both of the latter actions need human interaction. \\ %
+All devices in an Air-Gap environment have no physical connectivity to the
+public internet or any other Local Area Network (LAN) that is not itself in an
+Air-Gap environment. Email clients, browsers, SSH, and other communication
+applications are all physically and logically isolated from the outside world. \\ %
+Systems in an Air-Gap environment are permanently separated from the outside
+world by default. However, if possible, the network can communicate with other physically
+isolated devices. Any data transfer outside of the network must take place via
+external hardware that is temporarily connected to the network. USB flash drives,
+Hotspot devices and other removable media are examples of such hardware. Importantly,
+these external devices must be physically connected to and disconnected from the
+Air-Gap environment network by human intervention. \\ %
+Figure \ref{fig:airgap} depicts an example overview of an Air-Gap environment
+consisting of two distinct Air-Gap networks that can connect with one another. Because
+they are on separate networks, each network resembles a hypothetical cluster
+implementation where communication between the two does not directly involve
+cluster operations and administration (see section \ref{subsec:architecture_network_internal_network}).
+Every machine in the environment is unable to exchange data, connect to any
+external network, or connect to the internet in general. The only mechanism to
+move data between the Air-Gap environment and the outside world is through the
+use of a USB flash drive, and the only way to connect the Air-Gap networks to an
+external network and/or the internet is through the use of a personal hotspot.
+Because no automated mechanisms are involved, both of the latter actions need human
+interaction. \\ %
 Air-Gap environments are frequently employed in Network Security scenarios where
 security is a top priority. In an Air-Gap scenario, a correctly designed network
-mandates that devices within the network be invisible to and successfully
-isolated from remote threat actors, who often scan the public internet for vulnerable
-devices. Similarly, an attacker outside of the Air-Gap environment network cannot
-directly execute Remote Code Execution\footnote{\url{https://tuxcare.com/remote-code-execution-attack-what-it-is-how-to-protect-your-systems}}
+mandates that devices within the network be invisible to and successfully isolated
+from remote threat actors, who often scan the public internet for vulnerable
+devices. Similarly, an attacker outside of the Air-Gap environment network
+cannot directly execute Remote Code Execution\footnote{\url{https://tuxcare.com/remote-code-execution-attack-what-it-is-how-to-protect-your-systems}}
 (RCE) attacks on potential software vulnerabilities within the environment\cite{airgap}.
 \\ %
-Although Air-Gap environments are extensively employed in the security branch, high-security
-scenarios are not the only ones for which the cluster implementation is designed.
-In reality, there are situations in which the internet connection, and thus the
-connectivity to the external global network is either too expensive to maintain
-or not available at all in the location where the cluster is deployed. \\ %
+Although Air-Gap environments are extensively employed in the security branch,
+high-security scenarios are not the only ones for which the cluster
+implementation is designed. In reality, there are situations in which the
+internet connection, and thus the connectivity to the external global network is
+either too expensive to maintain or not available at all in the location where the
+cluster is deployed. \\ %
 To be fully compatible with an Air-Gap environment in various possible scenarios,
-the cluster implementation is designed to have all external dependencies,
-including custom Linux Distributions, pre-packaged with each cluster release and
-without the need, by default, for possible external requests during its utilization.
-As a result, all that is required is the unique archive file, which is
-automatically created with each new release and contains all of the files
-required to bootstrap a functioning cluster instance. Furthermore, even if not
-in an Air-Gap environment, during the installation procedure, the organization
-in charge of the cluster's administration can choose to either download all
-external dependencies from the internet (every time for every node) or to
-directly use the already available pre-packaged dependencies, reducing network usage
-as well as overall installation time.
+the cluster implementation is designed to have all external dependencies, including
+custom Linux Distributions, pre-packaged with each cluster release and without
+the need, by default, for possible external requests during its utilization. As a
+result, all that is required is the unique archive file, which is automatically created
+with each new release and contains all of the files required to bootstrap a functioning
+cluster instance. Furthermore, even if not in an Air-Gap environment, during the
+installation procedure, the organization in charge of the cluster's administration
+can choose to either download all external dependencies from the internet (every
+time for every node) or to directly use the already available pre-packaged dependencies,
+reducing network usage as well as overall installation time.
 
 \subsection{K3s}
 \label{subsec:implementation_dependencies_k3s}
