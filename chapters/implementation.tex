@@ -747,17 +747,57 @@ POSIX script.
 \subsection{Air-Gap Environment}
 \label{subsec:implementation_dependencies_air_gap_environment}
 
-All devices in an Air-Gap environment have no physical connectivity to the
-public internet or any other Local Area Network (LAN) that is not itself in an
-Air-Gap environment. Email clients, browsers, SSH, and other communication
-applications are all physically and logically isolated from the outside world. \\ %
-Systems in an Air-Gap environment are permanently separated from the outside
-world by default. However, if possible, the network can communicate with other physically
-isolated devices. Any data transfer outside of the network must take place via
-external hardware that is temporarily connected to the network. USB flash drives,
-Hotspot devices and other removable media are examples of such hardware. Importantly,
-these external devices must be physically connected to and disconnected from the
-Air-Gap environment network by human intervention. \\ %
+\begin{wrapfigure}
+  {r}{.5\textwidth}
+  \centering
+  \includegraphics[width=.5\textwidth]{images/recluster/airgap.png}
+  \caption{An
+  Air-Gap
+  Environment
+  composed
+  of
+  two
+  Air-Gap
+  Networks
+  that
+  are
+  physically
+  and
+  logically
+  isolated
+  by
+  any
+  external
+  data
+  exchange
+  and
+  network.}
+  \label{fig:airgap}
+\end{wrapfigure}
+
+All devices in an Air-Gap environment have no physical connectivity to the public
+internet or any other Local Area Network (LAN) that is not itself in an Air-Gap environment.
+Email clients, browsers, SSH, and other communication applications are all physically
+and logically isolated from the outside world. \\ %
+Systems in an Air-Gap environment are permanently separated from the outside world
+by default. However, if possible, the network can communicate with other
+physically isolated devices. Any data transfer outside of the network must take place
+via external hardware that is temporarily connected to the network. USB flash
+drives, Hotspot devices and other removable media are examples of such hardware.
+Importantly, these external devices must be physically connected to and disconnected
+from the Air-Gap environment network by human intervention. \\ %
+Figure \ref{fig:airgap} depicts an example overview of an Air-Gap environment consisting
+of two distinct Air-Gap networks that can connect with one another. Because they
+are on separate networks, each network resembles a hypothetical cluster implementation
+where communication between the two does not directly involve cluster operations
+and administration (see section
+\ref{subsec:architecture_network_internal_network}). Every machine in the
+environment is unable to exchange data, connect to any external network, or
+connect to the internet in general. The only mechanism to move data between the Air-Gap
+environment and the outside world is through the use of a USB flash drive, and
+the only way to connect the Air-Gap networks to an external network and/or the
+internet is through the use of a personal hotspot. Because no automated mechanisms
+are involved, both of the latter actions need human interaction. \\ %
 Air-Gap environments are frequently employed in Network Security scenarios where
 security is a top priority. In an Air-Gap scenario, a correctly designed network
 mandates that devices within the network be invisible to and successfully
