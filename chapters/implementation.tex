@@ -132,7 +132,7 @@ distribution.
   \texttt{bc} program is used throughout the installation procedure to guarantee
   that computed data, such as the node's mean power consumption and Simple
   Standard Deviation\footnote{\url{https://wikipedia.org/wiki/Standard_deviation}},
-  is neither less than nor more than a predefined threshold. \\ \hline
+  is neither less than nor more than a threshold value. \\ \hline
 
   coreutils & \textcolor{bulmaGreen}{\faicon{check}} & The GNU Core Utilities
   are the GNU\footnote{\url{https://www.gnu.org}} operating system's essential
@@ -839,103 +839,78 @@ as well as overall installation time.
   \caption{K3s logo}
 \end{wrapfigure}
 
-K3s is a lightweight Kubernetes distribution that is designed for production workloads
-in environments where resource-constrained, high availability, unattended and remote
-operations are crucial. K3s is the core of the cluster implementation where all
-Kubernetes-related operations are managed and executed. K3s does not have a perfect
-mapping to an architecture component since it is one of the key application that
-compose both a Worker and Controller Node component.
+K3s is a lightweight Kubernetes distribution designed for production workloads in
+resource-constrained, high-availability, unattended, and remote environments\cite{k3s}.
+K3s is the cluster implementation's core, where all Kubernetes-related operations
+are managed and processed. Because K3s is an element of both a Worker and a
+Controller Node has no clear mapping to an architectural component. \\ %
+K3s is distributed as a single small binary (less than 60MiB) that reduces the
+requirements and procedures required to install, run, and automatically update a
+production Kubernetes cluster\cite{k3s}. It is completely compatible with both
+the \texttt{OpenRC} and \texttt{systemd} Init Systems (see section \ref{subsec:implementation_distributions_init_system})
+and can run on any Linux distribution with a Kernel that satisfies the basic
+Kubernetes requirements\footnote{\url{https://github.com/k3s-io/k3s/blob/master/install.sh}}.
 
-K3s is packaged as a single small binary (less than 60MiB) that reduces the dependencies
-and steps needed to install, run and auto-update a production Kubernetes cluster.
-It can be executed on any Linux distributions that have a Kernel that meets the minimum
-Kubernetes requirements, and is fully compatible with both the OpenRC and
-systemd Init Systems.
+\subsubsection{Enhancements}
+\label{subsubsec:implementation_dependencies_k3s_enhancements}
 
-K3s is a fully compliant Kubernetes distribution where most of the legacy, alpha
-and cloud-provider-specific code has been removed to reduce the overall application
-size and its minimal hardware requirements. Moreover, following the latter, K3s
-has the following enhancements over the standard Kubernetes distribution: 1. All
-required dependencies are pre-packaged within the single binary file requiring only
-a minimal set of external dependencies (a modern Kernel and cgroup mounts). 1.
-Lightweight storage backend based on sqlite as the default storage mechanism. Additional
-solutions based on etcd, MySQL or PostgreSQL are also available. Both embedded and
-external storage are supported. As written in section B, the cluster architecture
-design is structured around a high availability model rather than a fault tolerance
-approach. Therefore, is suggested to rely on etcd (embedded or external) storage
-or directly use the cluster's database as external storage avoiding possible unnecessary
-data replications and relyign on a single storage area that can be managed autonomously.
-1. Secure by default with reasonable default configurations for lightweight
-environments. K3s automatically manages the complexity of TLS(Transport Layer Security)
-like certificates distributions. If security is not a concern or the cluster is located
-in an Air-Gap environment, the security configuration can be relaxed to improve
-the overall performance while also reducing resource usage.
+K3s is a fully compliant Kubernetes distribution that has removed the majority of
+legacy, alpha, and cloud-provider-specific code to minimize overall application size
+and hardware requirements. Furthermore, K3s provides the following enhancements over
+a conventional Kubernetes distribution\cite{k3s_enhancements}:
+\begin{itemize}
+  \item All required dependencies are pre-packaged within a single binary file,
+    necessitating only a modern Kernel and cgroup mounts.
 
-K3s architecture have a clear distinction between the two possible node types (Controller
-and Worker): 1. Server node A Server node is defined as a host running the K3s server
-command (`k3s server`), with control-plane and datastore components managed by
-K3s. The cluster's architecture Controller Node component, shown in section A, is
-a logical mapping to the Server Node. 2. Agent node An Agent node is defined as
-a host running the K3s agent command (`k3s agent`), without any datastore or control-plane
-components. The cluster's architecture Agent Node component, shown in section B,
-is a logical mapping to the Agent Node. Moreover, the architecture of K3s is
-fully modular and can support different setup based on the cluster's usage and
-final objective: 1. Single-server Setup with an Embedded Database A single-node K3s
-server with an embedded SQLite database. Ech agent node is registered to the
-same server node. A K3s user can manipulate Kubernetes resources by calling the K3s
-API on the server node. This setup is suggested only for testing purposes and
-not for real production deployments nor for the cluster implementation. 2. High-Availability
-K3s Server with an Embedded Database An High-Availability (HA) K3s cluster is composed
-of two or more Server nodes that serve the Kubernetes API and run other control plane
-services. The Database is embedded in the measn that it is executed in the same
-K3s instance on the same Server node. 3. High-Availability K3s Server with an External
-Database Similar to High-Availability K3s Server with an Embedded Database setup
-but the datastore is external to the Server Node. The K3s Server instance does
-not run any database application but relies on an external running, and reachable,
-database.
+  \item Lightweight storage backend with \texttt{SQlite}\footnote{\url{https://www.sqlite.org}}
+    as the default storage mechanism. Additional solutions based on \texttt{etcd}\footnote{\url{https://etcd.io}},
+    \texttt{MySQL}\footnote{\url{https://www.mysql.com}}, or \texttt{PostgreSQL}
+    are also available. Both embedded and external storage mechanisms are supported.
+    \newline
+    The cluster architecture design, as stated in chapter \ref{cha:architecture},
+    is based on a high availability model rather than a fault tolerance strategy.
+    As a result, it is recommended to use \texttt{etcd} (embedded or external) or
+    the already available cluster's database as an external storage mechanism,
+    eliminating needless data replications and relying on a single storage area
+    that can be controlled autonomously.
 
-K3s distribution has been chosen among a multitude of different Kubernetes
-distributions, including the official one, for four main reasons: 1. Minimum hardware
-requirements of K3s are extremely minimal and very easy to achieve even for old systems:
-1.1 Server node requires 1 GiB of memory and 1 CPU core. As written in section A,
-server (controller) node's minimal hardware requirements must be adapted
-following the size of the cluster. It is impossible to imagine a cluster with hundreds
-of worker nodes that is managed by a single server node with only 1GiB of memory
-and 1 CPU core. 1.2 Agent node hardware requirements are even lower: 512 MiB of memory
-and 1 CPU core. A Raspberry Pi 3 Model B single-board computer, released in February
-2016(7 years ago as of time of writing), is fully compatible with K3s and can be
-used as a worker node without any particular problem.
+  \item Secure by default, with appropriate default parameters for lightweight
+    environments. K3s manages automatically the complexity of TLS\footnote{\url{https://wikipedia.org/wiki/Transport_Layer_Security}}
+    (Transport Layer Security) like certificate distributions.
+    \newline
+    If security is not a priority, or if the cluster is in an Air-Gap environment,
+    the security settings can be relaxed to increase overall cluster's
+    performance while simultaneously decreasing resource utilization.
+\end{itemize}
 
-As a comparison, the official Kubernetes distributions, named kubeadm, requires
-at least 2 GiB of memory and 2 CPU core.
+\subsubsection{Architecture}
+\label{subsubsec:implementation_dependencies_k3s_architecture}
 
-2. K3s is extremely modular, configurable and easy to use. As an example, to bootstrap
-a minimal Kubernetes cluster in a Single-server with an Embedded Database setup with
-K3s is straightforward: 2.1. Start the Server Node with a custom token (used to
-join a server or agent nodes to the cluster): k3s server --token <TOKEN> 2.1. Start
-the Agent Node with the custom token and the server address: k3s agent --token <TOKEN>
---server <SERVER\_ADDRESS>
+K3s architecture clearly distinguishes between two types of Nodes, Server nodes
+and Agent nodes, which are described below\cite{k3s_architecture}. Furthermore,
+figure \ref{fig:k3s} depicts the distinction between the two node types by
+displaying the various components provided on each node.
+\begin{enumerate}
+  \item \texttt{Server} node
+    \newline
+    A server node is defined as a host running the K3s server command (\lstinline[language=shell,
+    basicstyle=\ttfamily, morekeywords={[2]{k3s}}, morekeywords={[3]{server}}]{k3s server}),
+    with K3s managing the control-plane and datastore components.
+    \newline
+    The \texttt{Controller} Node component of the cluster's architecture, depicted
+    in the section \ref{subsubsec:architecture_components_node_controller}, is a
+    logical mapping to the K3s Server Node.
 
-3. K3s can be installed in an Air-Gap environment with minimal effort. The only
-additional steps required with respect to a standard installation to have a
-fully functioning cluster are the requirement to deploy a private registry (see section
-A) and the necessity to manually deploy specific container images to each node. By
-default, the latter two requirements are already available in the cluster
-implementation's bundle file. Therefore, an organization that needs to deploy a
-cluster in an Air-Gap environment have been already provided with all the
-necessary files and applications without requiring any addiotional data transfer
-involving an internet connecion.
-
-4. K3s project has been accepted to the Cloud Native Computing Foundation (CNCF)
-on August 19th 2020 with Sandbox maturity level. CNCF is the vendor-neutral hub of
-cloud native computing hosting critical components of the global technology infrastructure
-dedicated to making cloud native ubiquitous. One of the key aspects of CNCF is
-that it certifies Kubernetes software conformance ensuring that every vendor's
-version of Kubernetes supports the required APIs, as do open source community versions.
-The latter implies full compatibility with all available Kubernetes products and
-software enabling the interchangiability of different components within the
-cluster implementation reflecting different organizations core aspects.
-
+  \item \texttt{Agent} node
+    \newline
+    An agent node is defined as a host running the K3s agent command (\lstinline[language=shell,
+    basicstyle=\ttfamily, morekeywords={[2]{k3s}}, morekeywords={[3]{agent}}]{k3s agent}),
+    that does not have any datastore or control-plane components running.
+    \newline
+    The \texttt{Worker} Node component of the cluster's architecture, depicted in
+    the section \ref{subsubsec:architecture_components_node_worker}, is a
+    logical mapping to the K3s Agent Node.
+\end{enumerate}
 \begin{figure}[htbp]
   \centering
   \def\stackalignment{r}\stackunder{ \includegraphics[width=.9\linewidth]{images/recluster/k3s.png} } %
@@ -943,6 +918,105 @@ cluster implementation reflecting different organizations core aspects.
   \caption{Difference between K3s Server and K3s Agent nodes}
   \label{fig:k3s}
 \end{figure}
+Additionally, the K3s architecture is completely adaptable and may accommodate a
+variety of different setups, as shown in the list below, depending on the
+cluster's usage and ultimate goal\cite{k3s_architecture}.
+\begin{enumerate}
+  \item \texttt{Single Server with an Embedded Database}
+    \newline
+    A single-node K3s server with a \texttt{SQLite} database embedded. Each
+    agent node is associated with the same K3s Server node. By utilizing the K3s
+    API on the Server node, an administrator can directly control the Kubernetes
+    resources.
+    \newline
+    This configuration is only recommended for testing purposes, not for real-world
+    production deployments or cluster implementation.
+
+  \item \texttt{High-Availability Server with an Embedded Database}
+    \newline
+    An High-Availability (HA) K3s cluster is composed of two or more Server
+    nodes that serve the Kubernetes API as well as additional control plane
+    services. The database is embedded and operated on the same Server node by the
+    K3s instance.
+
+  \item \texttt{High-Availability Server with an External Database}
+    \newline
+    Similar to the previous setup, however, the datastore is located outside of
+    the Server Node. The K3s Server instance does not execute any database application
+    and instead relies on an externally accessible and operating database.
+\end{enumerate}
+
+\subsubsection{The Choice}
+\label{subsubsec:implementation_dependencies_k3s_the_choice}
+
+The K3s distribution was chosen from among a multitude of various Kubernetes
+distributions, including the official one, for the four main reasons, listed below.
+
+\begin{enumerate}
+  \item Minimal hardware requirements that are simple to satisfy, even on older
+    systems\cite{k3s_hardware}:
+    \begin{itemize}
+      \item A Server node requires 1 GiB of memory and 1 CPU core.
+        \newline
+        As stated in the section
+        \ref{subsubsec:architecture_components_node_controller}, the Server (Controller)
+        node's minimal hardware requirements must be adjusted to match the cluster's
+        size. A cluster with hundreds of Worker nodes managed by a single Server
+        node with only 1 GiB of memory and 1 CPU core is unrealistic.
+
+      \item An Agent node requires 512 MiB of memory and 1 CPU core.
+        \newline
+        A Raspberry Pi 3 Model B single-board computer, released in February 2016\footnote{\url{https://www.raspberrypi.com/products/raspberry-pi-3-model-b-plus}}
+        (7 years ago at the time of writing), is fully compatible with K3s and
+        can operate as a Worker node without any difficulty.
+    \end{itemize}
+    In comparison, the official Kubernetes distribution, \texttt{kubeadm},
+    necessitates at least 2 GiB of memory and 2 CPU cores\cite{k8s_hardware}.
+
+  \item Configurability, modularity, and usability\cite{k3s_configuration}.
+    \newline
+    As an example, it is extremely simple to bootstrap a small Kubernetes
+    cluster using K3s in a Single Server with an Embedded Database setup:
+    \begin{itemize}
+      \item Start the Server node with a unique token (used to join a Server or
+        Agent nodes to the cluster).
+        \newline
+        \lstinline[language=shell, alsoletter={-}, morekeywords={[2]{k3s}}, morekeywords={[3]{--token}},
+        morekeywords={[4]{server}}, xleftmargin=\parindent]{ k3s server --token "<TOKEN>"}
+
+      \item Start the Agent node specifying the unique token and the Server address.
+        \newline
+        \lstinline[language=shell, alsoletter={-}, morekeywords={[2]{k3s}}, morekeywords={[3]{--token, --server}},
+        morekeywords={[4]{agent}}, xleftmargin=\parindent]{ k3s agent --token "<TOKEN>" --server "<SERVER_ADDRESS>"}
+    \end{itemize}
+
+  \item K3s can be easily installed in an Air-Gap environment. The only
+    additional steps necessary to have a fully functional cluster in comparison
+    to a standard installation are the deployment of a private registry (see section
+    \ref{subsec:implementation_dependencies_docker_registry}) and the manual
+    deployment of particular container images on each node\cite{k3s_airgap}.
+    \newline
+    By default, the cluster implementation installation (see section
+    \ref{sec:implementation_installer}) already meets the latter two requirements.
+    As a result, an organization that has to deploy a cluster in an Air-Gap environment
+    already has received all of the required files and programs without the need
+    for any additional data transfer involving an internet connection. As a
+    result, an organization that has to deploy a cluster in an Air-Gap environment
+    already has all of the necessary files and applications without the need for
+    any additional data transfer involving an internet connection.
+
+  \item On August 19th, 2020, the K3s project was approved into the Cloud Native
+    Computing Foundation\footnote{\url{https://www.cncf.io}} (CNCF) with Sandbox
+    maturity level\cite{cncf_k3s}. CNCF is a vendor-neutral cloud native computing,
+    hosting critical components of the global technology infrastructure
+    dedicated to making cloud native ubiquitous\cite{cncf}. CNCF certifies
+    Kubernetes software compliance, ensuring that every vendor's version of Kubernetes,
+    as well as open source community versions, supports the large set of Kubernetes
+    APIs\cite{cncf_conformance}. The latter means full compatibility with all existing
+    Kubernetes products and software, allowing for the interchangeability of
+    various components within the cluster implementation representing diverse
+    organizations' core aspects.
+\end{enumerate}
 
 \subsection{Node Exporter}
 \label{subsec:implementation_dependencies_node_exporter}
