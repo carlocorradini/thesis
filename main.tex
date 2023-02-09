@@ -65,6 +65,10 @@
 \definecolor{iniOrange}{RGB}{209,154,102}
 \definecolor{iniBlue}{RGB}{64,120,242}
 \definecolor{iniGray}{RGB}{56,58,66}
+\definecolor{prometheusOrange}{RGB}{209,154,102}
+\definecolor{prometheusBlue}{RGB}{64,120,242}
+\definecolor{prometheusGray}{RGB}{160,161,167}
+\definecolor{prometheusGreen}{RGB}{80,161,79}
 \definecolor{yamlPurple}{RGB}{166,38,164}
 \definecolor{yamlBlue}{RGB}{64,120,242}
 \definecolor{yamlGreen}{RGB}{80,161,79}
@@ -126,6 +130,16 @@ literate={{=}{{\textcolor{iniGray}{=}}}1}, %
 keywordstyle=\color{iniBlue}, %
 morecomment=[s][\color{iniOrange}]{[}{]}, %
 morecomment=[l]{;} %
+}
+
+\lstdefinelanguage{prometheus}
+{ %
+keywordstyle=\color{prometheusOrange}, %
+keywordstyle=[2]\color{prometheusBlue}, %
+morestring=[b]", %
+stringstyle=\color{prometheusGreen}, %
+comment=[l]{\#}, %
+commentstyle=\color{prometheusGray}\upshape %
 }
 
 \lstdefinelanguage{yaml}
