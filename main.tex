@@ -69,6 +69,11 @@
 \definecolor{prometheusBlue}{RGB}{64,120,242}
 \definecolor{prometheusGray}{RGB}{160,161,167}
 \definecolor{prometheusGreen}{RGB}{80,161,79}
+\definecolor{promqlPurple}{RGB}{166,38,164}
+\definecolor{promqlOrange}{RGB}{209,154,102}
+\definecolor{promqlBlue}{RGB}{64,120,242}
+\definecolor{promqlRed}{RGB}{228,86,73}
+\definecolor{promqlGreen}{RGB}{80,161,79}
 \definecolor{yamlPurple}{RGB}{166,38,164}
 \definecolor{yamlBlue}{RGB}{64,120,242}
 \definecolor{yamlGreen}{RGB}{80,161,79}
@@ -140,6 +145,17 @@ morestring=[b]", %
 stringstyle=\color{prometheusGreen}, %
 comment=[l]{\#}, %
 commentstyle=\color{prometheusGray}\upshape %
+}
+
+\lstdefinelanguage{promql}
+{ %
+morekeywords={avg, without, rate}, %
+keywordstyle=\color{promqlPurple}, %
+keywordstyle=[2]\color{promqlOrange}, %
+keywordstyle=[3]\color{promqlBlue}, %
+keywordstyle=[4]\color{promqlRed}, %
+morestring=[b]", %
+stringstyle=\color{promqlGreen}, %
 }
 
 \lstdefinelanguage{yaml}

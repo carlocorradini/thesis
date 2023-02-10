@@ -1042,7 +1042,7 @@ alsoletter={_, -, ., <, >}, morekeywords={[2]{node_exporter}}, morekeywords={[3]
 or disabled (\lstinline[language=shell, basicstyle=\ttfamily, alsoletter={_, -, ., <, >},
 morekeywords={[2]{node_exporter}}, morekeywords={[3]{--no-collector.<NAME>}}]{node_exporter --no-collector.<NAME>})
 based on the data that the node needs to provide for monitoring. The exposed
-metrics are represented in a standardized format (see section \ref{subsubsec:implementation_dependencies_prometheus_metric_names_and_labels}),
+metrics are represented in a standardized format (see section \ref{subsubsec:implementation_dependencies_prometheus_features}),
 allowing Prometheus (see section
 \ref{subsec:implementation_dependencies_prometheus}) to analyze and process them.
 Listing \ref{lst:node_exporter} depicts an example section of a response
@@ -1052,7 +1052,9 @@ approximately 4 GiB of system memory. Three metrics are displayed, one from the
 is a counter that keeps track of how many seconds each CPU core (\texttt{0} and
 \texttt{1}) spent in each mode, \texttt{node\_memory\_MemTotal\_bytes} is the
 total amount of physical memory (in bytes), and \texttt{node\_memory\_MemFree\_bytes}
-is the total amount of physical memory (in bytes) that is not in use. \begin{lstlisting}[language=prometheus, xleftmargin=\parindent, alsoletter={_}, morekeywords={node_cpu_seconds_total, node_memory_MemTotal_bytes, node_memory_MemFree_bytes}, morekeywords={[2]{cpu, mode}}, label={lst:node_exporter}, caption=Example section of a Node Exporter response with \texttt{cpu} and \texttt{meminfo} collectors enabled]
+is the total amount of physical memory (in bytes) that is not in use.
+
+\begin{lstlisting}[language=prometheus, xleftmargin=\parindent, alsoletter={_}, morekeywords={node_cpu_seconds_total, node_memory_MemTotal_bytes, node_memory_MemFree_bytes}, morekeywords={[2]{cpu, mode}}, label={lst:node_exporter}, caption=Example section of a Node Exporter response with \texttt{cpu} and \texttt{meminfo} collectors enabled]
   # HELP node_cpu_seconds_total Seconds the CPUs spent in each mode.
   # TYPE node_cpu_seconds_total counter
   node_cpu_seconds_total{cpu="0",mode="idle"} 980.6
@@ -1082,44 +1084,40 @@ is the total amount of physical memory (in bytes) that is not in use. \begin{lst
 \subsubsection{Installer}
 \label{subsubsec:implementation_dependencies_node_exporter_installer}
 
-To represent diverse organizations' goals and preferences, the cluster's installation
-procedure on a system node, as detailed in the section
-\ref{sec:implementation_installer}, requires complete automation and configuration
-when installing a dependency. Despite being a very popular and widely used
-application, Node Exporter lacks a fully featured installation script, such as
-\texttt{install.sh}\footnote{\url{https://github.com/k3s-io/k3s/blob/master/install.sh}}
-provided by K3s, which can simply automate every operation. As a solution, a
-side project called Node Exporter Installer was established to address the
-latter issue(s). The installation script is completely POSIX-compliant, highly customizable,
-\texttt{OpenRC} and \texttt{systemd} Init Systems compatible, and requires only basic
-applications as dependencies that are ubiquitous in almost all \texttt{*NIX} systems.
-The project is completely Open Source, and other users may use it to easily and rapidly
-configure and install Node Exporter. Attachment
-\ref{sec:corollary_projects_node_exporter_installer} has a detailed description
-of the Node Exporter Installer project.
+To represent diverse organizations' goals and preferences, the cluster's
+installation procedure on a system node, as detailed in the section \ref{sec:implementation_installer},
+requires complete automation and configuration when installing a dependency. Despite
+being a very popular and widely used application, Node Exporter lacks a fully
+featured installation script, such as \texttt{install.sh}\footnote{\url{https://github.com/k3s-io/k3s/blob/master/install.sh}}
+provided by K3s, which can simply automate every operation. As a solution, a side
+project called Node Exporter Installer was established to address the latter issue(s).
+The installation script is completely POSIX-compliant, highly customizable, \texttt{OpenRC}
+and \texttt{systemd} Init Systems compatible, and requires only basic
+applications as dependencies that are ubiquitous in almost all \texttt{*NIX}
+systems. The project is completely Open Source, and other users may use it to
+easily and rapidly configure and install Node Exporter. Attachment \ref{sec:corollary_projects_node_exporter_installer}
+has a detailed description of the Node Exporter Installer project.
 
 \subsubsection{Graphics Processing Unit metrics}
 \label{subsubsec:implementation_dependencies_node_exporter_graphics_processing_unit_metrics}
 
 Node Exporter does not support exporting Graphics Processing Unit\footnote{\url{https://wikipedia.org/wiki/Graphics_processing_unit}}
-(GPU) metrics. In general, supporting systems equipped with GPU(s) in a uniform
-and easily accessible manner is a fairly hard undertaking that necessitates a
-significant amount of work in terms of initial setup and overall administration.
-Furthermore, GPU-equipped systems require availability and compatibility with a
-per GPU model-specific Kernel driver to be efficient without scarifying precious
-performance and wasting resources. Nevertheless, exporter implementations such
-as \texttt{DCGM-Exporter}\footnote{\url{https://github.com/NVIDIA/dcgm-exporter}}
+(GPU) metrics. In general, supporting systems equipped with GPU(s) in a uniform and
+easily accessible manner is a fairly hard undertaking that necessitates a significant
+amount of work in terms of initial setup and overall administration. Furthermore,
+GPU-equipped systems require availability and compatibility with a per GPU model-specific
+Kernel driver to be efficient without scarifying precious performance and wasting
+resources. Nevertheless, exporter implementations such as \texttt{DCGM-Exporter}\footnote{\url{https://github.com/NVIDIA/dcgm-exporter}}
 and \texttt{nvidia\_gpu\_exporter}\footnote{\url{https://github.com/utkuozdemir/nvidia_gpu_exporter}}
 are specifically designed to provide just GPU metrics that can be used alongside
 Node Exporter metrics. However, all current GPU exporters only support NVIDIA\footnote{\url{https://www.nvidia.com}}
-GPUs and require extra dependencies to be deployed. Moreover, because of its
-intrinsic heterogeneity, purpose, and complexity of supporting GPU systems, the cluster
-implementation currently does not offer any GPU data, metrics, or statistics.
-Furthermore, because the cluster is primarily composed of consumer hardware rather
-than high-end enterprise solutions, there is a high possibility that some
-systems would be equipped with AMD\footnote{\url{https://www.amd.com}} GPUs, which,
-as previously stated, are currently not supported by any official and/or reliable
-exporter program.
+GPUs and require extra dependencies to be deployed. Moreover, because of its intrinsic
+heterogeneity, purpose, and complexity of supporting GPU systems, the cluster
+implementation currently does not offer any GPU data, metrics, or statistics. Furthermore,
+because the cluster is primarily composed of consumer hardware rather than high-end
+enterprise solutions, there is a high possibility that some systems would be equipped
+with AMD\footnote{\url{https://www.amd.com}} GPUs, which, as previously stated,
+are currently not supported by any official and/or reliable exporter program.
 
 \subsection{Docker Registry}
 \label{subsec:implementation_dependencies_docker_registry}
@@ -1154,8 +1152,137 @@ exporter program.
   \caption{Prometheus logo}
 \end{wrapfigure}
 
-\subsubsection{Metric Names and Labels}
-\label{subsubsec:implementation_dependencies_prometheus_metric_names_and_labels}
+Prometheus is an Open Source system that is specifically designed for monitoring
+and alerting. It is the only system that Kubernetes natively supports and the de
+facto standard across the Cloud Native ecosystem\cite{prometheus_overview_faq}. Prometheus
+joined CNCF in 2016 as the second hosted project with a Graduated maturity level,
+only after Kubernetes itself\footnote{\url{https://www.cncf.io/projects/prometheus}}\cite{prometheus_overview}.
+Prometheus has no mapping to a cluster component, and the architecture overview indicates
+no monitoring component at all. This is because having Prometheus deployed and
+continually operating in the cluster is a choice of the organization operating
+the cluster rather than a hard necessity; even if the Metrics Server is required
+on each Node. Furthermore, Prometheus may be deployed outside of the cluster environment
+and configured to access node metrics from the external network, or it can be
+run exclusively for certain periods, allowing monitoring of the cluster for testing
+or performance evaluation. Nonetheless, Prometheus remains an important tool for
+monitoring and analyzing how the cluster is behaving, which is why it is
+specified as a dependency and is also included in the final archive bundle.
+
+As previously stated, Prometheus' primary function is to collect metrics data
+generated by exporters and query/interpolate this data. Moreover, Prometheus can
+monitor itself since, like Node Exporter, it provides its metrics via an HTTP
+endpoint. There is a plethora of available exporters and possible integrations\footnote{\url{https://prometheus.io/docs/instrumenting/exporters}}.
+In addition to the default exporter installed on each node in the cluster
+implementation, an organization managing the cluster can choose to add as many exporters
+as the number of components and applications running on it, resulting in a
+better, clearer, and finer-grained overview of the entire cluster status both in
+real-time and over a period. For example, in addition to the Database component,
+it is possible to install its corresponding exporter, which allows the
+monitoring of Database metrics such as health, performance and resource usage.
+
+\subsubsection{Features}
+\label{subsubsec:implementation_dependencies_prometheus_features}
+
+Prometheus has several features\footnote{\url{https://prometheus.io/docs/introduction/overview/\#features}},
+but the two most essential for the cluster implementation are described below\cite{prometheus_overview}:
+\begin{enumerate}
+  \item A multidimensional data model that contains time series data that is uniquely
+    identified by metric name and optional key-value pairs known as labels. Time
+    series data are streams of timestamped values from the same metric and set
+    of labeled dimensions\cite{prometheus_data_model}.
+    \begin{enumerate}
+      \item \texttt{Metrics}
+        \newline
+        The metric name, which is sometimes complemented by a short description (\lstinline[language=prometheus]{# HELP ...}),
+        defines the overall system characteristic being monitored.
+        \newline
+        For example, \lstinline[language=prometheus, alsoletter={_},
+        morekeywords={node_memory_MemFree_bytes}]{node_memory_MemFree_bytes}
+        metric defines the total amount of physical memory (in bytes) that is
+        not in use.
+        \newline
+        Each metric has a distinct type (\lstinline[language=prometheus]{# TYPE ...}).
+        There is a total of four different types of metrics, which are briefly outlined
+        below\cite{prometheus_metric_types}:
+        \begin{enumerate}
+          \item \texttt{Counter}
+            \newline
+            A cumulative metric that depicts a single monotonically increasing
+            counter, the value of which can only increase or be reset to zero\footnote{\url{https://prometheus.io/docs/concepts/metric_types/\#counter}}.
+
+          \item \texttt{Gauge}
+            \newline
+            A metric that represents a single numerical value that can vary
+            arbitrarily up and down\footnote{\url{https://prometheus.io/docs/concepts/metric_types/\#gauge}}.
+
+          \item \texttt{Histogram}
+            \newline
+            Samples and counts observations in variable buckets, providing also the
+            total sum of all observed values\footnote{\url{https://prometheus.io/docs/concepts/metric_types/\#histogram}}.
+
+          \item \texttt{Summary}
+            \newline
+            Similar to \texttt{Histogram} type, it also calculates configurable
+            quantiles over a time window\footnote{\url{https://prometheus.io/docs/concepts/metric_types/\#summary}}.
+        \end{enumerate}
+
+      \item \texttt{Labels}
+        \newline
+        Labels allow Prometheus' dimensional data model: each given combination
+        of labels for the same metric name identifies a unique dimensional
+        instantiation of that metric. These dimensions can be used to filter and
+        aggregate data by the \texttt{PromQL} query language.
+        \newline
+        For example, \lstinline[language=prometheus, alsoletter={_},
+        morekeywords={node_cpu_seconds_total}, morekeywords={[2]{cpu, mode}}]|node_cpu_seconds_total{cpu="0",mode="idle"}|,
+        determines the number of seconds spent in idle mode by CPU core 0.
+    \end{enumerate}
+
+  \item Prometheus includes a functional and extensible query language known as PromQL\footnote{\url{https://prometheus.io/docs/prometheus/latest/querying/basics}}
+    (Prometheus Query Language) that allows the selection and aggregation of time
+    series data in real-time. The outcome of an expression can be shown as a
+    graph, tabulated data, or consumed by external systems (such as Grafana, see
+    section \ref{subsubsec:implementation_dependencies_prometheus_grafana}) via the
+    HTTP API\cite{prometheus_promql}.
+\end{enumerate}
+
+Two examples of \texttt{PromQL} queries are provided below. Note of how the
+various metrics and labels are used for filtering and aggregation.
+
+Listing \ref{lst:promql_1} illustrates an example of a \texttt{PromQL} query to obtain
+the overall CPU usage in percent (\texttt{0} to \texttt{100}). Because the
+metric \lstinline[language=prometheus, alsoletter={_}, morekeywords={node_cpu_seconds_total}]{node_cpu_seconds_total}
+is of type counter, the considered value is limited to the last one minute (\texttt{1m}).
+
+\begin{lstlisting}[language=promql, numbers=none, alsoletter={_01}, morekeywords={[2]{node_cpu_seconds_total}}, morekeywords={[3]{cpu, mode}}, morekeywords={[4]{100, 1, 1m}}, xleftmargin=\parindent, label={lst:promql_1}, caption=\texttt{PromQL} query to obtain overall CPU usage in percent]
+  100 * (avg without (mode, cpu) (1 - rate(node_cpu_seconds_total{mode="idle"}[1m])))
+\end{lstlisting}
+
+Listing \ref{lst:promql_2} illustrates an example of a \texttt{PromQL} query to
+obtain the amount of memory usage in percent (\texttt{0} to \texttt{100}).
+
+\begin{lstlisting}[language=promql, numbers=none, alsoletter={_, 0, 1}, morekeywords={[2]{node_memory_MemTotal_bytes, node_memory_MemFree_bytes}}, morekeywords={[4]{100}}, xleftmargin=\parindent, label={lst:promql_2}, caption=\texttt{PromQL} query to obtain the amount of memory usage in percent]
+  100 * ((node_memory_MemTotal_bytes - node_memory_MemFree_bytes) / node_memory_MemTotal_bytes)
+\end{lstlisting}
+
+\subsubsection{Grafana}
+\label{subsubsec:implementation_dependencies_prometheus_grafana}
+
+\begin{wrapfigure}
+  {l}{.25\textwidth} %
+  \centering
+  \def\stackalignment{l}\stackunder{ \includegraphics[width=\linewidth]{images/logos/grafana.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://grafana.com}} }
+  \caption{Grafana logo}
+\end{wrapfigure}
+
+Prometheus is frequently used in conjunction with Grafana\footnote{\url{https://grafana.com/grafana}},
+an interactive data visualization platform\cite{grafana}. \\ %
+Prometheus collects metrics and provides the sophisticated \texttt{PromQL} query
+language; Grafana then translates these metrics and/or query results into relevant
+charts and graphs that may be consolidated into one or more dashboards. \\ %
+It should be noted that Grafana is not considered a dependency in the cluster implementation
+and therefore is not distributed in the release archive bundle.
 
 \subsection{Management}
 \label{subsec:implementation_dependencies_management}

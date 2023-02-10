@@ -102,6 +102,8 @@
     "postbuild",
     "powerha-aix",
     "procps",
+    "promql",
+    "quantiles",
     "recluster",
     "respawn",
     "rulecolor",
