@@ -1246,20 +1246,22 @@ but the two most essential for the cluster implementation are described below\ci
     HTTP API\cite{prometheus_promql}.
 \end{enumerate}
 
-Two examples of \texttt{PromQL} queries are provided below. Note of how the
-various metrics and labels are used for filtering and aggregation.
+Two examples of \texttt{PromQL} queries that have been widely used for cluster monitoring
+are shown below. Note of how the various metrics and labels are used for
+filtering and aggregation.
 
 Listing \ref{lst:promql_1} illustrates an example of a \texttt{PromQL} query to obtain
 the overall CPU usage in percent (\texttt{0} to \texttt{100}). Because the
 metric \lstinline[language=prometheus, alsoletter={_}, morekeywords={node_cpu_seconds_total}]{node_cpu_seconds_total}
-is of type counter, the considered value is limited to the last one minute (\texttt{1m}).
+is of type \texttt{counter}, the considered value is limited to the last one
+minute (\texttt{1m}).
 
 \begin{lstlisting}[language=promql, numbers=none, alsoletter={_01}, morekeywords={[2]{node_cpu_seconds_total}}, morekeywords={[3]{cpu, mode}}, morekeywords={[4]{100, 1, 1m}}, xleftmargin=\parindent, label={lst:promql_1}, caption=\texttt{PromQL} query to obtain overall CPU usage in percent]
   100 * (avg without (mode, cpu) (1 - rate(node_cpu_seconds_total{mode="idle"}[1m])))
 \end{lstlisting}
 
-Listing \ref{lst:promql_2} illustrates an example of a \texttt{PromQL} query to
-obtain the amount of memory usage in percent (\texttt{0} to \texttt{100}).
+Listing \ref{lst:promql_2} illustrates an example of a \texttt{PromQL} query to obtain
+the amount of memory usage in percent (\texttt{0} to \texttt{100}).
 
 \begin{lstlisting}[language=promql, numbers=none, alsoletter={_, 0, 1}, morekeywords={[2]{node_memory_MemTotal_bytes, node_memory_MemFree_bytes}}, morekeywords={[4]{100}}, xleftmargin=\parindent, label={lst:promql_2}, caption=\texttt{PromQL} query to obtain the amount of memory usage in percent]
   100 * ((node_memory_MemTotal_bytes - node_memory_MemFree_bytes) / node_memory_MemTotal_bytes)
@@ -1279,10 +1281,11 @@ obtain the amount of memory usage in percent (\texttt{0} to \texttt{100}).
 Prometheus is frequently used in conjunction with Grafana\footnote{\url{https://grafana.com/grafana}},
 an interactive data visualization platform\cite{grafana}. \\ %
 Prometheus collects metrics and provides the sophisticated \texttt{PromQL} query
-language; Grafana then translates these metrics and/or query results into relevant
-charts and graphs that may be consolidated into one or more dashboards. \\ %
-It should be noted that Grafana is not considered a dependency in the cluster implementation
-and therefore is not distributed in the release archive bundle.
+language; Grafana then translates these metrics and/or query results into
+relevant charts and graphs that may be consolidated into one or more dashboards.
+\\ %
+It should be noted that Grafana is not considered a dependency in the cluster
+implementation and therefore is not distributed in the release archive bundle.
 
 \subsection{Management}
 \label{subsec:implementation_dependencies_management}
