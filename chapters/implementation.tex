@@ -1144,68 +1144,144 @@ are currently not supported by any official and/or reliable exporter program.
   \caption{Docker Registry logo}
 \end{wrapfigure}
 
-Docker Registry is a stateless, highly scalable server side application that stores
-and distributes container-based application images. A registry is a storage and
-content delivery system, holding named Docker images, available in different
-tagged versions. Docker registry has an direct mapping to the Registry component
-of the cluster architecture.
+Docker Registry is a stateless, highly scalable server-side service for storing and
+distributing container-based application images\cite{docker_registry}. A registry
+is a storage and content delivery system that holds container images in different
+tagged versions\cite{docker_registry_about}. \\ %
+The Docker Registry, thus the name, has a direct mapping to the Registry
+component of the cluster architecture.
 
-Storage The registry must save the available images onto persistent storage. The
-storage is delegated to drivers where the default driver is the local POSIX
-filesystem of the node executing the registry instance. This is not suitable and
-can lead to losing all the available images. Therefore, the cluster can be equipped
-with additional storage drivers to fullfill possible different needs and requirements.
-Note however that the chosen driver(s) must be compatible with the available cluster
-environment, nodes' hardware and/or fullfills certain additional requirements.
-An example, from the same developers of K3s, of a possible solution is Longhorn\footnote{\url{https://longhorn.io}}:
-an Open Source, lightweight, reliable and easy-to-use distributed block storage system
-for Kubernetes. Scrivi SSD consigliate!
+\subsubsection{Image Naming}
+\label{subsubsec:implementation_dependencies_docker_registry_image_naming}
 
-FOTO!
+\texttt{[REGISTRY\_HOSTNAME][:REGISTRY\_PORT]IMAGE[:TAG]} \\ %
+An image name is made up of slash-separated name fields that are optionally
+prefixed with a registry hostname, complying with standard DNS\footnote{\url{https://wikipedia.org/wiki/Domain_Name_System}}
+(Domain Name System) rules, and optionally postfixed with a tag name that
+identifies different versions of the same series of images. If a hostname is specified,
+it may be followed by a port number in the format \texttt{:PORT}. If the registry
+hostname is not provided, Docker, Kubernetes, Podman, and practically every other
+software that deals with container images by default utilizes Docker's public registry
+(Docker Hub\footnote{\url{https://hub.docker.com}}, which is hosted at \texttt{docker.io}
+at port \texttt{443})\cite{k8s_image_names}. If no tag name is supplied, the value
+\texttt{latest} is automatically assigned, indicating that the image is designated
+as the most recent available release version\cite{docker_tag}. \\ %
+For example, the image name \texttt{node:18} (short for \texttt{docker.io:443/node:18})
+indicates the container image of Node.js version 18 accessible on the Docker public
+registry at port \texttt{443}. Instead, the name \texttt{registry.recluster.local:5000/node:18}
+also identifies the container image of Node.js version 18 but available on the local
+private registry \texttt{registry.recluster.local} at port \texttt{5000}.
+Therefore, if there is a requirement in the cluster to refer to container images
+on a registry different from the default one, the full image name must be
+provided.
 
-Image Naming An image name is composed of slash-separated name fields, optionally
-prefixed with a registry hostname, that comply with standard DNS (Domain Name System)
-rules, and optionally postfixed with a tag name that identify different versions
-of the same series of images. If a hostname is present, it may optionally be followed
-by a port number in the format ":<PORT>". If the registry hostname is not specified;
-Docker, Kubernetes, podman and almost every application dealing with container
-images, uses the Docker's public registry (Docker Hub\footnote{\url{https://hub.docker.com}})
-located at "docker.io" by default. If a tag name is not specified, it is automatically
-defaulted the value "latest" meaning that it is identified the latest available release
-version of the image. As an example, the image name `node:18` (short form of `docker.io:443/node:18`)
-identifies the container image of Node.js version 18 available on the Docker public
-registry at port 443. Instead, the name `registry.recluster.local:5000/node:18`
-equally identifies the container image of Node.js version 18 but available on a
-local private registry at port 5000. Therefore, whenever in the cluster there is
-the need of referencing container images on a registry that is not the default one
-it must be specified the full hostname.
+\subsubsection{Hostname To IP Address Mapping}
+\label{subsubsec:implementation_dependencies_docker_registry_hostname_to_ip_address_mapping}
 
-Mapping hostname to IP address A local registry deployment implies that in the cluster
-there must be a known mapping between the registry hostname to the IP address where
-the registry instance is running. There are three solutions available that are
-shown in the list below: 1. Relying on a custom configuration file/entry of the chosen
-Kubernetes distribution that instructs the container runtime about the mapping.
-K3s does support this feature by default via a configuration file named "registries.yaml"
-that must be saved under the directory "/etc/rancher/k3s" on each node that compose
-the Kubernetes cluster. 1. Adding an entry in the local "/etc/hosts" file on every
-node of the cluster. 1.Deploying a DNS component that must continuously running in
-the cluster. This solution implies that all nodes in the cluster must be
-configured to know about the local DNS by manually modifying the "/etc/resolv.conf"
-or automatically using DHCP (Dynamic Host Configuration Protocol).
+A local registry deployment requires that there be a known mapping in the cluster
+between the registry hostname and the IP address where the registry instance is executing.
+There are three options available, as indicated in the list below:
+\begin{enumerate}
+  \item Use a custom Kubernetes distribution configuration file/entry to instruct
+    the container runtime about the mapping. Moreover, if the Kubernetes distribution
+    and runtime support it, the mapping may also be used to rewrite the default
+    Docker Hub registry hostname to link to an alternative local registry
+    hostname. An example image \texttt{docker.io/node:18} is transparently
+    rewritten as \texttt{registry.recluster.local:5000/node:18}. The latter, allows
+    the cluster to continue operating without any changes to the container image
+    name of the deployments, enabling future less possible maintenance burden
+    because the only change that has to be performed is on the configuration
+    file and not on the cluster deployments.
+    \newline
+    This functionality is supported by default in K3s through a configuration file
+    called \texttt{registries.yaml} that must be saved in the directory \texttt{/etc/rancher/k3s}
+    on each node in the Kubernetes cluster\footnote{\url{https://docs.k3s.io/installation/private-registry}}.
 
-All three solutions have advantages and disadvantages. If the cluster size is
-relatively small and the IP address of the local registry does not change over
-time it is suggested to simply use the first or second solutions depending if
-the chosen Kubernetes distribution support the feature. However, if the cluster
-is composed with multiple nodes or the IP address of the registry can change
-frequently or there is the necessity to have additional hostname to IP mapping, then,
-having a DNS component is far way the best approach. Nevertheless, the final
-decision on what is the best solution for the mapping relies on the organization
-running the cluster: nothing forbids, even for a really small cluster, to deploy
-a DNS component. In reCluster, since it relies on K3s, it is composed by a few
-number of nodes and the IP address of the registry never changes thank to
-MetalLB (see section A), the decision has relapsed to the first solution. More
-on this in section B.
+  \item Add an entry to the \texttt{/etc/hosts}\footnote{\url{https://tldp.org/LDP/solrhe/Securing-Optimizing-Linux-RH-Edition-v1.3/chap9sec95.html}}
+    file on each cluster node.
+
+  \item Deploy a DNS component that must be operational in the cluster at all times.
+    \newline
+    This solution requires that all cluster nodes be configured to know about
+    the local DNS, either manually by modifying \texttt{/etc/resolv.conf}\footnote{\url{https://tldp.org/LDP/nag/node84.html}}
+    file or automatically via DHCP\footnote{\url{https://wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol}}
+    (Dynamic Host Configuration Protocol).
+\end{enumerate}
+Each of the three options has pros and cons. If the cluster size is relatively small
+and the IP address of the local registry does not vary over time, the first or
+second (depending on whether the chosen Kubernetes distribution supports the functionality)
+solutions are recommended. However, if the cluster consists of numerous nodes, or
+if the IP address of the registry changes regularly, or if further hostname to
+IP mappings are required, then having a DNS component is by far the best approach.
+Nonetheless, the organization operating the cluster makes the final decision on what
+is the best solution: nothing prevents the deployment of a DNS component even in
+a very small cluster. \\ %
+Because reCluster is based on K3s, has a modest number of nodes, and the IP
+address of the registry never changes thanks to MetalLB (see section \ref{subsec:implementation_dependencies_metallb}),
+the decision fell almost naturally on the first alternative. Section
+\ref{subsec:implementation_installer_configuration_files} goes into further
+detail on this.
+
+\subsubsection{Image Storage}
+\label{subsubsec:implementation_dependencies_docker_registry_image_storage}
+
+The registry must store the available container images in persistent storage in order
+to keep them if a failure occurs or the registry instance is restarted. Storage
+operation and management are not handled by the registry itself but are
+delegated to specialized drivers, the default driver of which is the local POSIX
+file system of the node executing the registry instance\cite{docker_registry_about}.
+\\ %
+Saving all container images on a single node is considered bad practice since it
+creates a single point of failure that might result in the loss of all images. Therefore,
+the cluster should be equipped with extra and more powerful storage drivers
+intended to tolerate multiple storage device failures at the same time as well
+as automated data recovery. It should be noted, however, that the driver(s)
+chosen must be compatible with the cluster environment, nodes hardware, and/or
+meet certain extra requirements. Almost every cloud provider supplies its customized
+driver that is compatible with the underlying high-performance and distributed data
+center storage system. Implementing a custom storage driver for the cluster
+implementation that meets all of the above requirements is extremely difficult
+owing to the overall complexity. Thankfully, a storage driver, Longhorn, from
+the same creators of K3s, already exists to address the latter with extra features
+and customization. Thankfully, a storage driver that addresses the latter problem
+with extra features and customization already exists: Longhorn, developed by the
+same team that created K3s. \\ %
+Longhorn\footnote{\url{https://longhorn.io}} is an Open Source and CNCF Incubating
+project\footnote{\url{https://www.cncf.io/projects/longhorn}} that provides a lightweight,
+reliable, and simple distributed block storage system for Kubernetes\cite{longhorn}.
+A block storage system stores data in fixed-size blocks, with each block
+identified by a memory address\cite{block_storage}. Longhorn provides a
+dedicated storage controller for each volume and replicates it synchronously
+across multiple replicas stored on multiple nodes. Kubernetes is used to orchestrate
+and manage the storage controller and replicas\cite{longhorn_architecture}. Figure
+\ref{fig:longhorn} depicts Longhorn's architecture overview and Read/Write Data Flow
+between the Volume, Longhorn Engine, Replica Instances, and Disks.
+\begin{figure}[htbp]
+  \centering
+  \def\stackalignment{r}\stackunder{ \includegraphics[width=.9\linewidth]{images/recluster/longhorn.png} } %
+  {\scriptsize Source: \url{https://longhorn.io} }
+  \caption{Longhorn's
+  architecture
+  overview
+  and
+  Read/Write
+  Data
+  Flow
+  between
+  the
+  Volume,
+  Longhorn
+  Engine,
+  Replica
+  Instances,
+  and
+  Disks}
+  \label{fig:longhorn}
+\end{figure}
+It should be mentioned that having an underlying reliable persistent storage for
+the whole cluster benefits not just the registry component but also every other Kubernetes
+application deployment that requires any type of persistent storage, such as
+database and media services.
 
 \subsection{MetalLB}
 \label{subsec:implementation_dependencies_metallb}
