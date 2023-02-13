@@ -925,6 +925,7 @@ displaying the various components provided on each node.
     the section \ref{subsubsec:architecture_components_node_worker}, is a
     logical mapping to the K3s Agent Node.
 \end{enumerate}
+
 \begin{figure}[htbp]
   \centering
   \def\stackalignment{r}\stackunder{ \includegraphics[width=.9\linewidth]{images/recluster/k3s.png} } %
@@ -932,6 +933,7 @@ displaying the various components provided on each node.
   \caption{Difference between K3s Server and K3s Agent nodes}
   \label{fig:k3s}
 \end{figure}
+
 Additionally, the K3s architecture is completely adaptable and may accommodate a
 variety of different setups, as shown in the list below, depending on the
 cluster's usage and ultimate goal\cite{k3s_architecture}.
@@ -1256,6 +1258,7 @@ across multiple replicas stored on multiple nodes. Kubernetes is used to orchest
 and manage the storage controller and replicas\cite{longhorn_architecture}. Figure
 \ref{fig:longhorn} depicts Longhorn's architecture overview and Read/Write Data Flow
 between the Volume, Longhorn Engine, Replica Instances, and Disks.
+
 \begin{figure}[htbp]
   \centering
   \def\stackalignment{r}\stackunder{ \includegraphics[width=.9\linewidth]{images/recluster/longhorn.png} } %
@@ -1278,6 +1281,7 @@ between the Volume, Longhorn Engine, Replica Instances, and Disks.
   Disks}
   \label{fig:longhorn}
 \end{figure}
+
 It should be mentioned that having an underlying reliable persistent storage for
 the whole cluster benefits not just the registry component but also every other Kubernetes
 application deployment that requires any type of persistent storage, such as
@@ -1293,6 +1297,66 @@ database and media services.
   {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://metallb.universe.tf}} }
   \caption{MetalLB logo}
 \end{wrapfigure}
+
+MetalLB is a load-balancer implementation that uses standard routing protocols
+for bare-metal Kubernetes clusters. \cite{https://metallb.universe.tf}. MetalLB
+has a direct mapping to the Load Balancer component of the cluster architecture
+and, since it is executed directly on and managed by Kubernetes itself, it is
+also considered an internal Load Balancer that does not require any external
+system to function.
+
+--- LoadBalancer Service type --- Kubernetes by default does not offer a fully
+fledged implementation of a network load balancer (Service of type LoadBalancer\footnote{\url{https://kubernetes.io/docs/concepts/services-networking/service/\#loadbalancer}})
+for bare-metal clusters\footnote{\url{https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer}}.
+The native Kubernetes implementation of network load balancers are only a set of
+predefined interfaces that are specifically designed/mapped to be compatible with
+the external and complex load balancers running inside huge and energy hungry data
+centers of the various cloud providers. These interfaces does not represents
+real implementations of network load balancers but are considered as proxies
+that translates the various API/function calls from the Kubernetes ecosystem to
+the specific cloud provider's load balancer and viceversa. Therefore, every
+Kubernetes Services of type "LoadBalancer" in bare-metal clusters remain in a "pending"
+state indefinitely, leaving every deployments that are leveraging the latter services
+unreachable from outside the Kubernetes network.
+
+Without the possibility of exploiting Kubernetes services of type LoadBalancer,
+the only way that bare-metal clusters are left with for enabling external
+traffic to establish connections with internal deployments are mainly two; they are
+briefly described below. 1. NodePort: The Kubernetes control plane allocates a port
+from a predefined range, by default from port 30000 to port 3276, and every node
+in the cluster proxies the same port into a Service instance. Every node in the
+cluster is configured to listen on the same assigned port and to forward traffic
+to one of the ready endpoints associated with the Service. Any external traffic that
+establishes a connection to any node of the cluster using the appropriate protocol
+(i.e., TCP or UDP) and port (i.e. 8080 or 9999) is forwared to a corresponding
+internal service instance. \cite{https://kubernetes.io/docs/concepts/services-networking/service/\#type-nodeport}
+1. ExternalIPs: External IP addresses are routed to one or more cluster nodes. Network
+traffic that ingresses the cluster with the external IP (as destination IP), on
+the corresponding service port, is then routed to one of the Service endpoints.
+ExternalIPs are not managed by Kubernetes itself and therefore is the
+responsibility of the cluster administrator. \cite{https://kubernetes.io/docs/concepts/services-networking/service/\#external-ips}
+
+Both of these service types have significant downsides which makes bare-metal
+clusters not ideal for a production environment.
+
+MetalLB offers a network load balancer implementation (service of type LoadBalancer)
+that directly resides inside the Kubernetes environment/network and easily
+integrates with standard network devices and protocols allowing Kubernetes
+deployments/services to be accessible from external network traffic.
+
+--- Address Allocation --- MetalLB is in charge of allocating and assigning IP
+addresses based on predefined IP address pools manually configured by the
+organization in charge of administrating the cluster. The IP addresses in the range
+of the pools must not be already allocated and/or reachable within the cluster network
+otherwise an IP address conflict occurs\footnote{\url{https://www.linksys.com/support-article?articleNum=132159}}.
+After MetalLB is deployed and configured it automatically assign and unassign
+individual addresses within the pools' range to Kubernetes services of type LoadBalancer.
+Moreover, a service deployment can be arbitrarily configured to be assigned with
+a specific IP address that is available within the range of a MetalLB pool and is
+also not already assigned to another service such that it is always externally available
+with the same IP address\cite{https://metallb.universe.tf/concepts}
+
+--- External Announcement ---
 
 \subsection{Prometheus}
 \label{subsec:implementation_dependencies_prometheus}
