@@ -1298,65 +1298,150 @@ database and media services.
   \caption{MetalLB logo}
 \end{wrapfigure}
 
-MetalLB is a load-balancer implementation that uses standard routing protocols
-for bare-metal Kubernetes clusters. \cite{https://metallb.universe.tf}. MetalLB
-has a direct mapping to the Load Balancer component of the cluster architecture
-and, since it is executed directly on and managed by Kubernetes itself, it is
-also considered an internal Load Balancer that does not require any external
-system to function.
+MetalLB is a load-balancer implementation for bare-metal Kubernetes clusters
+that leverages standard networking and routing protocols\cite{metallb}. \\ %
+MetalLB has a direct mapping to the cluster architecture's Load Balancer component,
+and because it is operated directly on and managed by Kubernetes, it is also regarded
+as an internal Load Balancer that does not require any external system to work.
 
---- LoadBalancer Service type --- Kubernetes by default does not offer a fully
-fledged implementation of a network load balancer (Service of type LoadBalancer\footnote{\url{https://kubernetes.io/docs/concepts/services-networking/service/\#loadbalancer}})
+\subsubsection{LoadBalancer Service Type}
+\label{subsubsec:implementation_dependencies_metallb__loadbalancer_service_type}
+
+By default, Kubernetes does not provide a fully functional implementation of a network
+load balancer (Service of type \texttt{LoadBalancer}\footnote{\url{https://kubernetes.io/docs/concepts/services-networking/service/\#loadbalancer}})
 for bare-metal clusters\footnote{\url{https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer}}.
-The native Kubernetes implementation of network load balancers are only a set of
-predefined interfaces that are specifically designed/mapped to be compatible with
-the external and complex load balancers running inside huge and energy hungry data
-centers of the various cloud providers. These interfaces does not represents
-real implementations of network load balancers but are considered as proxies
-that translates the various API/function calls from the Kubernetes ecosystem to
-the specific cloud provider's load balancer and viceversa. Therefore, every
-Kubernetes Services of type "LoadBalancer" in bare-metal clusters remain in a "pending"
-state indefinitely, leaving every deployments that are leveraging the latter services
-unreachable from outside the Kubernetes network.
+The native Kubernetes implementation of network load balancers is just a collection
+of predefined interfaces that are explicitly designed/mapped to be compatible with
+the external and sophisticated load balancers running within the different cloud
+providers' large and energy-hungry data centers. These interfaces are not a real
+network load balancer implementations, but rather proxies that translate
+different API/function calls from the Kubernetes ecosystem to the individual
+cloud provider's load balancer and vice versa. As a result, all Kubernetes
+Services of type \texttt{LoadBalancer} on bare-metal clusters remain in a \texttt{pending}
+state indefinitely, making any deployments that rely on the latter services unavailable
+from outside the Kubernetes network\cite{metallb}. \\ %
+Without the capability of using Kubernetes services of LoadBalancer type, the only
+alternatives for enabling external traffic to establish connections with internal
+deployments are primarily two; they are briefly described below.
+\begin{itemize}
+  \item \texttt{NodePort}\footnote{\url{https://kubernetes.io/docs/concepts/services-networking/service/\#type-nodeport}}
+    \newline
+    The Kubernetes Control Plane\footnote{\url{https://kubernetes.io/docs/concepts/overview/components/\#control-plane-components}}
+    allocates a port from a predetermined range, by default from port \texttt{30000}
+    to port \texttt{32767}, and every node in the cluster proxies the same port
+    into a Service instance. \\ %
+    Every node in the cluster is configured to listen on the same allocated port
+    and forward traffic to one of the Service's ready endpoints. \\ %
+    Any external traffic that connects to any node in the cluster using the
+    proper protocol (i.e., \texttt{TCP} or \texttt{UDP}) and port (i.e., \texttt{31234}
+    or \texttt{32000}) is forwarded to a matching internal service instance\cite{k8s_service_node_port}.
 
-Without the possibility of exploiting Kubernetes services of type LoadBalancer,
-the only way that bare-metal clusters are left with for enabling external
-traffic to establish connections with internal deployments are mainly two; they are
-briefly described below. 1. NodePort: The Kubernetes control plane allocates a port
-from a predefined range, by default from port 30000 to port 3276, and every node
-in the cluster proxies the same port into a Service instance. Every node in the
-cluster is configured to listen on the same assigned port and to forward traffic
-to one of the ready endpoints associated with the Service. Any external traffic that
-establishes a connection to any node of the cluster using the appropriate protocol
-(i.e., TCP or UDP) and port (i.e. 8080 or 9999) is forwared to a corresponding
-internal service instance. \cite{https://kubernetes.io/docs/concepts/services-networking/service/\#type-nodeport}
-1. ExternalIPs: External IP addresses are routed to one or more cluster nodes. Network
-traffic that ingresses the cluster with the external IP (as destination IP), on
-the corresponding service port, is then routed to one of the Service endpoints.
-ExternalIPs are not managed by Kubernetes itself and therefore is the
-responsibility of the cluster administrator. \cite{https://kubernetes.io/docs/concepts/services-networking/service/\#external-ips}
+  \item \texttt{ExternalIPs}\footnote{\url{https://kubernetes.io/docs/concepts/services-networking/service/\#external-ips}}
+    \newline
+    External IP addresses from outside the Kubernetes network are routed to one
+    or more cluster nodes. Network traffic that enters the cluster using the external
+    IP address (as the destination IP) on the corresponding Service port is then
+    forwarded to one of the Service endpoints. \\ %
+    External IP addresses are not managed by Kubernetes and are therefore the responsibility
+    of the cluster administrator\cite{k8s_service_external_ips}.
+\end{itemize}
 
-Both of these service types have significant downsides which makes bare-metal
-clusters not ideal for a production environment.
+Both of these service types have considerable disadvantages, making bare-metal clusters
+unsuitable for production environments. \\ %
+MetalLB provides a network load balancer implementation (service of type \texttt{LoadBalancer})
+that directly resides within the Kubernetes environment/network and easily
+integrates with standard network devices and protocols, allowing Kubernetes deployments/services
+to be accessible from external network traffic.
 
-MetalLB offers a network load balancer implementation (service of type LoadBalancer)
-that directly resides inside the Kubernetes environment/network and easily
-integrates with standard network devices and protocols allowing Kubernetes
-deployments/services to be accessible from external network traffic.
+\subsubsection{Address Allocation}
+\label{subsubsec:implementation_dependencies_metallb_address_allocation}
 
---- Address Allocation --- MetalLB is in charge of allocating and assigning IP
-addresses based on predefined IP address pools manually configured by the
-organization in charge of administrating the cluster. The IP addresses in the range
-of the pools must not be already allocated and/or reachable within the cluster network
-otherwise an IP address conflict occurs\footnote{\url{https://www.linksys.com/support-article?articleNum=132159}}.
-After MetalLB is deployed and configured it automatically assign and unassign
-individual addresses within the pools' range to Kubernetes services of type LoadBalancer.
-Moreover, a service deployment can be arbitrarily configured to be assigned with
-a specific IP address that is available within the range of a MetalLB pool and is
-also not already assigned to another service such that it is always externally available
-with the same IP address\cite{https://metallb.universe.tf/concepts}
+MetalLB is responsible for allocating and assigning IP addresses to services
+based on predefined IP address pools that have been manually created by the
+organization in charge of cluster administration. If the IP addresses in the pool
+range are already assigned and/or reachable within the (Internal) cluster network,
+an IP address conflict occurs\footnote{\url{https://www.linksys.com/support-article?articleNum=132159}}.
+\\ %
+After MetalLB is deployed and configured, it will automatically assign and unassign
+individual addresses within the pools' range to Kubernetes services of type
+\texttt{LoadBalancer}. Furthermore, a service deployment may be arbitrarily set to
+be allocated with a certain IP address, ensuring that it is always externally
+accessible with the same IP address. The latter is only possible if the IP address
+is available within the range of a MetalLB pool and is not already assigned to another
+service. \\ %
+It should be noted that if all available IP addresses have already been allocated,
+subsequent \texttt{LoadBalancer} services remain in the \texttt{pending} state
+until an IP address from a pool becomes available for assignment or a newer pool
+is created\cite{metallb_address_allocation}.
 
---- External Announcement ---
+\subsubsection{External Announcement}
+\label{subsubsec:implementation_dependencies_metallb__external_announcement}
+
+Once MetalLB has allocated a pool's IP address to a \texttt{LoadBalancer} service
+type, the network outside Kubernetes, i.e. the Internal Network, must be aware that
+the IP address has been assigned and is accessible ("\textit{lives}" in the network)
+for any kind of communication to take place. To accomplish this, MetalLB deploys
+a \texttt{DaemonSet}\footnote{\url{https://kubernetes.io/docs/concepts/workloads/controllers/daemonset}}
+component called \texttt{Speaker} on each cluster node, which is in charge of IP
+address announcements on the network\cite{metallb_installation}. \\ %
+MetalLB supports two external IP announcement modes, which are explained below and
+are based on common networking or routing protocols\cite{metallb_external_announcement}.
+\begin{itemize}
+  \item \texttt{BGP mode}\footnote{\url{https://metallb.universe.tf/concepts/bgp}}
+    \newline
+    In \texttt{BGP mode}, all nodes in the cluster establish BGP\footnote{\url{https://wikipedia.org/wiki/Border_Gateway_Protocol}}
+    (Border Gateway Protocol) peering sessions with adjacent routers and advise
+    them on how to forward traffic to the service IPs\cite{metallb_bgp}. \\ %
+    Due to the requirement of BGP-capable routers and a complex configuration,
+    this mode cannot be employed in cluster implementation. Furthermore, BGP is
+    utilized to link with various and external Autonomous Systems\footnote{\url{https://wikipedia.org/wiki/Autonomous_system_(Internet)}}
+    (AS).
+
+  \item \texttt{Layer 2 mode}\footnote{\url{https://metallb.universe.tf/concepts/layer2}}
+    \newline
+    In \texttt{Layer 2 mode}, one Kubernetes cluster node takes ownership of the
+    \texttt{LoadBalancer} service and utilizes standard address discovery protocols
+    (ARP\footnote{\url{https://wikipedia.org/wiki/Address_Resolution_Protocol}}
+    for IPv4, NDP\footnote{\url{https://wikipedia.org/wiki/Neighbor_Discovery_Protocol}}
+    for IPv6) to make the IP address visible on the local network. From the perspective
+    of the network LAN, the announcing node's NIC has multiple IP addresses
+    assigned to it. \\ %
+    The Kubernetes \texttt{kube-proxy}\footnote{\url{https://kubernetes.io/docs/concepts/overview/components/\#kube-proxy}}
+    component running on the corresponding node manages all network traffic for a
+    service IP, which subsequently forwards the request to one of the service's
+    pods. \\ %
+    \texttt{Layer 2 mode} does not employ a true load balancer method, but
+    rather a failover strategy in which a new node replaces the current leader
+    node if it fails for any reason.\cite{metallb_layer2}
+\end{itemize}
+Due to the inability of using \texttt{BGP mode} and its inherent universality to
+operate on any Ethernet network without the need for additional hardware, configurations,
+or routers, the cluster implementation is completely based on \texttt{Layer 2 mode}.
+
+Figure \ref{fig:metallb} depicts an example schema of a MetalLB cluster with
+distinct Kubernetes namespaces, services, and pods, as well as IP network connections.
+
+\begin{figure}[htbp]
+  \centering
+  \def\stackalignment{r}\stackunder{ \includegraphics[width=.9\linewidth]{images/recluster/metallb.png} } %
+  {\scriptsize Source: \url{https://docs.openshift.com/container-platform/latest/networking/metallb/about-metallb.html} }
+  \caption{MetalLB
+  cluster
+  with
+  distinct
+  Kubernetes
+  namespaces,
+  services,
+  and
+  pods,
+  as
+  well
+  as
+  IP
+  network
+  connections}
+  \label{fig:metallb}
+\end{figure}
 
 \subsection{Prometheus}
 \label{subsec:implementation_dependencies_prometheus}
