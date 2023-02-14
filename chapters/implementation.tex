@@ -842,6 +842,55 @@ external dependencies from the internet (every time for every node) or to
 directly use the already available pre-packaged dependencies, reducing network usage
 as well as overall installation time.
 
+\subsection{PostgreSQL}
+\label{subsec:implementation_dependencies_postgresql}
+
+\begin{wrapfigure}
+  {l}{.25\textwidth} %
+  \centering
+  \def\stackalignment{l}\stackunder{ \includegraphics[width=\linewidth]{images/logos/postgresql.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://wiki.postgresql.org/wiki/Logo}} }
+  \caption{PostgreSQL logo}
+\end{wrapfigure}
+
+Premise: This section varies from the other following sections in that it does
+not intend to go into detail about the PostgreSQL dependency and what and how
+its core features have been employed in the cluster implementation. PostgreSQL has
+only been used in the most basic ways for storing the server's data in a persistent
+and reliable system. Furthermore, there are numerous database systems to choose from,
+both free and paid, each with unique characteristics that might meet the different
+requirements of the organization managing the cluster. \\ %
+
+PostgreSQL\footnote{\url{https://www.postgresql.org}} is a powerful, open-source
+object-relational database system that uses and extends the SQL\footnote{\url{https://wikipedia.org/wiki/SQL}}
+language with several capabilities for properly storing and scaling the most complex
+data workloads. It is designed to assist developers in building applications, and
+administrators in preserving data integrity and building fault-tolerant systems\cite{postgresql}.
+\\ %
+PostgreSQL has a direct mapping with the cluster architecture's Database
+component. \\ %
+PostgreSQL was chosen over all other possible alternatives for three key reasons,
+which are detailed below:
+\begin{enumerate}
+  \item Is one of four databases officially supported by the K3s dependency (see
+    section \ref{subsec:implementation_dependencies_k3s}) that may be utilized as
+    an external data source for persistently storing the Kubernetes cluster's state
+    (see section \ref{subsubsec:implementation_dependencies_k3s_enhancements}).
+
+  \item The Prisma ORM (see section
+    \ref{subsubsec:implementation_server_database_prisma}) used in the server component
+    implementation officially supports it (see section
+    \ref{sec:implementation_server}).
+
+  \item The server implementation mostly employs simple SQL code, with no
+    complex or proprietary functionalities. As a result, it may be easily
+    substituted with MySQL\footnote{\url{https://www.mysql.com}} (another database
+    that fulfills the preceding two criteria) without any difficult migration
+    procedures. The latter is particularly valuable since it allows organizations
+    to select from a variety of database systems while being compatible with cluster
+    implementation.
+\end{enumerate}
+
 \subsection{K3s}
 \label{subsec:implementation_dependencies_k3s}
 
@@ -878,8 +927,8 @@ a conventional Kubernetes distribution\cite{k3s_enhancements}:
 
   \item Lightweight storage backend with \texttt{SQlite}\footnote{\url{https://www.sqlite.org}}
     as the default storage mechanism. Additional solutions based on \texttt{etcd}\footnote{\url{https://etcd.io}},
-    \texttt{MySQL}\footnote{\url{https://www.mysql.com}}, or \texttt{PostgreSQL}
-    are also available. Both embedded and external storage mechanisms are supported.
+    \texttt{MySQL}, or \texttt{PostgreSQL} are also available. Both embedded and
+    external storage mechanisms are supported.
     \newline
     The cluster architecture design, as stated in chapter \ref{cha:architecture},
     is based on a high availability model rather than a fault tolerance strategy.
@@ -1665,9 +1714,6 @@ implementation and therefore is not distributed in the release archive bundle.
 \section{Installer}
 \label{sec:implementation_installer}
 
-\subsection{POSIX Shell}
-\label{subsec:implementation_installer_posix_shell}
-
 \subsection{Configuration Arguments}
 \label{subsec:implementation_installer_configuration_arguments}
 
@@ -1754,17 +1800,6 @@ implementation and therefore is not distributed in the release archive bundle.
 
 \subsection{Database}
 \label{subsec:implementation_server_database}
-
-\subsubsection{PostgreSQL}
-\label{subsubsec:implementation_server_database_postgresql}
-
-\begin{wrapfigure}
-  {r}{.25\textwidth} %
-  \centering
-  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/logos/postgresql.png} } %
-  {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://wiki.postgresql.org/wiki/Logo}} }
-  \caption{PostgreSQL logo}
-\end{wrapfigure}
 
 \subsubsection{Prisma}
 \label{subsubsec:implementation_server_database_prisma}
