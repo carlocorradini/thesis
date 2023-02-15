@@ -1295,18 +1295,27 @@ implementation that meets all of the above requirements is extremely difficult
 owing to the overall complexity. Thankfully, a storage driver, Longhorn, from
 the same creators of K3s, already exists to address the latter with extra features
 and customization. Thankfully, a storage driver that addresses the latter problem
-with extra features and customization already exists: Longhorn, developed by the
-same team that created K3s. \\ %
-Longhorn\footnote{\url{https://longhorn.io}} is an Open Source and CNCF Incubating
-project\footnote{\url{https://www.cncf.io/projects/longhorn}} that provides a lightweight,
-reliable, and simple distributed block storage system for Kubernetes\cite{longhorn}.
-A block storage system stores data in fixed-size blocks, with each block
-identified by a memory address\cite{block_storage}. Longhorn provides a
-dedicated storage controller for each volume and replicates it synchronously
-across multiple replicas stored on multiple nodes. Kubernetes is used to orchestrate
-and manage the storage controller and replicas\cite{longhorn_architecture}. Figure
-\ref{fig:longhorn} depicts Longhorn's architecture overview and Read/Write Data Flow
-between the Volume, Longhorn Engine, Replica Instances, and Disks.
+with extra features and customization already exist: Longhorn, developed by the same
+team that created K3s.
+
+\begin{wrapfigure}
+  {r}{.25\textwidth} %
+  \centering
+  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/logos/longhorn.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://longhorn.io}} }
+  \caption{Longhorn logo}
+\end{wrapfigure}
+
+Longhorn\footnote{\url{https://longhorn.io}} is an Open Source and CNCF
+Incubating project\footnote{\url{https://www.cncf.io/projects/longhorn}} that
+provides a lightweight, reliable, and simple distributed block storage system
+for Kubernetes\cite{longhorn}. A block storage system stores data in fixed-size
+blocks, with each block identified by a memory address\cite{block_storage}. Longhorn
+provides a dedicated storage controller for each volume and replicates it synchronously
+across multiple replicas stored on multiple nodes. Kubernetes is used to
+orchestrate and manage the storage controller and replicas\cite{longhorn_architecture}.
+Figure \ref{fig:longhorn} depicts Longhorn's architecture overview and Read/Write
+Data Flow between the Volume, Longhorn Engine, Replica Instances, and Disks.
 
 \begin{figure}[htbp]
   \centering
@@ -1332,9 +1341,9 @@ between the Volume, Longhorn Engine, Replica Instances, and Disks.
 \end{figure}
 
 It should be mentioned that having an underlying reliable persistent storage for
-the whole cluster benefits not just the registry component but also every other Kubernetes
-application deployment that requires any type of persistent storage, such as
-database and media services.
+the whole cluster benefits not just the registry component but also every other
+Kubernetes application deployment that requires any type of persistent storage, such
+as database and media services.
 
 \subsection{MetalLB}
 \label{subsec:implementation_dependencies_metallb}
@@ -1347,31 +1356,33 @@ database and media services.
   \caption{MetalLB logo}
 \end{wrapfigure}
 
-MetalLB is a load-balancer implementation for bare-metal Kubernetes clusters
-that leverages standard networking and routing protocols\cite{metallb}. \\ %
-MetalLB has a direct mapping to the cluster architecture's Load Balancer component,
-and because it is operated directly on and managed by Kubernetes, it is also regarded
-as an internal Load Balancer that does not require any external system to work.
+MetalLB is a load-balancer implementation for bare-metal Kubernetes clusters that
+leverages standard networking and routing protocols\cite{metallb}. \\ %
+MetalLB has a direct mapping to the cluster architecture's Load Balancer
+component, and because it is operated directly on and managed by Kubernetes, it
+is also regarded as an internal Load Balancer that does not require any external
+system to work.
 
 \subsubsection{LoadBalancer Service Type}
 \label{subsubsec:implementation_dependencies_metallb__loadbalancer_service_type}
 
-By default, Kubernetes does not provide a fully functional implementation of a network
-load balancer (Service of type \texttt{LoadBalancer}\footnote{\url{https://kubernetes.io/docs/concepts/services-networking/service/\#loadbalancer}})
+By default, Kubernetes does not provide a fully functional implementation of a
+network load balancer (Service of type \texttt{LoadBalancer}\footnote{\url{https://kubernetes.io/docs/concepts/services-networking/service/\#loadbalancer}})
 for bare-metal clusters\footnote{\url{https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer}}.
-The native Kubernetes implementation of network load balancers is just a collection
-of predefined interfaces that are explicitly designed/mapped to be compatible with
-the external and sophisticated load balancers running within the different cloud
-providers' large and energy-hungry data centers. These interfaces are not a real
-network load balancer implementations, but rather proxies that translate
-different API/function calls from the Kubernetes ecosystem to the individual
-cloud provider's load balancer and vice versa. As a result, all Kubernetes
-Services of type \texttt{LoadBalancer} on bare-metal clusters remain in a \texttt{pending}
-state indefinitely, making any deployments that rely on the latter services unavailable
-from outside the Kubernetes network\cite{metallb}. \\ %
-Without the capability of using Kubernetes services of LoadBalancer type, the only
-alternatives for enabling external traffic to establish connections with internal
-deployments are primarily two; they are briefly described below.
+The native Kubernetes implementation of network load balancers is just a
+collection of predefined interfaces that are explicitly designed/mapped to be
+compatible with the external and sophisticated load balancers running within the
+different cloud providers' large and energy-hungry data centers. These
+interfaces are not a real network load balancer implementations, but rather proxies
+that translate different API/function calls from the Kubernetes ecosystem to the
+individual cloud provider's load balancer and vice versa. As a result, all Kubernetes
+Services of type \texttt{LoadBalancer} on bare-metal clusters remain in a
+\texttt{pending} state indefinitely, making any deployments that rely on the
+latter services unavailable from outside the Kubernetes network\cite{metallb}.
+\\ %
+Without the capability of using Kubernetes services of LoadBalancer type, the
+only alternatives for enabling external traffic to establish connections with
+internal deployments are primarily two; they are briefly described below.
 \begin{itemize}
   \item \texttt{NodePort}\footnote{\url{https://kubernetes.io/docs/concepts/services-networking/service/\#type-nodeport}}
     \newline
@@ -1395,46 +1406,46 @@ deployments are primarily two; they are briefly described below.
     of the cluster administrator\cite{k8s_service_external_ips}.
 \end{itemize}
 
-Both of these service types have considerable disadvantages, making bare-metal clusters
-unsuitable for production environments. \\ %
+Both of these service types have considerable disadvantages, making bare-metal
+clusters unsuitable for production environments. \\ %
 MetalLB provides a network load balancer implementation (service of type \texttt{LoadBalancer})
-that directly resides within the Kubernetes environment/network and easily
-integrates with standard network devices and protocols, allowing Kubernetes deployments/services
+that directly resides within the Kubernetes environment/network and easily integrates
+with standard network devices and protocols, allowing Kubernetes deployments/services
 to be accessible from external network traffic.
 
 \subsubsection{Address Allocation}
 \label{subsubsec:implementation_dependencies_metallb_address_allocation}
 
-MetalLB is responsible for allocating and assigning IP addresses to services
-based on predefined IP address pools that have been manually created by the
-organization in charge of cluster administration. If the IP addresses in the pool
-range are already assigned and/or reachable within the (Internal) cluster network,
-an IP address conflict occurs\footnote{\url{https://www.linksys.com/support-article?articleNum=132159}}.
+MetalLB is responsible for allocating and assigning IP addresses to services based
+on predefined IP address pools that have been manually created by the organization
+in charge of cluster administration. If the IP addresses in the pool range are
+already assigned and/or reachable within the (Internal) cluster network, an IP address
+conflict occurs\footnote{\url{https://www.linksys.com/support-article?articleNum=132159}}.
 \\ %
-After MetalLB is deployed and configured, it will automatically assign and unassign
-individual addresses within the pools' range to Kubernetes services of type
-\texttt{LoadBalancer}. Furthermore, a service deployment may be arbitrarily set to
-be allocated with a certain IP address, ensuring that it is always externally
-accessible with the same IP address. The latter is only possible if the IP address
-is available within the range of a MetalLB pool and is not already assigned to another
-service. \\ %
-It should be noted that if all available IP addresses have already been allocated,
-subsequent \texttt{LoadBalancer} services remain in the \texttt{pending} state
-until an IP address from a pool becomes available for assignment or a newer pool
-is created\cite{metallb_address_allocation}.
+After MetalLB is deployed and configured, it will automatically assign and
+unassign individual addresses within the pools' range to Kubernetes services of type
+\texttt{LoadBalancer}. Furthermore, a service deployment may be arbitrarily set
+to be allocated with a certain IP address, ensuring that it is always externally
+accessible with the same IP address. The latter is only possible if the IP
+address is available within the range of a MetalLB pool and is not already
+assigned to another service. \\ %
+It should be noted that if all available IP addresses have already been
+allocated, subsequent \texttt{LoadBalancer} services remain in the \texttt{pending}
+state until an IP address from a pool becomes available for assignment or a newer
+pool is created\cite{metallb_address_allocation}.
 
 \subsubsection{External Announcement}
 \label{subsubsec:implementation_dependencies_metallb__external_announcement}
 
-Once MetalLB has allocated a pool's IP address to a \texttt{LoadBalancer} service
-type, the network outside Kubernetes, i.e. the Internal Network, must be aware that
-the IP address has been assigned and is accessible ("\textit{lives}" in the network)
-for any kind of communication to take place. To accomplish this, MetalLB deploys
-a \texttt{DaemonSet}\footnote{\url{https://kubernetes.io/docs/concepts/workloads/controllers/daemonset}}
+Once MetalLB has allocated a pool's IP address to a \texttt{LoadBalancer}
+service type, the network outside Kubernetes, i.e. the Internal Network, must be
+aware that the IP address has been assigned and is accessible ("\textit{lives}"
+in the network) for any kind of communication to take place. To accomplish this,
+MetalLB deploys a \texttt{DaemonSet}\footnote{\url{https://kubernetes.io/docs/concepts/workloads/controllers/daemonset}}
 component called \texttt{Speaker} on each cluster node, which is in charge of IP
 address announcements on the network\cite{metallb_installation}. \\ %
-MetalLB supports two external IP announcement modes, which are explained below and
-are based on common networking or routing protocols\cite{metallb_external_announcement}.
+MetalLB supports two external IP announcement modes, which are explained below
+and are based on common networking or routing protocols\cite{metallb_external_announcement}.
 \begin{itemize}
   \item \texttt{BGP mode}\footnote{\url{https://metallb.universe.tf/concepts/bgp}}
     \newline
@@ -1464,11 +1475,12 @@ are based on common networking or routing protocols\cite{metallb_external_announ
     node if it fails for any reason.\cite{metallb_layer2}
 \end{itemize}
 Due to the inability of using \texttt{BGP mode} and its inherent universality to
-operate on any Ethernet network without the need for additional hardware, configurations,
-or routers, the cluster implementation is completely based on \texttt{Layer 2 mode}.
+operate on any Ethernet network without the need for additional hardware,
+configurations, or routers, the cluster implementation is completely based on
+\texttt{Layer 2 mode}.
 
-Figure \ref{fig:metallb} depicts an example schema of a MetalLB cluster with
-distinct Kubernetes namespaces, services, and pods, as well as IP network connections.
+Figure \ref{fig:metallb} depicts an example schema of a MetalLB cluster with distinct
+Kubernetes namespaces, services, and pods, as well as network connections.
 
 \begin{figure}[htbp]
   \centering
@@ -1486,7 +1498,6 @@ distinct Kubernetes namespaces, services, and pods, as well as IP network connec
   as
   well
   as
-  IP
   network
   connections}
   \label{fig:metallb}
@@ -1505,31 +1516,31 @@ distinct Kubernetes namespaces, services, and pods, as well as IP network connec
 
 Prometheus is an Open Source system that is specifically designed for monitoring
 and alerting. It is the only system that Kubernetes natively supports and the de
-facto standard across the Cloud Native ecosystem\cite{prometheus_overview_faq}. Prometheus
-joined CNCF in 2016 as the second hosted project with a Graduated maturity level,
-only after Kubernetes itself\footnote{\url{https://www.cncf.io/projects/prometheus}}\cite{prometheus_overview}.
-Prometheus has no mapping to a cluster component, and the architecture overview indicates
-no monitoring component at all. This is because having Prometheus deployed and
-continually operating in the cluster is a choice of the organization operating
+facto standard across the Cloud Native ecosystem\cite{prometheus_overview_faq}.
+Prometheus joined CNCF in 2016 as the second hosted project with a Graduated
+maturity level, only after Kubernetes itself\footnote{\url{https://www.cncf.io/projects/prometheus}}\cite{prometheus_overview}.
+Prometheus has no mapping to a cluster component, and the architecture overview
+indicates no monitoring component at all. This is because having Prometheus deployed
+and continually operating in the cluster is a choice of the organization operating
 the cluster rather than a hard necessity; even if the Metrics Server is required
-on each Node. Furthermore, Prometheus may be deployed outside of the cluster environment
-and configured to access node metrics from the external network, or it can be
-run exclusively for certain periods, allowing monitoring of the cluster for testing
-or performance evaluation. Nonetheless, Prometheus remains an important tool for
-monitoring and analyzing how the cluster is behaving, which is why it is
-specified as a dependency and is also included in the final archive bundle.
+on each Node. Furthermore, Prometheus may be deployed outside of the cluster
+environment and configured to access node metrics from the external network, or it
+can be run exclusively for certain periods, allowing monitoring of the cluster
+for testing or performance evaluation. Nonetheless, Prometheus remains an
+important tool for monitoring and analyzing how the cluster is behaving, which is
+why it is specified as a dependency and is also included in the final archive bundle.
 
-As previously stated, Prometheus' primary function is to collect metrics data
-generated by exporters and query/interpolate this data. Moreover, Prometheus can
-monitor itself since, like Node Exporter, it provides its metrics via an HTTP
-endpoint. There is a plethora of available exporters and possible integrations\footnote{\url{https://prometheus.io/docs/instrumenting/exporters}}.
-In addition to the default exporter installed on each node in the cluster
-implementation, an organization managing the cluster can choose to add as many exporters
-as the number of components and applications running on it, resulting in a
-better, clearer, and finer-grained overview of the entire cluster status both in
-real-time and over a period. For example, in addition to the Database component,
-it is possible to install its corresponding exporter, which allows the
-monitoring of Database metrics such as health, performance and resource usage.
+As previously stated, Prometheus' primary function is to collect metrics data generated
+by exporters and query/interpolate this data. Moreover, Prometheus can monitor itself
+since, like Node Exporter, it provides its metrics via an HTTP endpoint. There
+is a plethora of available exporters and possible integrations\footnote{\url{https://prometheus.io/docs/instrumenting/exporters}}.
+In addition to the default exporter installed on each node in the cluster implementation,
+an organization managing the cluster can choose to add as many exporters as the
+number of components and applications running on it, resulting in a better,
+clearer, and finer-grained overview of the entire cluster status both in real-time
+and over a period. For example, in addition to the Database component, it is
+possible to install its corresponding exporter, which allows the monitoring of Database
+metrics such as health, performance and resource usage.
 
 \subsubsection{Features}
 \label{subsubsec:implementation_dependencies_prometheus_features}
@@ -1597,22 +1608,22 @@ but the two most essential for the cluster implementation are described below\ci
     HTTP API\cite{prometheus_promql}.
 \end{enumerate}
 
-Two examples of \texttt{PromQL} queries that have been widely used for cluster monitoring
-are shown below. Note of how the various metrics and labels are used for
+Two examples of \texttt{PromQL} queries that have been widely used for cluster
+monitoring are shown below. Note of how the various metrics and labels are used for
 filtering and aggregation.
 
-Listing \ref{lst:promql_1} illustrates an example of a \texttt{PromQL} query to obtain
-the overall CPU usage in percent (\texttt{0} to \texttt{100}). Because the
+Listing \ref{lst:promql_1} illustrates an example of a \texttt{PromQL} query to
+obtain the overall CPU usage in percent (\texttt{0} to \texttt{100}). Because the
 metric \lstinline[language=prometheus, alsoletter={_}, morekeywords={node_cpu_seconds_total}]{node_cpu_seconds_total}
-is of type \texttt{counter}, the considered value is limited to the last one
-minute (\texttt{1m}).
+is of type \texttt{counter}, the considered value is limited to the last one minute
+(\texttt{1m}).
 
 \begin{lstlisting}[language=promql, numbers=none, alsoletter={_01}, morekeywords={[2]{node_cpu_seconds_total}}, morekeywords={[3]{cpu, mode}}, morekeywords={[4]{100, 1, 1m}}, xleftmargin=\parindent, label={lst:promql_1}, caption=\texttt{PromQL} query to obtain overall CPU usage in percent]
   100 * (avg without (mode, cpu) (1 - rate(node_cpu_seconds_total{mode="idle"}[1m])))
 \end{lstlisting}
 
-Listing \ref{lst:promql_2} illustrates an example of a \texttt{PromQL} query to obtain
-the amount of memory usage in percent (\texttt{0} to \texttt{100}).
+Listing \ref{lst:promql_2} illustrates an example of a \texttt{PromQL} query to
+obtain the amount of memory usage in percent (\texttt{0} to \texttt{100}).
 
 \begin{lstlisting}[language=promql, numbers=none, alsoletter={_, 0, 1}, morekeywords={[2]{node_memory_MemTotal_bytes, node_memory_MemFree_bytes}}, morekeywords={[4]{100}}, xleftmargin=\parindent, label={lst:promql_2}, caption=\texttt{PromQL} query to obtain the amount of memory usage in percent]
   100 * ((node_memory_MemTotal_bytes - node_memory_MemFree_bytes) / node_memory_MemTotal_bytes)
@@ -1632,11 +1643,10 @@ the amount of memory usage in percent (\texttt{0} to \texttt{100}).
 Prometheus is frequently used in conjunction with Grafana\footnote{\url{https://grafana.com/grafana}},
 an interactive data visualization platform\cite{grafana}. \\ %
 Prometheus collects metrics and provides the sophisticated \texttt{PromQL} query
-language; Grafana then translates these metrics and/or query results into
-relevant charts and graphs that may be consolidated into one or more dashboards.
-\\ %
-It should be noted that Grafana is not considered a dependency in the cluster
-implementation and therefore is not distributed in the release archive bundle.
+language; Grafana then translates these metrics and/or query results into relevant
+charts and graphs that may be consolidated into one or more dashboards. \\ %
+It should be noted that Grafana is not considered a dependency in the cluster implementation
+and therefore is not distributed in the release archive bundle.
 
 \subsection{Management}
 \label{subsec:implementation_dependencies_management}
