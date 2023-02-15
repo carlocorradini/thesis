@@ -226,9 +226,7 @@ Many helpful features of Inline are described below.
 \subsection{Configuration}
 \label{subsec:corollary_projects_inline_configuration}
 
-Inline's behavior is easily customizable by using argument flags, which begin with
-a double dash followed by the property name and an optional value (\texttt{--NAME
-[VALUE]}). \\ %
+Inline's behavior is easily customizable by using argument flags. \\ %
 The accepted configuration parameters are listed in the table below.
 
 \begin{xltabular}
@@ -320,8 +318,9 @@ The following two listings show the contents of the two files:
 \end{minipage}
 
 The goal is to inline the script file \texttt{hello.sh} and produce an output
-file that has no source commands. When the command \texttt{./inline.sh --in-file
-"hello.sh"} is executed, the following result is obtained:
+file that has no source commands. When the command \lstinline[language=shell,
+alsoletter={.-}, morekeywords={[2]{inline.sh}}, morekeywords={[3]{--in-file}}]{./inline.sh --in-file "hello.sh"}
+is executed, the following result is obtained:
 
 \begin{lstlisting}[language=shell, alsoletter={.}, morekeywords={[2]{.}}, xleftmargin=\parindent, caption=Inlined script \texttt{hello.inlined.sh}]
   #!/usr/bin/env sh

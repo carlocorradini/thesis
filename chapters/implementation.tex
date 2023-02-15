@@ -1657,10 +1657,96 @@ implementation and therefore is not distributed in the release archive bundle.
 \subsection{Management}
 \label{subsec:implementation_dependencies_management}
 
+To create a cluster release bundle, all of the dependencies must be managed and
+downloaded (see section \ref{subsec:good_practices_continuous_deployment_bundle}).
+Furthermore, as stated in previous sections, having all of the required dependencies
+locally during cluster initialization without the need for an internet connection
+is essential for an Air-Gap environment but can also be beneficial for speeding up
+the overall installation time because there is no need to download them from the
+Internet. It should be noted that if the cluster is made up of many systems with
+various architectures, such as \texttt{amd64} or \texttt{arm64}, the necessary
+dependencies must be downloaded for all architectures, otherwise, the
+installation procedure will fail with an error. \\ %
+The management of dependencies should be as straightforward as possible, with as
+few manual tasks as possible. As a result, the entire procedure has been entirely
+automated using a simple configuration file called \texttt{dependencies.config.yaml}
+and detailed in the section
+\ref{subsec:implementation_dependencies_management_configuration}, as well as a POSIX
+script called \texttt{dependencies.sh} and explained in section
+\ref{subsec:implementation_dependencies_management_script}. \\ %
+It should be mentioned that dependencies management has been designed to be as
+compatible as possible, with no restrictions on what dependency and version must
+be downloaded. The procedure is compatible with any publicly accessible software
+on \texttt{GitHub}\footnote{\url{https://github.com}} that has at least one release\footnote{\url{docs.github.com/repositories/releasing-projects-on-github/managing-releases-in-a-repository}}.
+Because compatibility with just GitHub is due to certain API calls, future versions
+will also include support for custom solutions as well as both \texttt{GitLab}\footnote{\url{gitlab.com}}
+and \texttt{Bitbucket}\footnote{\url{https://bitbucket.org}}.
 \subsubsection{Configuration}
 \label{subsec:implementation_dependencies_management_configuration}
 
-\begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{autoscaler, k3s, node_exporter, prometheus, url, assets, releases, files, LICENSE, install.sh}}, xleftmargin=\parindent, caption=TODO]
+The dependencies management configuration file, \texttt{dependencies.config.yaml},
+is written in YAML\footnote{\url{https://yaml.org}} format. \\ %
+The attributes for each dependency declared as a root object, are defined in table
+\ref{tbl:dependency_attributes}.
+
+\begin{xltabular}
+  {\textwidth} { >{\ttfamily}l | >{\ttfamily}l | X }
+
+  \multicolumn{1}{ c |}{\large{\textbf{Name}}} &
+  \multicolumn{1}{ c |}{\large{\textbf{Type}}} &
+  \multicolumn{1}{ c }{\large{\textbf{Description}}} \\ \hhline{===}
+
+  url & string\footnote{\url{https://yaml.org/spec/1.2.2/\#10113-generic-string}}
+  & The \texttt{URL} of the dependency project's \texttt{GitHub} repository. \\ \hline
+
+  assets & string sequence & A list of assets (files) to be downloaded.
+  \newline
+  Regular Expression\footnote{\url{https://wikipedia.org/wiki/Regular_expression}}
+  may be used in the asset string name. This is especially useful for matching
+  files that may not always have the same name across releases. \texttt{Node Exporter}
+  and \texttt{Prometheus}, for example, always include the version name in each release
+  asset. \\ \hline
+
+  releases & string sequence\footnote{\url{https://yaml.org/spec/1.2.2/\#10112-generic-sequence}}
+  & A list of releases (versions) to download.
+  \newline
+  All of the files specified in the \texttt{assets} attribute are downloaded for
+  each release. As a result, the specified release values must be precisely selected,
+  otherwise, the number and total size of the downloaded files might quickly become
+  unmanageable. For example, if three \texttt{releases} and five \texttt{assets}
+  are provided, the total number of files downloaded is 15: 5 for each release.
+  \newline
+  All \texttt{assets} are saved in the same directory as the corresponding release
+  name.
+  \newline
+  A special release value named \texttt{latest} is supported, which denotes the
+  most recent available release version. A particular \texttt{GitHub} API\footnote{\url{https://docs.github.com/rest}}
+  request is used to obtain the corresponding version name of a \texttt{latest} release.
+  \\ \hline
+
+  files & string mapping\footnote{\url{https://yaml.org/spec/1.2.2/\#10111-generic-mapping}}
+  & A list of extra files to be downloaded.
+  \newline
+  Each file has a \texttt{name} (key) and a string \texttt{URL} (value). A file is
+  downloaded from the specified \texttt{URL} and saved with the specified
+  \texttt{name}. Because these files lack a matching release value, they are saved
+  in the directory with the same name as the dependency root name (the same
+  where release directories are saved) \\ \hline
+
+  \caption{Dependency attributes}
+  \label{tbl:dependency_attributes}
+\end{xltabular}
+
+Listing \ref{lst:dependencies_config} displays the content of the dependencies
+configuration file, \texttt{dependencies.config.yaml}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/dependencies/dependencies.config.yaml}},
+which is used in the cluster implementation. It is worth noting the use of the
+\texttt{latest} value in the \texttt{releases} attribute, as well as the use of Regular
+Expression in the \texttt{promethues} and \texttt{node\_exporter} \texttt{assets}
+attribute. Furthermore, the \texttt{files} attribute specifies the corresponding
+\texttt{LICENSE} file for each dependency.
+
+\begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{autoscaler, k3s, node_exporter, prometheus, url, assets, releases, files, LICENSE, install.sh}}, xleftmargin=\parindent, label={lst:dependencies_config}, caption=Example content of dependencies configuration file]
+  ---
   autoscaler:
     url: "https://github.com/carlocorradini/autoscaler"
     assets:
@@ -1671,6 +1757,7 @@ implementation and therefore is not distributed in the release archive bundle.
     files:
       LICENSE: "https://raw.githubusercontent.com/carlocorradini/autoscaler/master/LICENSE"
 
+  ---
   k3s:
     url: "https://github.com/k3s-io/k3s"
     assets:
@@ -1680,34 +1767,51 @@ implementation and therefore is not distributed in the release archive bundle.
       - "k3s-airgap-images-arm64.tar.gz"
     releases:
       - "latest"
+      - "v1.26.1+k3s1"
+      - "v1.25.6+k3s1"
     files:
       LICENSE: "https://raw.githubusercontent.com/k3s-io/k3s/master/LICENSE"
       install.sh: "https://raw.githubusercontent.com/k3s-io/k3s/master/install.sh"
 
+  ---
   node_exporter:
     url: "https://github.com/prometheus/node_exporter"
     assets:
-      - "node_exporter-[0-9]+.[0-9]+.[0-9]+.linux-amd64.tar.gz"
-      - "node_exporter-[0-9]+.[0-9]+.[0-9]+.linux-arm64.tar.gz"
+      - "node_exporter-[0-9]+\.[0-9]+\.[0-9]+\.linux-amd64.tar.gz"
+      - "node_exporter-[0-9]+\.[0-9]+\.[0-9]+\.linux-arm64.tar.gz"
     releases:
       - "latest"
+      - "v1.5.0"
     files:
       LICENSE: "https://raw.githubusercontent.com/prometheus/node_exporter/master/LICENSE"
-      install.sh: "https://raw.githubusercontent.com/carlocorradini/node_exporter_installer/main/install.sh"
+      install.sh: "https://raw.githubusercontent.com/carlocorradini/node_exporter_installer/main/
+                     install.sh"
 
+  ---
   prometheus:
     url: "https://github.com/prometheus/prometheus"
     assets:
-      - "prometheus-[0-9]+.[0-9]+.[0-9]+.linux-amd64.tar.gz"
-      - "prometheus-[0-9]+.[0-9]+.[0-9]+.linux-arm64.tar.gz"
+      - "prometheus-[0-9]+\.[0-9]+\.[0-9]+\.linux-amd64.tar.gz"
+      - "prometheus-[0-9]+\.[0-9]+\.[0-9]+\.linux-arm64.tar.gz"
     releases:
       - "latest"
+      - "v2.42.0"
     files:
       LICENSE: "https://raw.githubusercontent.com/prometheus/prometheus/main/LICENSE"
 \end{lstlisting}
 
 \subsubsection{Script}
-\label{subsec:implementation_dependencies_management_script}
+\label{subsec:implementation_dependencies_management_script} A POSIX script named
+\texttt{dependencies.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/dependencies/dependencies.sh}}
+is used to automate all dependencies-related procedures. Its primary function is
+to read the dependencies configuration file and synchronize (download) the dependencies
+listed therein. \\ %
+The script requires some \texttt{coreutils} package's utility programs and the
+\texttt{yq} application to correctly handle \texttt{YAML} file and syntax. \\ %
+Dependencies' script behavior is customizable by using argument flags, which
+begin with a double dash followed by the property name and an optional value (\texttt{--NAME
+[VALUE]}). \\ %
+The accepted configuration parameters are listed in the table below.
 
 \begin{xltabular}
   {\textwidth} { >{\ttfamily}l | X | >{\ttfamily}c }
@@ -1716,16 +1820,54 @@ implementation and therefore is not distributed in the release archive bundle.
   \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
   \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hhline{===}
 
-  --config-file <FILE> & & dependencies.config.yaml \\ \hline
+  --config-file <FILE> & Path to the dependencies configuration file (\texttt{<FILE>}).
+  \newline
+  Both relative and absolute paths are supported.
+  \newline
+  It should be noted that the configuration file name does not have to be \texttt{dependencies.config.yaml},
+  but may be any name and extension. The sole condition is that it must be in
+  \texttt{YAML} format and that the attributes structure is respected. &
+  dependencies.config.yaml \\ \hline
 
-  --help & & \\ \hline
+  --sync & Synchronize all dependencies specified in the configuration file.
+  \newline
+  Dependencies are saved in the current working directory.
+  \newline
+  If a file is already present in the respective directory, it is not downloaded
+  (skipped). & \\ \hline
 
-  --log-level <LEVEL> & & info \\ \hline
+  --sync-force & The same as \texttt{--sync}, except that all dependencies are
+  downloaded even if they are already present locally.
+  \newline
+  The downloaded file replaces the local one (if exists). & \\ \hline
 
-  --sync & & \\ \hline
+  --log-level <LEVEL> & Logging level (\texttt{<LEVEL>}).
+  \newline
+  Attachment \ref{cha:logging} provides additional information regarding logging
+  and logging levels.
+  \newline
+  The following logging levels are supported (listed in descending order of importance):
+  \begin{itemize}[noitemsep]
+    \item[\protect\icircled{\texttt{5}}] \texttt{fatal}
 
-  --sync-force & & \\ \hline
+    \item[\protect\icircled{\texttt{4}}] \texttt{error}
+
+    \item[\protect\icircled{\texttt{3}}] \texttt{warn}
+
+    \item[\protect\icircled{\texttt{2}}] \texttt{info}
+
+    \item[\protect\icircled{\texttt{1}}] \texttt{debug}
+  \end{itemize}
+  & info \\ \hline
+
+  --help & Display a help message and terminate (successfully). & \\ \hline
+
+  \caption{Dependencies script parameters}
 \end{xltabular}
+
+To synchronize (force) all of the dependencies listed in the configuration file
+with the script, just execute: \lstinline[language=shell, alsoletter={.-},
+morekeywords={[2]{dependencies.sh}}, morekeywords={[3]{--sync-force}}]{./dependencies.sh --sync-force}
 
 \section{Installer}
 \label{sec:implementation_installer}
