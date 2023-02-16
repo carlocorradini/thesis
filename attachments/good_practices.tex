@@ -74,11 +74,11 @@ The previously mentioned CI/CDE workflow fully automates the creation of a new
 release\footnote{\url{https://github.com/carlocorradini/reCluster/releases}}. When
 a new Git Tag\footnote{\url{https://git-scm.com/book/en/v2/Git-Basics-Tagging}} is
 pushed to the main repository and the CI pipeline succeeds, the current cluster
-implementation code is bundled (see section \ref{subsec:good_practices_bundle})
-and released with the same name as the Git Tag. In the future, a CD pipeline
-will be implemented that automatically produces a prerelease anytime a new
-change in the code is made, ensuring that the newest nightly code is always available,
-even if it is not as stable as a tagged release. \\ %
+implementation code is bundled (see section \ref{sec:good_practices_bundle}) and
+released with the same name as the Git Tag. In the future, a CD pipeline will be
+implemented that automatically produces a prerelease anytime a new change in the
+code is made, ensuring that the newest nightly code is always available, even if
+it is not as stable as a tagged release. \\ %
 It should be noted that all prior implementations of Continuous Practices rely
 on the GitHub platform. Yet, there are equivalent implementations for
 practically every other coding platform.
