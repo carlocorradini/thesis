@@ -1745,7 +1745,7 @@ Expression in the \texttt{prometheus} and \texttt{node\_exporter} \texttt{assets
 attribute. Furthermore, the \texttt{files} attribute specifies the corresponding
 \texttt{LICENSE} file for each dependency.
 
-\begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{autoscaler, k3s, node_exporter, prometheus, url, assets, releases, files, LICENSE, install.sh}}, xleftmargin=\parindent, label={lst:dependencies_config}, caption=Example content of dependencies configuration file]
+\begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{autoscaler, k3s, node_exporter, prometheus, url, assets, releases, files, LICENSE, install.sh}}, xleftmargin=\parindent, label={lst:dependencies_config}, caption=Content of dependencies configuration file]
   ---
   autoscaler:
     url: "https://github.com/carlocorradini/autoscaler"
@@ -1801,15 +1801,16 @@ attribute. Furthermore, the \texttt{files} attribute specifies the corresponding
 \end{lstlisting}
 
 \subsubsection{Script}
-\label{subsec:implementation_dependencies_management_script} A POSIX script named
-\texttt{dependencies.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/dependencies/dependencies.sh}}
+\label{subsec:implementation_dependencies_management_script}
+
+A POSIX script named \texttt{dependencies.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/dependencies/dependencies.sh}}
 is used to automate all dependencies-related procedures. Its primary function is
-to read the dependencies configuration file and synchronize (download) the dependencies
-listed therein. \\ %
-The script requires some \texttt{coreutils} package's utility programs and the
-\texttt{yq} application to correctly handle \texttt{YAML} file and syntax. \\ %
-Dependencies' script behavior is customizable by using argument flags, which
-begin with a double dash followed by the property name and an optional value (\texttt{--NAME
+to read the dependencies configuration file and synchronize (download) the
+dependencies listed therein. \\ %
+The script requires some \texttt{coreutils} package's utility programs and the \texttt{yq}
+application to correctly handle \texttt{YAML} file and syntax. \\ %
+Dependencies' script behavior is customizable by using argument flags, which begin
+with a double dash followed by the property name and an optional value (\texttt{--NAME
 [VALUE]}). \\ %
 The accepted configuration parameters are listed in the table below.
 
@@ -1865,9 +1866,9 @@ The accepted configuration parameters are listed in the table below.
   \caption{Dependencies script parameters}
 \end{xltabular}
 
-To synchronize (force) all of the dependencies listed in the configuration file
-with the script, just execute: \lstinline[language=shell, alsoletter={.-},
-morekeywords={[2]{dependencies.sh}}, morekeywords={[3]{--sync-force}}]{./dependencies.sh --sync-force}
+To synchronize (force) all of the dependencies listed in the configuration file with
+the script, just execute: \lstinline[language=shell, alsoletter={.-}, morekeywords={[2]{dependencies.sh}},
+morekeywords={[3]{--sync-force}}]{./dependencies.sh --sync-force}
 
 \section{Installer}
 \label{sec:implementation_installer}
