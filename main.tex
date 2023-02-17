@@ -76,6 +76,7 @@
 \definecolor{promqlGreen}{RGB}{80,161,79}
 \definecolor{yamlPurple}{RGB}{166,38,164}
 \definecolor{yamlBlue}{RGB}{64,120,242}
+\definecolor{yamlOrange}{RGB}{209,154,102}
 \definecolor{yamlGreen}{RGB}{80,161,79}
 \definecolor{yamlGray}{RGB}{160,161,167}
 \definecolor{graphqlPurple}{RGB}{166,38,164}
@@ -111,6 +112,7 @@ keepspaces=true, %
 title=\lstname, %
 commentstyle=\color{green}\upshape, %
 autogobble=true, %
+upquote=true, %
 keywordstyle=\bfseries %
 }
 
@@ -158,13 +160,19 @@ morestring=[b]", %
 stringstyle=\color{promqlGreen}, %
 }
 
+\def\beginlstdelim#1#2#3%
+{%
+\def\endlstdelim{#2\egroup}%
+\fontencoding{T1}\ttfamily\color{#3}#1\bgroup\aftergroup\endlstdelim%
+}
 \lstdefinelanguage{yaml}
 { %
 keywords={true, false, null}, %
-keywordstyle=\color{yamlPurple}, %
+keywordstyle=\color{yamlOrange}, %
 keywordstyle=[2]\color{yamlBlue}, %
+moredelim = **[is][\beginlstdelim{\$\{\{}{\}\}}{yamlPurple}]{\$\{\{}{\}\}}, %
 morestring=[b]', %
-morestring=[b]", %
+morestring=*[b]", %
 stringstyle=\color{yamlGreen}, %
 comment=[l]{\#}, %
 morecomment=[s]{/*}{*/}, %

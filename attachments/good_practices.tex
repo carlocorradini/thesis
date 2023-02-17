@@ -180,7 +180,7 @@ programs that provide various outputs required for the release bundle.
 
 \begin{lstlisting}[language=yaml, alsoletter={._-}, morekeywords={[2]{__, run, install.sh, LICENSE, README.md, configs, certs, k3s, k8s, autoscaler, loadbalancer, config.yaml, deployment.yaml, registry, node_exporter, recluster, ssh, dependencies, prometheus, distributions, alpine, arch, logo.png, iso, docs, scripts, certs.sh, configs.sh, configs.config.yaml, server, package.json, package-lock.json, build, prisma, schema.prisma, migrations}}, xleftmargin=\parindent, label={lst:bundle_config}, caption=Content of bundle configuration file]
   __:
-    run: "./scripts/inline.sh --in-file ./install.sh --overwrite"
+    run: './scripts/inline.sh --in-file ./install.sh --overwrite'
   install.sh: true
   LICENSE: true
   README.md: true
@@ -194,8 +194,8 @@ programs that provide various outputs required for the release bundle.
       autoscaler: true
       loadbalancer:
         __:
-          run: "wget --output-document=deployment.yaml https://raw.githubusercontent.com/metallb
-                  /metallb/v0.13.7/config/manifests/metallb-native.yaml"
+          run: 'wget --output-document=deployment.yaml https://raw.githubusercontent.com/metallb
+                  /metallb/v0.13.7/config/manifests/metallb-native.yaml'
         config.yaml: true
         deployment.yaml: true
         README.md: true
@@ -206,7 +206,7 @@ programs that provide various outputs required for the release bundle.
 
   dependencies:
     __:
-      run: "./dependencies/dependencies.sh --sync-force"
+      run: './dependencies/dependencies.sh --sync-force'
     autoscaler: true
     k3s: true
     node_exporter: true
@@ -215,13 +215,13 @@ programs that provide various outputs required for the release bundle.
   distributions:
     alpine:
       __:
-        run: "./distributions/alpine/build.sh"
+        run: './distributions/alpine/build.sh'
       README.md: true
       logo.png: true
       iso: true
     arch:
       __:
-        run: "./distributions/arch/build.sh"
+        run: './distributions/arch/build.sh'
       README.md: true
       logo.png: true
       iso: true
@@ -230,8 +230,8 @@ programs that provide various outputs required for the release bundle.
 
   scripts:
     __:
-      run: "./scripts/inline.sh --in-file ./certs.sh --overwrite && ./scripts/inline.sh --in-file
-              ./configs.sh --overwrite"
+      run: './scripts/inline.sh --in-file ./certs.sh --overwrite && ./scripts/inline.sh --in-file
+              ./configs.sh --overwrite'
     README.md: true
     certs.sh: true
     configs.sh: true
@@ -239,7 +239,7 @@ programs that provide various outputs required for the release bundle.
 
   server:
     __:
-      run: "npm run build:clean && npm run build"
+      run: 'npm run build:clean && npm run build'
     README.md: true
     package.json: true
     package-lock.json: true

@@ -1748,56 +1748,55 @@ attribute. Furthermore, the \texttt{files} attribute specifies the corresponding
 \begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{autoscaler, k3s, node_exporter, prometheus, url, assets, releases, files, LICENSE, install.sh}}, xleftmargin=\parindent, label={lst:dependencies_config}, caption=Content of dependencies configuration file]
   ---
   autoscaler:
-    url: "https://github.com/carlocorradini/autoscaler"
+    url: 'https://github.com/carlocorradini/autoscaler'
     assets:
-      - "cluster-autoscaler.amd64.tar.gz"
-      - "cluster-autoscaler.arm64.tar.gz"
+      - 'cluster-autoscaler.amd64.tar.gz'
+      - 'cluster-autoscaler.arm64.tar.gz'
     releases:
-      - "latest"
+      - 'latest'
     files:
-      LICENSE: "https://raw.githubusercontent.com/carlocorradini/autoscaler/master/LICENSE"
+      LICENSE: 'https://raw.githubusercontent.com/carlocorradini/autoscaler/master/LICENSE'
 
   ---
   k3s:
-    url: "https://github.com/k3s-io/k3s"
+    url: 'https://github.com/k3s-io/k3s'
     assets:
-      - "k3s"
-      - "k3s-arm64"
-      - "k3s-airgap-images-amd64.tar.gz"
-      - "k3s-airgap-images-arm64.tar.gz"
+      - 'k3s'
+      - 'k3s-arm64'
+      - 'k3s-airgap-images-amd64.tar.gz'
+      - 'k3s-airgap-images-arm64.tar.gz'
     releases:
-      - "latest"
-      - "v1.26.1+k3s1"
-      - "v1.25.6+k3s1"
+      - 'latest'
+      - 'v1.26.1+k3s1'
+      - 'v1.25.6+k3s1'
     files:
-      LICENSE: "https://raw.githubusercontent.com/k3s-io/k3s/master/LICENSE"
-      install.sh: "https://raw.githubusercontent.com/k3s-io/k3s/master/install.sh"
+      LICENSE: 'https://raw.githubusercontent.com/k3s-io/k3s/master/LICENSE'
+      install.sh: 'https://raw.githubusercontent.com/k3s-io/k3s/master/install.sh'
 
   ---
   node_exporter:
-    url: "https://github.com/prometheus/node_exporter"
+    url: 'https://github.com/prometheus/node_exporter'
     assets:
-      - "node_exporter-[0-9]+\.[0-9]+\.[0-9]+\.linux-amd64.tar.gz"
-      - "node_exporter-[0-9]+\.[0-9]+\.[0-9]+\.linux-arm64.tar.gz"
+      - 'node_exporter-[0-9]+\.[0-9]+\.[0-9]+\.linux-amd64.tar.gz'
+      - 'node_exporter-[0-9]+\.[0-9]+\.[0-9]+\.linux-arm64.tar.gz'
     releases:
-      - "latest"
-      - "v1.5.0"
+      - 'latest'
+      - 'v1.5.0'
     files:
-      LICENSE: "https://raw.githubusercontent.com/prometheus/node_exporter/master/LICENSE"
-      install.sh: "https://raw.githubusercontent.com/carlocorradini/node_exporter_installer/main/
-                     install.sh"
+      LICENSE: 'https://raw.githubusercontent.com/prometheus/node_exporter/master/LICENSE'
+      install.sh: 'https://raw.githubusercontent.com/carlocorradini/node_exporter_installer/main/                  install.sh'
 
   ---
   prometheus:
-    url: "https://github.com/prometheus/prometheus"
+    url: 'https://github.com/prometheus/prometheus'
     assets:
-      - "prometheus-[0-9]+\.[0-9]+\.[0-9]+\.linux-amd64.tar.gz"
-      - "prometheus-[0-9]+\.[0-9]+\.[0-9]+\.linux-arm64.tar.gz"
+      - 'prometheus-[0-9]+\.[0-9]+\.[0-9]+\.linux-amd64.tar.gz'
+      - 'prometheus-[0-9]+\.[0-9]+\.[0-9]+\.linux-arm64.tar.gz'
     releases:
-      - "latest"
-      - "v2.42.0"
+      - 'latest'
+      - 'v2.42.0'
     files:
-      LICENSE: "https://raw.githubusercontent.com/prometheus/prometheus/main/LICENSE"
+      LICENSE: 'https://raw.githubusercontent.com/prometheus/prometheus/main/LICENSE'
 \end{lstlisting}
 
 \subsubsection{Script}
@@ -1873,8 +1872,108 @@ morekeywords={[3]{--sync-force}}]{./dependencies.sh --sync-force}
 \section{Installer}
 \label{sec:implementation_installer}
 
-\subsection{Configuration Arguments}
-\label{subsec:implementation_installer_configuration_arguments}
+\url{https://github.com/carlocorradini/reCluster/blob/main/install.sh}
+
+\subsection{Configuration Parameters}
+\label{subsec:implementation_installer_configuration_parameters}
+
+\begin{xltabular}
+  {\textwidth} { >{\ttfamily}l | X | >{\ttfamily}c }
+
+  \multicolumn{1}{ c |}{\large{\textbf{Name}}} &
+  \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
+  \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hhline{===}
+
+  --admin-username <USERNAME> & & admin \\ \hline
+
+  --admin-password <PASSWORD> & & Password\$0 \\ \hline
+
+  --airgap & & false \\ \hline
+
+  --autoscaler-username <USERNAME> & & autoscaler \\ \hline
+
+  --autoscaler-password <PASSWORD> & & Password\$0 \\ \hline
+
+  --autoscaler-version <VERSION> & & latest \\ \hline
+
+  --bench-time <TIME> & & 30 \\ \hline
+
+  --certs-dir <DIR> & & configs/certs \\ \hline
+
+  --config-file <FILE> & & configs/recluster/config.yaml \\ \hline
+
+  --disable-color & & false \\ \hline
+
+  --disable-spinner & & false \\ \hline
+
+  --help & Display a help message and terminate (successfully). & \\ \hline
+
+  --init-cluster & & false \\ \hline
+
+  --k3s-config-file <FILE> & & configs/k3s/config.yaml \\ \hline
+
+  --k3s-registry-config-file <FILE> & & configs/k3s/registries.yaml \\ \hline
+
+  --k3s-version <VERSION> & & latest \\ \hline
+
+  --log-level <LEVEL> & Logging level (\texttt{<LEVEL>}).
+  \newline
+  Attachment \ref{cha:logging} provides additional information regarding logging
+  and logging levels.
+  \newline
+  The following logging levels are supported (listed in descending order of importance):
+  \begin{itemize}[noitemsep]
+    \item[\protect\icircled{\texttt{5}}] \texttt{fatal}
+
+    \item[\protect\icircled{\texttt{4}}] \texttt{error}
+
+    \item[\protect\icircled{\texttt{3}}] \texttt{warn}
+
+    \item[\protect\icircled{\texttt{2}}] \texttt{info}
+
+    \item[\protect\icircled{\texttt{1}}] \texttt{debug}
+  \end{itemize}
+  & info \\ \hline
+
+  --node-exporter-config-file <FILE> & & configs/node\_exporter/config.yaml \\
+  \hline
+
+  --node-exporter-version <VERSION> & & latest \\ \hline
+
+  --pc-device-api <URL> & & http://pc.recluster.local/cm?cmnd=status\%2010 \\
+  \hline
+
+  --pc-interval <TIME> & & 1 \\ \hline
+
+  --pc-time <TIME> & & 30 \\ \hline
+
+  --pc-warmup <TIME> & & 10 \\ \hline
+
+  --server-env-file <FILE> & & configs/recluster/server.env \\ \hline
+
+  --spinner &
+  \begin{enumerate}
+    \item \texttt{dots}
+      \newline
+
+    \item \texttt{grayscale}
+      \newline
+
+    \item \texttt{propeller}
+      \newline
+  \end{enumerate}
+  & \\ \hline
+
+  --ssh-authorized-keys-file <FILE> & & configs/ssh/authorized\_keys \\ \hline
+
+  --ssh-config-file <FILE> & & configs/ssh/ssh\_config \\ \hline
+
+  --sshd-config-file <FILE> & & configs/ssh/sshd\_config \\ \hline
+
+  --user <USER> & & root \\ \hline
+
+  \caption{Installer script parameters}
+\end{xltabular}
 
 \subsection{Configuration Files}
 \label{subsec:implementation_installer_configuration_files}
@@ -1884,6 +1983,36 @@ morekeywords={[3]{--sync-force}}]{./dependencies.sh --sync-force}
 
 \subsubsection{K3s}
 \label{subsubsec:implementation_installer_configuration_files_k3s}
+
+\begin{lstlisting}[language=yaml, alsoletter={._}, escapeinside={(*@}{@*)}, morekeywords={[2]{mirrors, endpoint, configs, tls, ca_file, key_file}}, xleftmargin=\parindent, label={lst:k3s_registries_config}, caption=TODO]
+  mirrors:
+    ${{ k8s.registry.mirror.host }}(*@\ttfamily\textcolor{yamlBlue}{:}@*)${{ k8s.registry.mirror.port }}:
+      endpoint:
+        - "https://${{ k8s.registry.endpoint.host }}:${{ k8s.registry.endpoint.port }}"
+
+  configs:
+    ${{ k8s.registry.mirror.host }}:
+      tls:
+        ca_file: '/usr/local/share/ca-certificates/registry.crt'
+        key_file: '/usr/local/share/ca-certificates/registry.key'
+\end{lstlisting}
+
+\begin{lstlisting}[language=yaml, alsoletter={.-}, morekeywords={[2]{token, cluster-init, cluster-domain, flannel-backend, disable, node-taint}}, xleftmargin=\parindent, label={lst:k3s_controller_config}, caption=TODO]
+  token: "${{ k3s.token }}"
+  cluster-init: true
+  # server: "https://${{ k3s.server.host }}:${{ k3s.server.port }}"
+  cluster-domain: 'recluster.local'
+  flannel-backend: 'host-gw'
+  disable:
+    - 'servicelb'
+  node-taint:
+    # - 'CriticalAddonsOnly=true:NoExecute'
+\end{lstlisting}
+
+\begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{token, server}}, xleftmargin=\parindent, label={lst:k3s_worker_config}, caption=TODO]
+  token: "${{ k3s.token }}"
+  server: "https://${{ k3s.server.host }}:${{ k3s.server.port }}"
+\end{lstlisting}
 
 \subsubsection{K8s}
 \label{subsubsec:implementation_installer_configuration_filesn_k8s}
