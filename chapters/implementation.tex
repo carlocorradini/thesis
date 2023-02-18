@@ -1658,15 +1658,15 @@ implementation and therefore is not distributed in the release archive bundle.
 \label{subsec:implementation_dependencies_management}
 
 To create a cluster release bundle, all of the dependencies must be managed and
-downloaded (see section \ref{subsec:good_practices_continuous_deployment_bundle}).
-Furthermore, as stated in previous sections, having all of the required dependencies
-locally during cluster initialization without the need for an internet connection
-is essential for an Air-Gap environment but can also be beneficial for speeding up
-the overall installation time because there is no need to download them from the
-Internet. It should be noted that if the cluster is made up of many systems with
-various architectures, such as \texttt{amd64} or \texttt{arm64}, the necessary
-dependencies must be downloaded for all architectures, otherwise, the
-installation procedure will fail with an error. \\ %
+downloaded (see section \ref{sec:good_practices_bundle}). Furthermore, as stated
+in previous sections, having all of the required dependencies locally during cluster
+initialization without the need for an internet connection is essential for an Air-Gap
+environment but can also be beneficial for speeding up the overall installation time
+because there is no need to download them from the Internet. It should be noted
+that if the cluster is made up of many systems with various architectures, such as
+\texttt{amd64} or \texttt{arm64}, the necessary dependencies must be downloaded
+for all architectures, otherwise, the installation procedure will fail with an
+error. \\ %
 The management of dependencies should be as straightforward as possible, with as
 few manual tasks as possible. As a result, the entire procedure has been entirely
 automated using a simple configuration file called \texttt{dependencies.config.yaml}
@@ -1869,6 +1869,56 @@ To synchronize (force) all of the dependencies listed in the configuration file 
 the script, just execute: \lstinline[language=shell, alsoletter={.-}, morekeywords={[2]{dependencies.sh}},
 morekeywords={[3]{--sync-force}}]{./dependencies.sh --sync-force}
 
+\section{Server}
+\label{sec:implementation_server}
+
+\subsection{Database}
+\label{subsec:implementation_server_database}
+
+\subsubsection{Prisma}
+\label{subsubsec:implementation_server_database_prisma}
+
+\begin{wrapfigure}
+  {r}{.25\textwidth} %
+  \centering
+  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/logos/prisma.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://www.prisma.io}} }
+  \caption{Prisma logo}
+\end{wrapfigure}
+
+\subsubsection{Schema}
+\label{subsubsec:implementation_server_database_schema}
+
+\subsection{GraphQL}
+\label{subsec:implementation_server_graphql}
+
+\subsubsection{GraphQL vs REST}
+\label{subsubsec:implementation_server_graphql_graphql_vs_rest}
+
+\subsubsection{Schema}
+\label{subsubsec:implementation_server_graphql_schema}
+
+\subsection{Node Pool}
+\label{subsec:implementation_server_node_pool}
+
+\subsection{Node Registration}
+\label{subsec:implementation_server_node_registration}
+
+\subsubsection{JSON Web Token}
+\label{subsubsec:implementation_server_node_registration_json_web_token}
+
+\subsection{Upscaling}
+\label{subsec:implementation_server_upscaling}
+
+\subsubsection{Wake-on-LAN}
+\label{subsubsec:implementation_server_scale_up_wake_on_lan}
+
+\subsection{Downscaling}
+\label{subsec:implementation_server_downscaling}
+
+\subsubsection{SSH}
+\label{subsubsec:implementation_server_scale_up_ssh}
+
 \section{Installer}
 \label{sec:implementation_installer}
 
@@ -1978,6 +2028,10 @@ morekeywords={[3]{--sync-force}}]{./dependencies.sh --sync-force}
 \subsection{Configuration Files}
 \label{subsec:implementation_installer_configuration_files}
 
+% TODO # ... means skipped
+% TODO config script
+% TODO # replaced value from configs.sh
+
 \subsubsection{Certificates}
 \label{subsubsec:implementation_installer_configuration_files_certificates}
 
@@ -1987,11 +2041,14 @@ morekeywords={[3]{--sync-force}}]{./dependencies.sh --sync-force}
 \begin{lstlisting}[language=yaml, alsoletter={._}, escapeinside={(*@}{@*)}, morekeywords={[2]{mirrors, endpoint, configs, tls, ca_file, key_file}}, xleftmargin=\parindent, label={lst:k3s_registries_config}, caption=TODO]
   mirrors:
     ${{ k8s.registry.mirror.host }}(*@\ttfamily\textcolor{yamlBlue}{:}@*)${{ k8s.registry.mirror.port }}:
+    # registry.recluster.local:5000:
       endpoint:
         - "https://${{ k8s.registry.endpoint.host }}:${{ k8s.registry.endpoint.port }}"
+          # "https://10.0.0.200:5000"
 
   configs:
     ${{ k8s.registry.mirror.host }}:
+    # registry.recluster.local:
       tls:
         ca_file: '/usr/local/share/ca-certificates/registry.crt'
         key_file: '/usr/local/share/ca-certificates/registry.key'
@@ -1999,8 +2056,10 @@ morekeywords={[3]{--sync-force}}]{./dependencies.sh --sync-force}
 
 \begin{lstlisting}[language=yaml, alsoletter={.-}, morekeywords={[2]{token, cluster-init, cluster-domain, flannel-backend, disable, node-taint}}, xleftmargin=\parindent, label={lst:k3s_controller_config}, caption=TODO]
   token: "${{ k3s.token }}"
+  # token: "4646f99bc4cbae3d5eceed856b337c9d3284be0d4056a3909f780c0c385fbf93"
   cluster-init: true
   # server: "https://${{ k3s.server.host }}:${{ k3s.server.port }}"
+  # server: "https://10.0.0.10:6443"
   cluster-domain: 'recluster.local'
   flannel-backend: 'host-gw'
   disable:
@@ -2011,20 +2070,249 @@ morekeywords={[3]{--sync-force}}]{./dependencies.sh --sync-force}
 
 \begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{token, server}}, xleftmargin=\parindent, label={lst:k3s_worker_config}, caption=TODO]
   token: "${{ k3s.token }}"
+  # token: "4646f99bc4cbae3d5eceed856b337c9d3284be0d4056a3909f780c0c385fbf93"
   server: "https://${{ k3s.server.host }}:${{ k3s.server.port }}"
+  # server: "https://10.0.0.10:6443"
 \end{lstlisting}
 
 \subsubsection{K8s}
 \label{subsubsec:implementation_installer_configuration_filesn_k8s}
 
+\begin{lstlisting}[language=yaml, alsoletter={.-1}, morekeywords={1}, morekeywords={[2]{apiVersion, kind, metadata, name, namespace, stringData, cloud-config, labels, app, spec, replicas, selector, matchLabels, template, serviceAccountName, tolerations, containers, image, command, volumeMounts, mountPath, readOnly, volumes, secret, secretName}}, xleftmargin=\parindent, label={lst:k8s_autoscaler_deployment}, caption=TODO]
+  # ...
+
+  ---
+  apiVersion: 'v1'
+  kind: 'Secret'
+  metadata:
+    name: 'cluster-autoscaler-secret'
+    # ...
+  stringData:
+    cloud-config: |-
+      {
+        "url": "http://${{ recluster.server.host }}:${{ recluster.server.port }}                                /${{ recluster.server.path }}",
+        # "url": "http://10.0.0.10:8080/graphql",
+        "token": "${{ __.token }}"
+        # "token": "${{ __.token }}"
+      }
+
+  ---
+  apiVersion: 'apps/v1'
+  kind: 'Deployment'
+  metadata:
+    name: 'cluster-autoscaler'
+    # ...
+  spec:
+    # ...
+    replicas: 1
+    template:
+      # ...
+      spec:
+        # ...
+        serviceAccountName: 'cluster-autoscaler'
+        containers:
+          - name: 'cluster-autoscaler'
+            image: "${{ k8s.registry.mirror.host }}:${{ k8s.registry.mirror.port }}/recluster                       /cluster-autoscaler"
+            # image: "registry.recluster.local:5000/recluster/cluster-autoscaler"
+            command:
+              - './cluster-autoscaler'
+              - '--v=4'
+              - '--stderrthreshold=info'
+              - '--cloud-provider=recluster'
+              - '--cloud-config=/config/cloud-config'
+              - '--cluster-name=recluster'
+              - '--scale-down-unneeded-time=5m'
+              - '--skip-nodes-with-local-storage=false'
+              - '--skip-nodes-with-system-pods=false'
+            # ...
+        volumes:
+          - name: 'cloud-config'
+            secret:
+              secretName: 'cluster-autoscaler-secret'
+\end{lstlisting}
+
+\begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{apiVersion, kind, metadata, name, namespace, spec, addresses, ipAddressPools}}, xleftmargin=\parindent, label={lst:k8s_metallb_config}, caption=TODO]
+  ---
+  apiVersion: 'metallb.io/v1beta1'
+  kind: 'IPAddressPool'
+  metadata:
+    name: 'default'
+    namespace: 'metallb-system'
+  spec:
+    addresses:
+      - "${{ k8s.loadbalancer.ip.from }}-${{ k8s.loadbalancer.ip.to }}"
+        # "10.0.0.200-10.0.0.250"
+
+  ---
+  apiVersion: 'metallb.io/v1beta1'
+  kind: 'L2Advertisement'
+  metadata:
+    name: 'default'
+    namespace: 'metallb-system'
+  spec:
+    ipAddressPools:
+      - 'default'
+\end{lstlisting}
+
+\begin{lstlisting}[language=yaml, alsoletter={.015}, morekeywords={1, 5000}, morekeywords={[2]{apiVersion, kind, type, metadata, name, namespace, data, tls.crt, tls.key, accessModes, storageClassName, resources, requests, storage, spec, selector, app, ports, protocol, port, targetPort, loadBalancerIP, replicas, template, containers, image, containerPort, volumes, secret, secretName, persistentVolumeClaim, claimName}}, xleftmargin=\parindent, label={lst:k8s_registry_config}, caption=TODO]
+  # ...
+
+  ---
+  apiVersion: 'v1'
+  kind: 'Secret'
+  type: 'kubernetes.io/tls'
+  metadata:
+    name: 'registry-secret'
+    # ...
+  data:
+    tls.crt: "${{ k8s.registry.tls.crt }}"
+    # tls.crt: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZaekNDQTArZ0F3SUJBZ0lVVWg5T01vV0k1SEFG..."
+    tls.key: "${{ k8s.registry.tls.key }}"
+    # tls.key: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUpRd0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVND..."
+
+  ---
+  apiVersion: 'v1'
+  kind: 'PersistentVolumeClaim'
+  metadata:
+    name: 'registry-data-pvc'
+    # ...
+  spec:
+    accessModes:
+      - 'ReadWriteOnce'
+    storageClassName: 'local-path'
+    # storageClassName: 'longhorn'
+    resources:
+      requests:
+        storage: '32Gi'
+
+  ---
+  apiVersion: 'apps/v1'
+  kind: 'Deployment'
+  metadata:
+    name: 'registry'
+    # ...
+  spec:
+    # ...
+    replicas: 1
+    template:
+      # ...
+      spec:
+        # ...
+        containers:
+          - name: 'registry'
+            image: 'registry:2'
+            ports:
+              - containerPort: 5000
+            # ...
+        volumes:
+          - name: 'registry-certs'
+            secret:
+              secretName: 'registry-secret'
+          - name: 'registry-data'
+            persistentVolumeClaim:
+              claimName:' registry-data-pvc'
+
+  ---
+  apiVersion: 'v1'
+  kind: 'Service'
+  metadata:
+    name: 'registry-service'
+    # ...
+  spec:
+    type: 'LoadBalancer'
+    selector:
+      app: 'registry'
+    ports:
+      - name: 'registry-port'
+        protocol: 'TCP'
+        port: ${{ k8s.registry.endpoint.port }}
+        # port: 5000
+        targetPort: 5000
+    loadBalancerIP: "${{ k8s.registry.endpoint.host }}"
+    # loadBalancerIP: "10.0.0.200"
+\end{lstlisting}
+
 \subsubsection{Node exporter}
 \label{subsubsec:implementation_installer_configuration_files_node_exporter}
+
+% TODO Write node exporter no config file but install.sh transform
+
+\begin{lstlisting}[language=yaml, alsoletter={.-}, morekeywords={[2]{collector, disable-defaults, cpu, meminfo}}, xleftmargin=\parindent, label={lst:node_exporter_config}, caption=TODO]
+collector:
+  disable-defaults: true
+  cpu: true
+  meminfo: true
+\end{lstlisting}
 
 \subsubsection{reCluster}
 \label{subsubsec:implementation_installer_configuration_files_recluster}
 
+\begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{kind, recluster, server}}, xleftmargin=\parindent, label={lst:recluster_controller_config}, caption=TODO]
+  kind: 'controller'
+
+  recluster:
+    server: "http://${{ recluster.server.host }}:${{ recluster.server.port }}"
+    # server: "10.0.0.10:8080"
+\end{lstlisting}
+
+\begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{kind, recluster, server}}, xleftmargin=\parindent, label={lst:recluster_worker_config}, caption=TODO]
+  kind: 'worker'
+
+  recluster:
+    server: "http://${{ recluster.server.host }}:${{ recluster.server.port }}"
+    # server: "10.0.0.10:8080"
+\end{lstlisting}
+
+\begin{lstlisting}[language=shell, alsoletter={_}, morestring={*[b]"}, morekeywords={[4]{NODE_ENV, HOST, PORT, LOGGER_LEVEL, DATABASE_URL, SSH_USERNAME, SSH_PRIVATE_KEY, SSH_PASSPHRASE, TOKEN_PRIVATE_KEY, TOKEN_PUBLIC_KEY, TOKEN_PASSPHRASE}}, xleftmargin=\parindent, label={lst:recluster_server_config}, caption=TODO]
+  NODE_ENV='production'
+  HOST='0.0.0.0'
+  PORT=${{ recluster.server.port }}
+  # PORT=8080
+  LOGGER_LEVEL='info'
+  DATABASE_URL="postgresql://${{ recluster.database.user }}:${{ recluster.database.password }}                  @${{ recluster.database.host }}:${{ recluster.database.port }}                                /${{ recluster.database.db }}"
+  # DATABASE_URL="postgresql://recluster:password@10.0.0.10:5432/recluster"
+  SSH_USERNAME='root'
+  SSH_PRIVATE_KEY='/etc/recluster/certs/ssh.key'
+  SSH_PASSPHRASE=
+  TOKEN_PRIVATE_KEY='/etc/recluster/certs/token.key'
+  TOKEN_PUBLIC_KEY='/etc/recluster/certs/token.crt'
+  TOKEN_PASSPHRASE=
+\end{lstlisting}
+
 \subsubsection{SSH}
 \label{subsubsec:implementation_installer_configuration_files_ssh}
+
+\begin{lstlisting}[language=shell, xleftmargin=\parindent, label={lst:ssh_authorized_keys}, caption=TODO]
+  ${{ ssh.authorized_key }}
+  # ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK4mrabO3qgmkmWKSP+WcBDEWGGqJUBoiQdK3yAbKry9
+\end{lstlisting}
+
+\begin{lstlisting}[language=shell, alsoletter={*.-@}, morekeywords={[4]{Host, AddKeysToAgent, IdentitiesOnly, PasswordAuthentication, ChallengeResponseAuthentication, PubkeyAuthentication, HostKeyAlgorithms, Ciphers, MACs, UseRoaming}}, keywordstyle={[5]\color{shellGreen}}, morekeywords={[5]{*, yes, no, ssh-ed25519-cert-v01@openssh.com, ssh-ed25519, chacha20-poly1305@openssh.com, aes256-gcm@openssh.com, aes128-gcm@openssh.com, aes256-ctr, aes192-ctr, aes128-ctr, hmac-sha2-512-etm@openssh.com, hmac-sha2-256-etm@openssh.com, umac-128-etm@openssh.com, hmac-sha2-512, hmac-sha2-256, umac-128@openssh.com}}, xleftmargin=\parindent, label={lst:ssh_config}, caption=TODO]
+  Host *
+    AddKeysToAgent yes
+    IdentitiesOnly yes
+    PasswordAuthentication no
+    ChallengeResponseAuthentication no
+    PubkeyAuthentication yes
+    HostKeyAlgorithms ssh-ed25519-cert-v01@openssh.com,ssh-ed25519
+    Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,                                           aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+    MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,                                    umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com
+    UseRoaming no
+    # ...
+\end{lstlisting}
+
+\begin{lstlisting}[language=shell, xleftmargin=\parindent, alsoletter={*.-@/}, morekeywords={[4]{Ciphers, MACs, PubkeyAuthentication, PasswordAuthentication, ChallengeResponseAuthentication, AllowTcpForwarding, GatewayPorts, X11Forwarding, Subsystem}}, keywordstyle={[5]\color{shellGreen}}, morekeywords={[5]{no, yes, sftp, /usr/lib/ssh/sftp-server, chacha20-poly1305@openssh.com, aes256-gcm@openssh.com, aes128-gcm@openssh.com, aes256-ctr, aes192-ctr, aes128-ctr, hmac-sha2-512-etm@openssh.com, hmac-sha2-256-etm@openssh.com, umac-128-etm@openssh.com, hmac-sha2-512, hmac-sha2-256, umac-128@openssh.com}}, label={lst:sshd_config}, caption=TODO]
+  Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,                                           aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+  MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,           hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com
+  PubkeyAuthentication yes
+  PasswordAuthentication
+  ChallengeResponseAuthentication no
+  AllowTcpForwarding no
+  GatewayPorts no
+  X11Forwarding no
+  Subsystem sftp /usr/lib/ssh/sftp-server
+  # ...
+\end{lstlisting}
 
 \subsection{Node Facts}
 \label{subsec:implementation_installer_node_facts}
@@ -2082,56 +2370,6 @@ morekeywords={[3]{--sync-force}}]{./dependencies.sh --sync-force}
 
 \subsubsection{Shutdown}
 \label{subsubsec:implementation_installer_services_shutdown}
-
-\section{Server}
-\label{sec:implementation_server}
-
-\subsection{Database}
-\label{subsec:implementation_server_database}
-
-\subsubsection{Prisma}
-\label{subsubsec:implementation_server_database_prisma}
-
-\begin{wrapfigure}
-  {r}{.25\textwidth} %
-  \centering
-  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/logos/prisma.png} } %
-  {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://www.prisma.io}} }
-  \caption{Prisma logo}
-\end{wrapfigure}
-
-\subsubsection{Schema}
-\label{subsubsec:implementation_server_database_schema}
-
-\subsection{GraphQL}
-\label{subsec:implementation_server_graphql}
-
-\subsubsection{GraphQL vs REST}
-\label{subsubsec:implementation_server_graphql_graphql_vs_rest}
-
-\subsubsection{Schema}
-\label{subsubsec:implementation_server_graphql_schema}
-
-\subsection{Node Pool}
-\label{subsec:implementation_server_node_pool}
-
-\subsection{Node Registration}
-\label{subsec:implementation_server_node_registration}
-
-\subsubsection{JSON Web Token}
-\label{subsubsec:implementation_server_node_registration_json_web_token}
-
-\subsection{Upscaling}
-\label{subsec:implementation_server_upscaling}
-
-\subsubsection{Wake-on-LAN}
-\label{subsubsec:implementation_server_scale_up_wake_on_lan}
-
-\subsection{Downscaling}
-\label{subsec:implementation_server_downscaling}
-
-\subsubsection{SSH}
-\label{subsubsec:implementation_server_scale_up_ssh}
 
 \section{Autoscaling}
 \label{sec:implementation_autoscaling}

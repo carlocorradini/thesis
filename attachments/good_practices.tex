@@ -194,8 +194,7 @@ programs that provide various outputs required for the release bundle.
       autoscaler: true
       loadbalancer:
         __:
-          run: 'wget --output-document=deployment.yaml https://raw.githubusercontent.com/metallb
-                  /metallb/v0.13.7/config/manifests/metallb-native.yaml'
+          run: 'wget --output-document=deployment.yaml https://raw.githubusercontent.com/metallb                /metallb/v0.13.7/config/manifests/metallb-native.yaml'
         config.yaml: true
         deployment.yaml: true
         README.md: true
@@ -230,8 +229,7 @@ programs that provide various outputs required for the release bundle.
 
   scripts:
     __:
-      run: './scripts/inline.sh --in-file ./certs.sh --overwrite && ./scripts/inline.sh --in-file
-              ./configs.sh --overwrite'
+      run: './scripts/inline.sh --in-file ./certs.sh --overwrite                                            && ./scripts/inline.sh --in-file ./configs.sh --overwrite'
     README.md: true
     certs.sh: true
     configs.sh: true
@@ -239,7 +237,7 @@ programs that provide various outputs required for the release bundle.
 
   server:
     __:
-      run: 'npm run build:clean && npm run build'
+      run: 'npm run build'
     README.md: true
     package.json: true
     package-lock.json: true
