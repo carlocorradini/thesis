@@ -19,42 +19,43 @@ organizations since it provides more configuration freedom and final control
 over the cluster while continuously reflecting its ultimate goal. \\ %
 The main implementation of the cluster and its related applications currently
 supports the \texttt{Linux} platform (see section
-\ref{subsec:architecture_components_node}) together with the architectures \texttt{amd64}\footnote{\url{https://wikipedia.org/wiki/X86-64}},
-arm32\footnote{\url{https://wikipedia.org/wiki/ARM_architecture_family}} and \texttt{arm64}\footnote{\url{https://wikipedia.org/wiki/AArch64}}.
+\ref{subsec:architecture_components_node}) together with the architectures \texttt{amd64}\footnote{\url{https://wikipedia.org/wiki/X86-64}}
+and \texttt{arm64}\footnote{\url{https://wikipedia.org/wiki/AArch64}}.
 
 \section{Distributions}
 \label{sec:implementation_distributions}
 
 % TODO Reference introduction dependencies
 
-Almost all software relies on the necessity for a stable and consistent
-operating system (OS). \\ %
-The OS, as specified in section \ref{subsec:architecture_components_node}, is
-installed on every node in the cluster and must be based on the \texttt{Linux
-Kernel}. The latter is a critical requirement because most of the technologies
-employed in the implementation rely on Linux primitives and core functionality
-to operate properly. To enforce resource management for pods and containers, for
-example, all Kubernetes distributions require the \texttt{cgroup v2}\footnote{\url{https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html}}
+Almost all software relies on the necessity for a stable and consistent operating
+system (OS). \\ %
+The OS, as specified in section \ref{subsec:architecture_components_node}, is installed
+on every node in the cluster and must be based on the \texttt{Linux Kernel}. The
+latter is a critical requirement because most of the technologies employed in the
+implementation rely on Linux primitives and core functionality to operate properly.
+To enforce resource management for pods and containers, for example, all
+Kubernetes distributions require the \texttt{cgroup v2}\footnote{\url{https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html}}
 kernel module\footnote{\url{https://kubernetes.io/docs/concepts/architecture/cgroups}}.
-Furthermore, the Linux Kernel is an Open Source project to which everyone can
-contribute and get access, representing one fundamental objective of the entire project.
+Furthermore, the Linux Kernel is an Open Source project to which everyone can contribute
+and get access, representing one fundamental objective of the entire project. \\ %
+To represent the potential of the implementation architecture being compatible
+with several Linux distributions, the section is titled Distributions rather than
+Operating System. A Linux distribution, often known as a Linux distro, is an
+operating system that is built from components developed by various open-source
+projects and programmers. The Linux kernel (the operating system's core), the
+GNU shell utilities (terminal interface and commands), the X server (for a
+graphical desktop), the desktop environment, a package management system, an
+installer, and other services are all included in each distribution. Many
+components are created independently and released in source code format. Thousands
+of software packages, utilities, and applications can be found in a single Linux
+distribution. Linux distributions combine code from open-source projects into a
+single operating system that can be installed and booted. Linux distributions are
+available for a wide range of specialized use cases, including desktop computers,
+servers without a graphical interface, supercomputers, mobile devices, and more\cite{linux_distro}.
 \\ %
-To represent the potential of the implementation architecture being compatible with
-several Linux distributions, the section is titled Distributions rather than
-Operating System. A Linux distribution, often known as a Linux distro, is an operating
-system that is built from components developed by various open-source projects and
-programmers. The Linux kernel (the operating system's core), the GNU shell utilities
-(terminal interface and commands), the X server (for a graphical desktop), the desktop
-environment, a package management system, an installer, and other services are
-all included in each distribution. Many components are created independently and
-released in source code format. Thousands of software packages, utilities, and
-applications can be found in a single Linux distribution. Linux distributions combine
-code from open-source projects into a single operating system that can be installed
-and booted. Linux distributions are available for a wide range of specialized
-use cases, including desktop computers, servers without a graphical interface, supercomputers,
-mobile devices, and more\cite{linux_distro}. \\ %
-To be completely compatible with the implementation architecture, a Linux distribution
-must meet three major requirements. They are described in the following list:
+To be completely compatible with the implementation architecture, a Linux
+distribution must meet three major requirements. They are described in the following
+list:
 \begin{enumerate}
   \item The Linux Kernel version must be compatible with the Kubernetes version.
     \newline
@@ -77,45 +78,46 @@ must meet three major requirements. They are described in the following list:
     the two most used init systems, and the majority of available distributions are
     based on one of them.
 \end{enumerate}
-Finally, two custom Linux distributions are already configured, built, and
-packaged as ISO files, as shown in section \ref{subsec:implementation_distributions_iso_image}.
-They are based on a simple command line with no graphical interface and contain
-only what is required to start a node. This is done to simplify the overall setup
-by eliminating unnecessary software and technologies, addressing any
-incompatibilities, and increasing the cluster's implementation and testing efficiency.
-Both are derived from pre-existing Linux distributions that are known to be
-stable, easy to configure, and lightweight, requiring just the bare minimum of resources
-to operate. Furthermore, they are built on separate init systems, requiring the
-overall implementation to be compatible with and tested with both.
+Finally, two custom Linux distributions are already configured, built, and packaged
+as ISO files, as shown in section
+\ref{subsec:implementation_distributions_iso_image}. They are based on a simple command
+line with no graphical interface and contain only what is required to start a node.
+This is done to simplify the overall setup by eliminating unnecessary software
+and technologies, addressing any incompatibilities, and increasing the cluster's
+implementation and testing efficiency. Both are derived from pre-existing Linux distributions
+that are known to be stable, easy to configure, and lightweight, requiring just
+the bare minimum of resources to operate. Furthermore, they are built on
+separate init systems, requiring the overall implementation to be compatible with
+and tested with both.
 
 \subsection{Packages}
 \label{subsec:implementation_distributions_packages}
 
-The packages used in the implementation that must be available in a Linux distribution
-are specified in this section. A package is a collection of files that have been
-bundled together and may be installed and uninstalled as a group\cite{package_manager}.
+The packages used in the implementation that must be available in a Linux
+distribution are specified in this section. A package is a collection of files that
+have been bundled together and may be installed and uninstalled as a group\cite{package_manager}.
 \\ %
-All packages may be installed automatically using the package manager of the respective
-Linux distribution. A package manager's job is to provide an interface that
-assists the user in managing the collection of packages installed on the system.
-A package manager maintains track of what software is installed on the system and
-makes it simple to install new software, update software to newer versions, or delete
-previously installed software. A package is usually a single piece of software. However,
-it is typical for applications to be made up of numerous dependent packages. For
-example, the \texttt{jq} package includes not just the \texttt{jq} command-line
+All packages may be installed automatically using the package manager of the
+respective Linux distribution. A package manager's job is to provide an interface
+that assists the user in managing the collection of packages installed on the system.
+A package manager maintains track of what software is installed on the system
+and makes it simple to install new software, update software to newer versions,
+or delete previously installed software. A package is usually a single piece of software.
+However, it is typical for applications to be made up of numerous dependent packages.
+For example, the \texttt{jq} package includes not just the \texttt{jq} command-line
 JSON processor, but also the \texttt{oniguruma}\footnote{\url{https://github.com/kkos/oniguruma}}
-package, a regular expressions library. Furthermore, various optional add-on packages
-including extra data and documentation are available\cite{package_manager}. \\ %
-All packages are already included by default in the two custom Linux
-distributions. As a result, there is no need for any changes or the installation
-of extra packages. \\ %
-Each package in table \ref{tbl:packages} contains a brief description extracted
-from its official documentation, as well as some notes on why it was utilized.
-Furthermore, the required column indicates with symbols if the package is required
-(\textcolor{bulmaGreen}{\faicon{check}}), optional (\textcolor{bulmaBlue}{\faicon{question}}),
-or not required (\textcolor{bulmaRed}{\faicon{times}}). It should be noted that the
-name of some packages may differ based on the package manager employed by the Linux
-distribution.
+package, a regular expressions library. Furthermore, various optional add-on
+packages including extra data and documentation are available\cite{package_manager}.
+\\ %
+All packages are already included by default in the two custom Linux distributions.
+As a result, there is no need for any changes or the installation of extra packages.
+\\ %
+Each package in table \ref{tbl:packages} contains a brief description extracted from
+its official documentation, as well as some notes on why it was utilized. Furthermore,
+the required column indicates with symbols if the package is required (\textcolor{bulmaGreen}{\faicon{check}}),
+optional (\textcolor{bulmaBlue}{\faicon{question}}), or not required (\textcolor{bulmaRed}{\faicon{times}}).
+It should be noted that the name of some packages may differ based on the
+package manager employed by the Linux distribution.
 
 \begin{xltabular}
   {\textwidth} { >{\ttfamily}l | c | X | X }
@@ -334,66 +336,66 @@ distribution.
 \label{subsec:implementation_distributions_init_system}
 
 The Init System, short for Initialization System, is the first process that runs
-when a Unix-based computer operating system is bootstrapped. Init is a daemon
-process that is normally given Process IDentifier 1 (PID 1) and runs until the
-system is shut down. It is the direct or indirect ancestor of all other processes
-and adopts all orphaned processes automatically. The kernel starts Init during
-the boot process; if the kernel is unable to start it, a kernel panic occurs\cite{init_system}.
+when a Unix-based computer operating system is bootstrapped. Init is a daemon process
+that is normally given Process IDentifier 1 (PID 1) and runs until the system is
+shut down. It is the direct or indirect ancestor of all other processes and
+adopts all orphaned processes automatically. The kernel starts Init during the boot
+process; if the kernel is unable to start it, a kernel panic occurs\cite{init_system}.
 \\ %
-The Init System is logically positioned above the Kernel and is an essential component
-of every modern system. It frequently integrates sophisticated features over
-simple ones and is very customizable. Furthermore, it offers active control and
-monitoring over the running processes, keeping the entire system healthy and active.
-The latter is critical because it enables automated and continuous monitoring of
-cluster implementation architecture-related processes operating in the node
-without the need for a custom solution. For example, if a K8s instance executing
-in a worker node crashes (i.e. exits with a code different than 0), the Init
-System detects it and restarts the process automatically, making the node active
-and able to receive workload again. \\ %
+The Init System is logically positioned above the Kernel and is an essential
+component of every modern system. It frequently integrates sophisticated features
+over simple ones and is very customizable. Furthermore, it offers active control
+and monitoring over the running processes, keeping the entire system healthy and
+active. The latter is critical because it enables automated and continuous monitoring
+of cluster implementation architecture-related processes operating in the node without
+the need for a custom solution. For example, if a K8s instance executing in a worker
+node crashes (i.e. exits with a code different than 0), the Init System detects it
+and restarts the process automatically, making the node active and able to
+receive workload again. \\ %
 When the node is bootstrapped, the Init System is set to start all cluster-related
-processes (i.e., K8s instance and Metric Server) and run a script that sends a
-message to the server component notifying it that the node is active and ready. Before
+processes (i.e., K8s instance and Metric Server) and run a script that sends a message
+to the server component notifying it that the node is active and ready. Before
 the node is shut down, it automatically terminates all cluster-related processes
-and sends a message to the server component informing that the node is shutting
-down and will be inactive. As previously stated, the cluster performs these two
-operations automatically: bootstrap for upscaling and shutdown for downscaling.
-However, there are scenarios in which a node is manually bootstrapped and/or shut
-down by human action without involving the server component directly. Despite
-the possibility of the latter, the overall cluster state remains consistent, and
-all node statuses are correctly updated, thanks to the Init System and its monitoring
-and configuration capabilities. \\ %
-The implementation currently supports two init systems: OpenRC (described in section
-\ref{subsec:implementation_distributions_init_system_openrc}) and Systemd (described
-in section \ref{subsec:implementation_distributions_init_system_systemd}). They are
-the two most popular and widely used Init Systems, and the vast majority of
-Linux distributions support one or both of them. Their capabilities are nearly identical.
-However, configuration files and available application(s) that interact with the
-bare-metal Init System API, are different, necessitating double effort to
-achieve the same objective. \\ %
-It should be noted that if the Init System daemon process crashes due to an
-error, the entire system crashes and becomes inactive, necessitating a manual
-restart. Even though the likelihood of the latter is extremely low, it is never
-zero. As a result, as stated in section
-\ref{subsec:architecture_components_server}, a heartbeat mechanism has been established
-in the cluster to constantly monitor and identify the status and availability of
-all active nodes. If there are no configuration or networking issues and a node's
-heartbeat is not received within the predefined interval, it indicates that the heartbeat
-daemon executing in the node has crashed and has not yet been restarted, or that
-the entire node has crashed and is not automatically recoverable. \\ %
-In each of the following sections, where an Init System distribution is described,
-an example of the related service configuration file is presented to illustrate
-its differences. A service configuration file contains information about a process
-that the Init System controls and monitors. The application used as a reference
-in this example is K3s, a lightweight Kubernetes distribution explained in further
-detail in section \ref{subsec:implementation_dependencies_k3s}. Before starting,
-it must clear any temporary files in the \texttt{tmp} directory and load
-environment variables from two distinct directories. Furthermore, anytime the
-application process crashes, the Init System must restart it within 5 seconds after
-detection. Even though each Init System has a unique service configuration file,
-the result is nearly identical. The list below highlights some of the most
-significant configuration requirements. To aid comprehension, the identification
-number for each requirement is also provided in the Init System's service
-configuration file.
+and sends a message to the server component informing that the node is shutting down
+and will be inactive. As previously stated, the cluster performs these two operations
+automatically: bootstrap for upscaling and shutdown for downscaling. However,
+there are scenarios in which a node is manually bootstrapped and/or shut down by
+human action without involving the server component directly. Despite the possibility
+of the latter, the overall cluster state remains consistent, and all node statuses
+are correctly updated, thanks to the Init System and its monitoring and
+configuration capabilities. \\ %
+The implementation currently supports two init systems: OpenRC (described in
+section \ref{subsec:implementation_distributions_init_system_openrc}) and Systemd
+(described in section
+\ref{subsec:implementation_distributions_init_system_systemd}). They are the two
+most popular and widely used Init Systems, and the vast majority of Linux distributions
+support one or both of them. Their capabilities are nearly identical. However,
+configuration files and available application(s) that interact with the bare-metal
+Init System API, are different, necessitating double effort to achieve the same objective.
+\\ %
+It should be noted that if the Init System daemon process crashes due to an error,
+the entire system crashes and becomes inactive, necessitating a manual restart.
+Even though the likelihood of the latter is extremely low, it is never zero. As
+a result, as stated in section \ref{subsec:architecture_components_server}, a
+heartbeat mechanism has been established in the cluster to constantly monitor
+and identify the status and availability of all active nodes. If there are no configuration
+or networking issues and a node's heartbeat is not received within the predefined
+interval, it indicates that the heartbeat daemon executing in the node has
+crashed and has not yet been restarted, or that the entire node has crashed and is
+not automatically recoverable. \\ %
+In each of the following sections, where an Init System distribution is
+described, an example of the related service configuration file is presented to illustrate
+its differences. A service configuration file contains information about a
+process that the Init System controls and monitors. The application used as a reference
+in this example is K3s, a lightweight Kubernetes distribution explained in
+further detail in section \ref{subsec:implementation_dependencies_k3s}. Before starting,
+it must clear any temporary files in the \texttt{tmp} directory and load environment
+variables from two distinct directories. Furthermore, anytime the application process
+crashes, the Init System must restart it within 5 seconds after detection. Even though
+each Init System has a unique service configuration file, the result is nearly
+identical. The list below highlights some of the most significant configuration requirements.
+To aid comprehension, the identification number for each requirement is also provided
+in the Init System's service configuration file.
 \begin{enumerate}[label=\protect\circled{\arabic{*}}]
   \item General information about the service.
     \newline
@@ -439,25 +441,24 @@ configuration file.
   \caption{Gentoo Linux logo}
 \end{wrapfigure}
 
-OpenRC is a dependency-based init system for Unix-like systems that maintain
-compatibility with the system's init system, which is generally found in \texttt{/sbin/init}.
-\\ %
-At boot, OpenRC starts the appropriate system services in the right sequence, manages
-them while the system is running, and stops them at shutdown. It can manage installed
-daemons, optionally monitor the processes it launches, and start processes in parallel
-when possible to reduce boot time. \\ %
-OpenRC was developed for Gentoo\footnote{\url{https://www.gentoo.org}}, but it
-may be used in other Linux distributions and BSD\footnote{\url{https://www.bsd.org}}
+OpenRC is a dependency-based init system for Unix-like systems that maintain compatibility
+with the system's init system, which is generally found in \texttt{/sbin/init}. \\ %
+At boot, OpenRC starts the appropriate system services in the right sequence,
+manages them while the system is running, and stops them at shutdown. It can
+manage installed daemons, optionally monitor the processes it launches, and
+start processes in parallel when possible to reduce boot time. \\ %
+OpenRC was developed for Gentoo\footnote{\url{https://www.gentoo.org}}, but it may
+be used in other Linux distributions and BSD\footnote{\url{https://www.bsd.org}}
 systems as well\cite{openrc}. \\ %
-Listing \ref{lst:openrc} illustrates the example of the OpenRC service configuration
-file for K3s saved in \texttt{/etc/init.d/k3s}. Manual control of the service is
-possible using the \texttt{rc-service} command, which locates and runs the
-OpenRC service with the specified arguments: \texttt{rc-service k3s <CMD> [...]}.
-\texttt{<CMD>} can be substituted by \texttt{start} to start the service,
-\texttt{stop} to stop the service, \texttt{restart} to restart the service, and
-\texttt{status} to acquire the service status. Furthermore, with the command \texttt{rc-update
-add k3s default}, the service may be set to start automatically when the system boots
-up. The latter examples are merely a very small subset of all the available
+Listing \ref{lst:openrc} illustrates the example of the OpenRC service
+configuration file for K3s saved in \texttt{/etc/init.d/k3s}. Manual control of the
+service is possible using the \texttt{rc-service} command, which locates and runs
+the OpenRC service with the specified arguments: \texttt{rc-service k3s <CMD> [...]}.
+\texttt{<CMD>} can be substituted by \texttt{start} to start the service, \texttt{stop}
+to stop the service, \texttt{restart} to restart the service, and \texttt{status}
+to acquire the service status. Furthermore, with the command \texttt{rc-update
+add k3s default}, the service may be set to start automatically when the system
+boots up. The latter examples are merely a very small subset of all the available
 commands/capabilities that OpenRC is capable of.
 
 \begin{lstlisting}[language=shell, escapeinside={(*@}{@*)}, morekeywords={[2]{depend, start_pre, want, after, sourcex}}, morekeywords={[4]{name, description, supervisor, command, command_args, output_log, error_log, pidfile, respawn_delay, respawn_max}}, xleftmargin=\parindent, label={lst:openrc}, caption=\texttt{OpenRC} service configuration file for K3s]
@@ -501,27 +502,27 @@ commands/capabilities that OpenRC is capable of.
   \caption{systemd logo}
 \end{wrapfigure}
 
-systemd is a collection of building blocks for a Linux system. It provides a
-system and service manager that runs as PID 1 and starts the rest of the system.
-\\ %
-systemd supports aggressive parallelization, on-demand daemon startup, process
-tracking through Linux control groups, mount and automount point management, and
-a complex transactional dependency-based service control logic. \\ %
-Other components include a logging daemon, tools to handle basic system configuration
-such as the hostname, date, and locale, a list of logged-in users and running
-containers and virtual machines, system accounts, runtime directories and
-settings, and daemons to manage simple network configuration, network time
-synchronization, log forwarding, and name resolution\cite{systemd}. \\ %
-Listing \ref{lst:systemd} illustrates the example of the systemd service configuration
-file for K3s saved in \texttt{/etc/systemd/system/k3s.service}. The \texttt{systemctl}
-command, which manages the systemd system and the service manager, may be used to
-manually control the service: \texttt{systemd <CMD> k3s [...]}. \texttt{<CMD>} can
-be replaced with \texttt{start} to start the service, \texttt{stop} to stop it, \texttt{restart}
-to restart it, and \texttt{status} to obtain the service status. Furthermore,
-the service may be enabled to start automatically when the system boots up by
-using the commands \texttt{systemctl enable k3s} followed by \texttt{systemctl daemon-reload}
-to reload the systemd management configuration. The latter examples are only a small
-portion of all the commands and capabilities provided by systemd.
+systemd is a collection of building blocks for a Linux system. It provides a system
+and service manager that runs as PID 1 and starts the rest of the system. \\ %
+systemd supports aggressive parallelization, on-demand daemon startup, process tracking
+through Linux control groups, mount and automount point management, and a complex
+transactional dependency-based service control logic. \\ %
+Other components include a logging daemon, tools to handle basic system
+configuration such as the hostname, date, and locale, a list of logged-in users and
+running containers and virtual machines, system accounts, runtime directories and
+settings, and daemons to manage simple network configuration, network time synchronization,
+log forwarding, and name resolution\cite{systemd}. \\ %
+Listing \ref{lst:systemd} illustrates the example of the systemd service
+configuration file for K3s saved in \texttt{/etc/systemd/system/k3s.service}. The
+\texttt{systemctl} command, which manages the systemd system and the service manager,
+may be used to manually control the service: \texttt{systemd <CMD> k3s [...]}. \texttt{<CMD>}
+can be replaced with \texttt{start} to start the service, \texttt{stop} to stop it,
+\texttt{restart} to restart it, and \texttt{status} to obtain the service status.
+Furthermore, the service may be enabled to start automatically when the system boots
+up by using the commands \texttt{systemctl enable k3s} followed by \texttt{systemctl
+daemon-reload} to reload the systemd management configuration. The latter
+examples are only a small portion of all the commands and capabilities provided
+by systemd.
 
 \begin{lstlisting}[language=ini, escapeinside={(*@}{@*)}, morekeywords={Description, Documentation, Wants, After, StartLimitBurst, WantedBy, Type, ExecStartPre, ExecStart, EnvironmentFile, KillMode, Delegate, TimeoutStartSec, Restart, RestartSec}, xleftmargin=\parindent, label={lst:systemd}, caption=\texttt{systemd} service configuration file for K3s]
   [Unit]
@@ -550,34 +551,34 @@ portion of all the commands and capabilities provided by systemd.
 \subsection{ISO Image}
 \label{subsec:implementation_distributions_iso_image}
 
-This section briefly describes the two original Linux distributions, Alpine
-Linux and Arch Linux, which served as the foundation for the two custom Linux distributions.
-They were both utilized and tested together in the implementation cluster. Furthermore,
-it is shown how the two custom ISO image files are customized and generated by
-the use of a simple script. \\ %
+This section briefly describes the two original Linux distributions, Alpine Linux
+and Arch Linux, which served as the foundation for the two custom Linux
+distributions. They were both utilized and tested together in the implementation
+cluster. Furthermore, it is shown how the two custom ISO image files are customized
+and generated by the use of a simple script. \\ %
 Each customized Linux distribution comes in the form of a single ISO image file.
-A disk image that contains everything that would be written on an optical disc,
-including the optical disc file system, is known as an optical disc image (or
-ISO image). ISO images are intended to include the binary image of an optical
-media file system, as well as the data in its binary files, replicated exactly
-as they were saved on the disc. The data included within the ISO image will be structured
-in accordance with the file system used on the optical disc from which it was produced\cite{iso}.
-\\ %
-The ISO image can be burned into physical media such as a CD, or a USB flash drive
-or can be mounted as an ISO file. The latter shows the high level of flexibility
-and overall compatibility that an ISO file has. Moreover, it is extremely
-portable since it is intrinsically only a single file making it the perfect
-format for a release bundle and very useful in an Air-Gap environment. \\ %
-After an ISO image of a Linux distribution has been burned to media, it can be easily
-installed on multiple systems by attaching the media to the system and selecting
-it as the default boot. It starts a live (volatile) OS that is not currently
+A disk image that contains everything that would be written on an optical disc, including
+the optical disc file system, is known as an optical disc image (or ISO image). ISO
+images are intended to include the binary image of an optical media file system,
+as well as the data in its binary files, replicated exactly as they were saved on
+the disc. The data included within the ISO image will be structured in
+accordance with the file system used on the optical disc from which it was
+produced\cite{iso}. \\ %
+The ISO image can be burned into physical media such as a CD, or a USB flash
+drive or can be mounted as an ISO file. The latter shows the high level of flexibility
+and overall compatibility that an ISO file has. Moreover, it is extremely portable
+since it is intrinsically only a single file making it the perfect format for a release
+bundle and very useful in an Air-Gap environment. \\ %
+After an ISO image of a Linux distribution has been burned to media, it can be
+easily installed on multiple systems by attaching the media to the system and
+selecting it as the default boot. It starts a live (volatile) OS that is not currently
 installed on the primary disk. The live Linux distribution may then be installed
-directly into the primary disk, making it permanently available on the system
-without the need for removable media. The latter step may be performed manually,
-but it is more complex than it appears since it necessitates an understanding of
-disk formatting, partitioning, as well as other topics. Fortunately, most Linux
-distributions, including the two custom ones, have simple tools that automate
-the installation procedure by asking only a few simple questions to the user/administrator.
+directly into the primary disk, making it permanently available on the system without
+the need for removable media. The latter step may be performed manually, but it is
+more complex than it appears since it necessitates an understanding of disk formatting,
+partitioning, as well as other topics. Fortunately, most Linux distributions,
+including the two custom ones, have simple tools that automate the installation procedure
+by asking only a few simple questions to the user/administrator.
 
 \subsubsection{Alpine Linux}
 \label{subsubsec:implementation_distributions_iso_alpine_linux}
@@ -590,55 +591,56 @@ the installation procedure by asking only a few simple questions to the user/adm
   \caption{Alpine Linux logo}
 \end{wrapfigure}
 
-Alpine Linux\footnote{\url{https://www.alpinelinux.org}} is a lightweight, security-focused,
-and resource-efficient distribution. In recent years, has grown in popularity as
-the foundation for the majority of Docker images. It is based on musl\footnote{\url{https://musl.libc.org}}
-(an implementation of the C standard library, an alternative to glibc\footnote{\url{https://www.gnu.org/software/libc}}),
-BusyBox\footnote{\url{https://busybox.net}} (a single, small executable that combines
-tiny versions of many common UNIX utilities), a custom package manager called APK\footnote{\url{https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper}}
-and the OpenRC Init System (see section
-\ref{subsec:implementation_distributions_init_system_openrc})\cite{alpine_linux}.
+Alpine Linux\footnote{\url{https://www.alpinelinux.org}} is a lightweight,
+security-focused, and resource-efficient distribution. In recent years, has grown
+in popularity as the foundation for the majority of Docker images. It is based
+on musl\footnote{\url{https://musl.libc.org}} (an implementation of the C standard
+library, an alternative to glibc\footnote{\url{https://www.gnu.org/software/libc}}),
+BusyBox\footnote{\url{https://busybox.net}} (a single, small executable that
+combines tiny versions of many common UNIX utilities), a custom package manager
+called APK\footnote{\url{https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper}}
+and the OpenRC Init System (see section \ref{subsec:implementation_distributions_init_system_openrc})\cite{alpine_linux}.
 \\ %
-Alpine Linux is the preferred reCluster distribution since it has been widely
-used and tested throughout the development process.
+Alpine Linux is the preferred reCluster distribution since it has been widely used
+and tested throughout the development process.
 
 The official documentation\footnote{\url{https://wiki.alpinelinux.org/wiki/How_to_make_a_custom_ISO_image_with_mkimage}}
-provides a brief guideline on how to build a custom Alpine Linux ISO image. Unfortunately,
-it is not exhaustive, and it assumes a lot of information and configurations. A
-simpler, easy-to-use, and portable solution is required for cluster
+provides a brief guideline on how to build a custom Alpine Linux ISO image.
+Unfortunately, it is not exhaustive, and it assumes a lot of information and
+configurations. A simpler, easy-to-use, and portable solution is required for cluster
 implementation. This resulted in the creation of a POSIX script that handles all
 of the burdens, as explained below. \\ %
 Building a custom Alpine Linux ISO image involves three prerequisites: an Alpine
-Linux system, specific tools/packages to configure and build the image, and a general
-configuration with a special administrator user and the generation of signing keys.
-These requirements remain constant over time and can be regarded as essentially
-static. Furthermore, having a physical Alpine Linux system dedicated just to
-generating custom images is a waste of resources. As a result, a custom
-Dockerfile based on Alpine Linux has been created to allow building the image in
-different environments without the need for a physical machine and with all of
-the previous requirements already fulfilled\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/alpine/Dockerfile}}.
-A Dockerfile is a text document that contains all of the commands needed to compile
-a container image\cite{dockerfile}. \\ %
+Linux system, specific tools/packages to configure and build the image, and a
+general configuration with a special administrator user and the generation of
+signing keys. These requirements remain constant over time and can be regarded as
+essentially static. Furthermore, having a physical Alpine Linux system dedicated
+just to generating custom images is a waste of resources. As a result, a custom Dockerfile
+based on Alpine Linux has been created to allow building the image in different environments
+without the need for a physical machine and with all of the previous requirements
+already fulfilled\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/alpine/Dockerfile}}.
+A Dockerfile is a text document that contains all of the commands needed to
+compile a container image\cite{dockerfile}. \\ %
 The ISO image is customized using the \texttt{mkimg.recluster.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/alpine/mkimg.recluster.sh}}
-file, which defines and integrates a custom recluster profile, based on the basic
-Alpine Linux profile. This file, whose content is shown in listing \ref{lst:alpine},
-is not included in the Dockerfile because it is considered dynamic, in the sense
-that it could be updated and customized over time to meet potential new cluster specifications.
-\\ %
-Finally, to create the ISO image, the container image must be launched in detached
-mode, a local volume mounted to the container, the \texttt{mkimg.recluster.sh}
-file loaded, and the official \texttt{mkimage.sh} script executed with extra
-configuration parameters. When performed manually, the latter tasks are
-extremely difficult and prone to human error. As a result, all operations have
-been included in a POSIX script, simply named \texttt{build.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/alpine/build.sh}},
+file, which defines and integrates a custom recluster profile, based on the
+basic Alpine Linux profile. This file, whose content is shown in listing
+\ref{lst:alpine}, is not included in the Dockerfile because it is considered dynamic,
+in the sense that it could be updated and customized over time to meet potential
+new cluster specifications. \\ %
+Finally, to create the ISO image, the container image must be launched in
+detached mode, a local volume mounted to the container, the \texttt{mkimg.recluster.sh}
+file loaded, and the official \texttt{mkimage.sh} script executed with extra configuration
+parameters. When performed manually, the latter tasks are extremely difficult and
+prone to human error. As a result, all operations have been included in a POSIX script,
+simply named \texttt{build.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/alpine/build.sh}},
 that does everything automatically, including cleanup procedures when the image(s)
-has been generated or an error occurs. Moreover, all ISO images created are saved
-in the current working directory under the directory \texttt{iso}. As an example,
-a custom image based on Alpine Linux version 3.17 and generated with the
+has been generated or an error occurs. Moreover, all ISO images created are
+saved in the current working directory under the directory \texttt{iso}. As an
+example, a custom image based on Alpine Linux version 3.17 and generated with the
 recluster profile for architecture \texttt{x86\_64} is saved as \texttt{alpine-recluster-v3.17-x86\_64.iso}
 and is just \texttt{190MiB} in size. \\ %
-To configure and install Alpine Linux permanently on the primary disk, simply
-run the \texttt{setup-alpine}\footnote{\url{https://docs.alpinelinux.org/user-handbook/0.1a/Installing/setup_alpine.html}}
+To configure and install Alpine Linux permanently on the primary disk, simply run
+the \texttt{setup-alpine}\footnote{\url{https://docs.alpinelinux.org/user-handbook/0.1a/Installing/setup_alpine.html}}
 program and answer a few easy questions.
 
 \begin{lstlisting}[language=shell, morekeywords={[2]{profile_recluster, profile_base}}, morekeywords={[4]{title, desc, profile_abbrev, image_ext, arch, output_format, apks, apkovl}}, xleftmargin=\parindent, label={lst:alpine}, caption=Contents of \texttt{mkimg.recluster.sh} file which shows the reCluster profile definition]
@@ -666,49 +668,47 @@ program and answer a few easy questions.
   \caption{Arch Linux logo}
 \end{wrapfigure}
 
-Arch Linux\footnote{\url{https://archlinux.org}} is a general-purpose
-distribution that focuses on simplicity, minimalism, and code elegance. It is based
-on Systemd Init System (see section
-\ref{subsec:implementation_distributions_init_system_systemd}) and strives to stay
-bleeding edge, offering the latest stable versions of most software through
-Pacman\footnote{\url{https://wiki.archlinux.org/title/Pacman}} package manager. Uses
-a rolling release system that allows one-time installation and perpetual software
-upgrades, allowing to not reinstall or upgrade the system from one version to
-the next. Notably, Arch Linux is the foundation for several many popular
-enterprise-grade distributions, such as Manjaro\footnote{\url{https://manjaro.org}}
-and SteamOS\footnote{\url{https://store.steampowered.com/steamos}},
+Arch Linux\footnote{\url{https://archlinux.org}} is a general-purpose distribution
+that focuses on simplicity, minimalism, and code elegance. It is based on
+Systemd Init System (see section \ref{subsec:implementation_distributions_init_system_systemd})
+and strives to stay bleeding edge, offering the latest stable versions of most software
+through Pacman\footnote{\url{https://wiki.archlinux.org/title/Pacman}} package manager.
+Uses a rolling release system that allows one-time installation and perpetual
+software upgrades, allowing to not reinstall or upgrade the system from one version
+to the next. Notably, Arch Linux is the foundation for several many popular enterprise-grade
+distributions, such as Manjaro\footnote{\url{https://manjaro.org}} and SteamOS\footnote{\url{https://store.steampowered.com/steamos}},
 demonstrating its customizability, power, and stability\cite{arch_linux}.
 
 The official documentation\footnote{\url{https://wiki.archlinux.org/title/archiso}}
-includes precise guidelines for building a custom Arch Linux ISO image. For
-cluster implementation, there is a need for only a basic/minimal image with a simple
-and easy-to-use procedure. As a result, a POSIX script has been written to handle
-all of the difficulties and configurations (described below). Some techniques
-are quite similar to those outlined in Alpine Linux. However, the files and
-overall configurations differ significantly. \\ %
-Building a custom Arch Linux ISO image requires three prerequisites: an Arch Linux
-system, specific tools/packages to configure and build the image, and a general configuration
-with a baseline profile. As with Alpine Linux, these requirements remain constant
-over time, resulting in the same possible problems. As a result, a custom
-Dockerfile based on Arch Linux has been developed\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/arch/Dockerfile}}.
+includes precise guidelines for building a custom Arch Linux ISO image. For cluster
+implementation, there is a need for only a basic/minimal image with a simple and
+easy-to-use procedure. As a result, a POSIX script has been written to handle
+all of the difficulties and configurations (described below). Some techniques are
+quite similar to those outlined in Alpine Linux. However, the files and overall configurations
+differ significantly. \\ %
+Building a custom Arch Linux ISO image requires three prerequisites: an Arch
+Linux system, specific tools/packages to configure and build the image, and a
+general configuration with a baseline profile. As with Alpine Linux, these
+requirements remain constant over time, resulting in the same possible problems.
+As a result, a custom Dockerfile based on Arch Linux has been developed\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/arch/Dockerfile}}.
 \\ %
 The ISO image is customized with the \texttt{profiledef.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/arch/profiledef.sh}}
-file, the content of which is displayed in listing \ref{lst:arch}, that defines and
-integrates a custom profile based on the baseline Arch Linux profile already included
-in the container image. For the same reasons as in Alpine Linux, this file is not
-available in the Dockerfile container image. \\ %
-Finally, similar to the Alpine Linux approach, the container image must be launched,
-a local volume mounted, the \texttt{profiledef.sh} file loaded, and the official
-\texttt{mkarchiso} program executed with extra configuration parameters to
-generate the ISO image. Because of its inherent difficulties, the latter exposes
-the same issues as in Alpine Linux. Therefore, a similar POSIX script, also named
-\texttt{build.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/arch/build.sh}},
+file, the content of which is displayed in listing \ref{lst:arch}, that defines
+and integrates a custom profile based on the baseline Arch Linux profile already
+included in the container image. For the same reasons as in Alpine Linux, this
+file is not available in the Dockerfile container image. \\ %
+Finally, similar to the Alpine Linux approach, the container image must be
+launched, a local volume mounted, the \texttt{profiledef.sh} file loaded, and
+the official \texttt{mkarchiso} program executed with extra configuration parameters
+to generate the ISO image. Because of its inherent difficulties, the latter exposes
+the same issues as in Alpine Linux. Therefore, a similar POSIX script, also
+named \texttt{build.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/arch/build.sh}},
 has been created with similar features but adapted to Arch Linux. As an example,
 a custom Arch Linux image based on the reCluster profile and built on March 23rd
 2023 for architecture \texttt{x86\_64} is saved as \texttt{reCluster-2023.03.23-x86\_64.iso}
 and is \texttt{731MiB} in size. \\ %
-To configure and install Arch Linux permanently on the primary disk, simply run the
-\texttt{archinstall}\footnote{\url{https://wiki.archlinux.org/title/archinstall}}
+To configure and install Arch Linux permanently on the primary disk, simply run
+the \texttt{archinstall}\footnote{\url{https://wiki.archlinux.org/title/archinstall}}
 program and answer a few easy questions.
 
 \begin{lstlisting}[language=shell, morekeywords={[4]{iso_name, iso_label, iso_publisher, iso_application, iso_version, install_dir, buildmodes, bootmodes, arch, pacman_conf, airootfs_image_type, airootfs_image_tool_options, file_permissions}}, xleftmargin=\parindent, label={lst:arch}, caption=Contents of \texttt{profiledef.sh} file which shows the reCluster profile definition]
@@ -734,33 +734,34 @@ program and answer a few easy questions.
 \section{Dependencies}
 \label{sec:implementation_dependencies}
 
-This section is split into three segments, each of which is dependent on the preceding
-one's knowledge. \\ %
-The first segment defines an Air-Gap environment and why it is critical for overall
-implementation, and more broadly for specific cluster use cases, to allow scenarios
-where internet access is highly limited or even non-existent. \\ %
-The second segment illustrates and explains the most important third-party applications
-on which the overall architectural implementation is based. Each one is tailored
-to a distinct function in the cluster and has a direct logical mapping to a
-component in the architecture depicted in chapter \ref{cha:architecture}. The majority,
-but not all, of the specified applications are interchangeable with other implementations/distributions.
-As a result, any application-specific configuration and/or capability must be adjusted
-and/or reconfigured to be compatible with the new one. \\ %
-The Server and Autoscaler components are missing because, due to their
-importance and implementation, they have their dedicated sections, section
-\ref{sec:implementation_server} and section \ref{sec:implementation_autoscaling},
-where they are explained in greater detail. Nevertheless, the name of the related
-component's implementation appears in various portions of this section. It
-should be noted that the Server implementation is cloud/cluster provider-specific,
-and therefore it is completely built from scratch, whereas Autoscaler has an
-official Kubernetes implementation that is only compatible with a limited number
-of particular and large cloud providers. As a result, a custom solution has been
-created that is derived from the original and has been appropriately changed to
-support the cluster implementation, Server API, and overall use case. \\ %
-Finally, the last segment discusses how to manage all dependencies and how they are
-downloaded for a cluster release and to be functional in an Air-Gap scenario,
-among other things. The latter relies on an intuitive configuration file and a user-friendly
-POSIX script.
+This section is split into three segments, each of which is dependent on the
+preceding one's knowledge. \\ %
+The first segment defines an Air-Gap environment and why it is critical for
+overall implementation, and more broadly for specific cluster use cases, to
+allow scenarios where internet access is highly limited or even non-existent. \\ %
+The second segment illustrates and explains the most important third-party
+applications on which the overall architectural implementation is based. Each one
+is tailored to a distinct function in the cluster and has a direct logical mapping
+to a component in the architecture depicted in chapter \ref{cha:architecture}.
+The majority, but not all, of the specified applications are interchangeable
+with other implementations/distributions. As a result, any application-specific
+configuration and/or capability must be adjusted and/or reconfigured to be
+compatible with the new one. \\ %
+The Server and Autoscaler components are missing because, due to their importance
+and implementation, they have their dedicated sections, section \ref{sec:implementation_server}
+and section \ref{sec:implementation_autoscaling}, where they are explained in
+greater detail. Nevertheless, the name of the related component's implementation
+appears in various portions of this section. It should be noted that the Server implementation
+is cloud/cluster provider-specific, and therefore it is completely built from
+scratch, whereas Autoscaler has an official Kubernetes implementation that is only
+compatible with a limited number of particular and large cloud providers. As a
+result, a custom solution has been created that is derived from the original and
+has been appropriately changed to support the cluster implementation, Server API,
+and overall use case. \\ %
+Finally, the last segment discusses how to manage all dependencies and how they
+are downloaded for a cluster release and to be functional in an Air-Gap scenario,
+among other things. The latter relies on an intuitive configuration file and a
+user-friendly POSIX script.
 
 \subsection{Air-Gap Environment}
 \label{subsec:implementation_dependencies_air_gap_environment}
@@ -793,54 +794,54 @@ POSIX script.
   \label{fig:airgap}
 \end{wrapfigure}
 
-All devices in an Air-Gap environment have no physical connectivity to the public
-internet or any other Local Area Network (LAN) that is not itself in an Air-Gap environment.
-Email clients, browsers, SSH, and other communication applications are all physically
-and logically isolated from the outside world. \\ %
-Systems in an Air-Gap environment are permanently separated from the outside world
-by default. However, if possible, the network can communicate with other
-physically isolated devices. Any data transfer outside of the network must take place
-via external hardware that is temporarily connected to the network. USB flash
-drives, Hotspot devices and other removable media are examples of such hardware.
-Importantly, these external devices must be physically connected to and disconnected
-from the Air-Gap environment network by human intervention. \\ %
-Figure \ref{fig:airgap} depicts an example overview of an Air-Gap environment consisting
-of two distinct Air-Gap networks that can connect with one another. Because they
-are on separate networks, each network resembles a hypothetical cluster implementation
-where communication between the two does not directly involve cluster operations
-and administration (see section
-\ref{subsec:architecture_network_internal_network}). Every machine in the
-environment is unable to exchange data, connect to any external network, or
-connect to the internet in general. The only mechanism to move data between the Air-Gap
-environment and the outside world is through the use of a USB flash drive, and
-the only way to connect the Air-Gap networks to an external network and/or the
-internet is through the use of a personal hotspot. Because no automated mechanisms
-are involved, both of the latter actions need human interaction. \\ %
+All devices in an Air-Gap environment have no physical connectivity to the
+public internet or any other Local Area Network (LAN) that is not itself in an
+Air-Gap environment. Email clients, browsers, SSH, and other communication
+applications are all physically and logically isolated from the outside world. \\ %
+Systems in an Air-Gap environment are permanently separated from the outside
+world by default. However, if possible, the network can communicate with other physically
+isolated devices. Any data transfer outside of the network must take place via
+external hardware that is temporarily connected to the network. USB flash drives,
+Hotspot devices and other removable media are examples of such hardware. Importantly,
+these external devices must be physically connected to and disconnected from the
+Air-Gap environment network by human intervention. \\ %
+Figure \ref{fig:airgap} depicts an example overview of an Air-Gap environment
+consisting of two distinct Air-Gap networks that can connect with one another. Because
+they are on separate networks, each network resembles a hypothetical cluster
+implementation where communication between the two does not directly involve
+cluster operations and administration (see section \ref{subsec:architecture_network_internal_network}).
+Every machine in the environment is unable to exchange data, connect to any
+external network, or connect to the internet in general. The only mechanism to
+move data between the Air-Gap environment and the outside world is through the
+use of a USB flash drive, and the only way to connect the Air-Gap networks to an
+external network and/or the internet is through the use of a personal hotspot.
+Because no automated mechanisms are involved, both of the latter actions need human
+interaction. \\ %
 Air-Gap environments are frequently employed in Network Security scenarios where
 security is a top priority. In an Air-Gap scenario, a correctly designed network
-mandates that devices within the network be invisible to and successfully
-isolated from remote threat actors, who often scan the public internet for vulnerable
-devices. Similarly, an attacker outside of the Air-Gap environment network cannot
-directly execute Remote Code Execution\footnote{\url{https://tuxcare.com/remote-code-execution-attack-what-it-is-how-to-protect-your-systems}}
+mandates that devices within the network be invisible to and successfully isolated
+from remote threat actors, who often scan the public internet for vulnerable
+devices. Similarly, an attacker outside of the Air-Gap environment network
+cannot directly execute Remote Code Execution\footnote{\url{https://tuxcare.com/remote-code-execution-attack-what-it-is-how-to-protect-your-systems}}
 (RCE) attacks on potential software vulnerabilities within the environment\cite{airgap}.
 \\ %
-Although Air-Gap environments are extensively employed in the security branch, high-security
-scenarios are not the only ones for which the cluster implementation is designed.
-In reality, there are situations in which the internet connection, and thus the
-connectivity to the external global network is either too expensive to maintain
-or not available at all in the location where the cluster is deployed. \\ %
+Although Air-Gap environments are extensively employed in the security branch,
+high-security scenarios are not the only ones for which the cluster
+implementation is designed. In reality, there are situations in which the
+internet connection, and thus the connectivity to the external global network is
+either too expensive to maintain or not available at all in the location where the
+cluster is deployed. \\ %
 To be fully compatible with an Air-Gap environment in various possible scenarios,
-the cluster implementation is designed to have all external dependencies,
-including custom Linux Distributions, pre-packaged with each cluster release and
-without the need, by default, for possible external requests during its utilization.
-As a result, all that is required is the unique archive file, which is
-automatically created with each new release and contains all of the files
-required to bootstrap a functioning cluster instance. Furthermore, even if not
-in an Air-Gap environment, during the installation procedure, the organization
-in charge of the cluster's administration can choose to either download all
-external dependencies from the internet (every time for every node) or to
-directly use the already available pre-packaged dependencies, reducing network usage
-as well as overall installation time.
+the cluster implementation is designed to have all external dependencies, including
+custom Linux Distributions, pre-packaged with each cluster release and without
+the need, by default, for possible external requests during its utilization. As a
+result, all that is required is the unique archive file, which is automatically created
+with each new release and contains all of the files required to bootstrap a functioning
+cluster instance. Furthermore, even if not in an Air-Gap environment, during the
+installation procedure, the organization in charge of the cluster's administration
+can choose to either download all external dependencies from the internet (every
+time for every node) or to directly use the already available pre-packaged dependencies,
+reducing network usage as well as overall installation time.
 
 \subsection{PostgreSQL}
 \label{subsec:implementation_dependencies_postgresql}
@@ -853,22 +854,22 @@ as well as overall installation time.
   \caption{PostgreSQL logo}
 \end{wrapfigure}
 
-Premise: This section varies from the other following sections in that it does
-not intend to go into detail about the PostgreSQL dependency and what and how
-its core features have been employed in the cluster implementation. PostgreSQL has
-only been used in the most basic ways for storing the server's data in a persistent
-and reliable system. Furthermore, there are numerous database systems to choose from,
-both free and paid, each with unique characteristics that might meet the different
-requirements of the organization managing the cluster. \\ %
+Premise: This section varies from the other following sections in that it does not
+intend to go into detail about the PostgreSQL dependency and what and how its core
+features have been employed in the cluster implementation. PostgreSQL has only
+been used in the most basic ways for storing the server's data in a persistent
+and reliable system. Furthermore, there are numerous database systems to choose
+from, both free and paid, each with unique characteristics that might meet the
+different requirements of the organization managing the cluster. \\ %
 
 PostgreSQL\footnote{\url{https://www.postgresql.org}} is a powerful, open-source
 object-relational database system that uses and extends the SQL\footnote{\url{https://wikipedia.org/wiki/SQL}}
-language with several capabilities for properly storing and scaling the most complex
-data workloads. It is designed to assist developers in building applications, and
-administrators in preserving data integrity and building fault-tolerant systems\cite{postgresql}.
+language with several capabilities for properly storing and scaling the most
+complex data workloads. It is designed to assist developers in building applications,
+and administrators in preserving data integrity and building fault-tolerant
+systems\cite{postgresql}. \\ %
+PostgreSQL has a direct mapping with the cluster architecture's Database component.
 \\ %
-PostgreSQL has a direct mapping with the cluster architecture's Database
-component. \\ %
 PostgreSQL was chosen over all other possible alternatives for three key reasons,
 which are detailed below:
 \begin{enumerate}
@@ -902,25 +903,25 @@ which are detailed below:
   \caption{K3s logo}
 \end{wrapfigure}
 
-K3s is a lightweight Kubernetes distribution designed for production workloads in
-resource-constrained, high-availability, unattended, and remote environments\cite{k3s}.
-K3s is the cluster implementation's core, where all Kubernetes-related operations
-are managed and processed. Because K3s is an element of both a Worker and a
-Controller Node has no clear mapping to an architectural component. \\ %
-K3s is distributed as a single small binary (less than 60MiB) that reduces the
-requirements and procedures required to install, run, and automatically update a
-production Kubernetes cluster\cite{k3s}. It is completely compatible with both
-the \texttt{OpenRC} and \texttt{systemd} Init Systems (see section \ref{subsec:implementation_distributions_init_system})
-and can run on any Linux distribution with a Kernel that satisfies the basic
-Kubernetes requirements\footnote{\url{https://github.com/k3s-io/k3s/blob/master/install.sh}}.
+K3s is a lightweight Kubernetes distribution designed for production workloads
+in resource-constrained, high-availability, unattended, and remote environments\cite{k3s}.
+K3s is the cluster implementation's core, where all Kubernetes-related
+operations are managed and processed. Because K3s is an element of both a Worker
+and a Controller Node has no clear mapping to an architectural component. \\ %
+K3s is distributed as a single small binary (less than 60MiB) that reduces the requirements
+and procedures required to install, run, and automatically update a production Kubernetes
+cluster\cite{k3s}. It is completely compatible with both the \texttt{OpenRC} and
+\texttt{systemd} Init Systems (see section
+\ref{subsec:implementation_distributions_init_system}) and can run on any Linux distribution
+with a Kernel that satisfies the basic Kubernetes requirements\footnote{\url{https://github.com/k3s-io/k3s/blob/master/install.sh}}.
 
 \subsubsection{Enhancements}
 \label{subsubsec:implementation_dependencies_k3s_enhancements}
 
-K3s is a fully compliant Kubernetes distribution that has removed the majority of
-legacy, alpha, and cloud-provider-specific code to minimize overall application size
-and hardware requirements. Furthermore, K3s provides the following enhancements over
-a conventional Kubernetes distribution\cite{k3s_enhancements}:
+K3s is a fully compliant Kubernetes distribution that has removed the majority
+of legacy, alpha, and cloud-provider-specific code to minimize overall
+application size and hardware requirements. Furthermore, K3s provides the
+following enhancements over a conventional Kubernetes distribution\cite{k3s_enhancements}:
 \begin{itemize}
   \item All required dependencies are pre-packaged within a single binary file,
     necessitating only a modern Kernel and \texttt{cgroup} mounts.
@@ -949,10 +950,10 @@ a conventional Kubernetes distribution\cite{k3s_enhancements}:
 \subsubsection{Architecture}
 \label{subsubsec:implementation_dependencies_k3s_architecture}
 
-K3s architecture clearly distinguishes between two types of Nodes, Server nodes
-and Agent nodes, which are described below\cite{k3s_architecture}. Furthermore,
-figure \ref{fig:k3s} depicts the distinction between the two node types by
-displaying the various components provided on each node.
+K3s architecture clearly distinguishes between two types of Nodes, Server nodes and
+Agent nodes, which are described below\cite{k3s_architecture}. Furthermore, figure
+\ref{fig:k3s} depicts the distinction between the two node types by displaying the
+various components provided on each node.
 \begin{enumerate}
   \item \texttt{Server} node
     \newline
@@ -984,8 +985,8 @@ displaying the various components provided on each node.
 \end{figure}
 
 Additionally, the K3s architecture is completely adaptable and may accommodate a
-variety of different setups, as shown in the list below, depending on the
-cluster's usage and ultimate goal\cite{k3s_architecture}.
+variety of different setups, as shown in the list below, depending on the cluster's
+usage and ultimate goal\cite{k3s_architecture}.
 \begin{enumerate}
   \item \texttt{Single Server with an Embedded Database}
     \newline
@@ -1014,8 +1015,8 @@ cluster's usage and ultimate goal\cite{k3s_architecture}.
 \subsubsection{The Choice}
 \label{subsubsec:implementation_dependencies_k3s_the_choice}
 
-The K3s distribution was chosen from among a multitude of various Kubernetes
-distributions, including the official one, for the four main reasons, listed below.
+The K3s distribution was chosen from among a multitude of various Kubernetes distributions,
+including the official one, for the four main reasons, listed below.
 
 \begin{enumerate}
   \item Minimal hardware requirements that are simple to satisfy, even on older
@@ -1087,11 +1088,11 @@ distributions, including the official one, for the four main reasons, listed bel
 \label{subsec:implementation_dependencies_node_exporter}
 
 Node Exporter provides hardware and OS-related metrics exposed by the \texttt{*NIX}
-Kernel\cite{node_exporter}. It is widely used in both testing and production environments
-thanks to its broad compatibility, simplicity of configuration, and reliability,
-and it can be regarded as the reference implementation for a Metrics Server. Because
-it is an element that constitutes both a Worker and a Controller Node, Node
-Exporter does not have a clear mapping to an architectural component.
+Kernel\cite{node_exporter}. It is widely used in both testing and production
+environments thanks to its broad compatibility, simplicity of configuration, and
+reliability, and it can be regarded as the reference implementation for a Metrics
+Server. Because it is an element that constitutes both a Worker and a Controller
+Node, Node Exporter does not have a clear mapping to an architectural component.
 
 \subsubsection{Collectors}
 \label{subsubsec:implementation_dependencies_node_exporter-collectors}
@@ -1099,25 +1100,25 @@ Exporter does not have a clear mapping to an architectural component.
 For each Operating System, such as Linux or OpenBSD\footnote{\url{https://www.openbsd.org}},
 Node Exporter supports a wide range of different collectors, such as \texttt{cpu}
 for providing CPU statistics or \texttt{meminfo} for exposing memory statistics\footnote{\url{https://github.com/prometheus/node_exporter\#collectors}}.
-A collector is an element of an exporter, which represents a collection of
-metrics. If it is part of direct instrumentation, it may be a single metric, or it
-may be multiple metrics if it is pulling metrics from another system\cite{prometheus_metrics}.
-Collectors can be enabled (\lstinline[language=shell, basicstyle=\ttfamily,
-alsoletter={_, -, ., <, >}, morekeywords={[2]{node_exporter}}, morekeywords={[3]{--collector.<NAME>}}]{node_exporter --collector.<NAME>})
+A collector is an element of an exporter, which represents a collection of metrics.
+If it is part of direct instrumentation, it may be a single metric, or it may be
+multiple metrics if it is pulling metrics from another system\cite{prometheus_metrics}.
+Collectors can be enabled (\lstinline[language=shell, basicstyle=\ttfamily, alsoletter={_, -, ., <, >},
+morekeywords={[2]{node_exporter}}, morekeywords={[3]{--collector.<NAME>}}]{node_exporter --collector.<NAME>})
 or disabled (\lstinline[language=shell, basicstyle=\ttfamily, alsoletter={_, -, ., <, >},
 morekeywords={[2]{node_exporter}}, morekeywords={[3]{--no-collector.<NAME>}}]{node_exporter --no-collector.<NAME>})
-based on the data that the node needs to provide for monitoring. The exposed
-metrics are represented in a standardized format (see section \ref{subsubsec:implementation_dependencies_prometheus_features}),
-allowing Prometheus (see section
-\ref{subsec:implementation_dependencies_prometheus}) to analyze and process them.
-Listing \ref{lst:node_exporter} depicts an example section of a response
-generated by Node Exporter running on a node with two CPU cores and
-approximately 4 GiB of system memory. Three metrics are displayed, one from the
-\texttt{cpu} collector and the other two from the \texttt{meminfo} collector: \texttt{node\_cpu\_seconds\_total}
-is a counter that keeps track of how many seconds each CPU core (\texttt{0} and
-\texttt{1}) spent in each mode, \texttt{node\_memory\_MemTotal\_bytes} is the
-total amount of physical memory (in bytes), and \texttt{node\_memory\_MemFree\_bytes}
-is the total amount of physical memory (in bytes) that is not in use.
+based on the data that the node needs to provide for monitoring. The exposed metrics
+are represented in a standardized format (see section
+\ref{subsubsec:implementation_dependencies_prometheus_features}), allowing
+Prometheus (see section \ref{subsec:implementation_dependencies_prometheus}) to
+analyze and process them. Listing \ref{lst:node_exporter} depicts an example section
+of a response generated by Node Exporter running on a node with two CPU cores and
+approximately 4 GiB of system memory. Three metrics are displayed, one from the \texttt{cpu}
+collector and the other two from the \texttt{meminfo} collector: \texttt{node\_cpu\_seconds\_total}
+is a counter that keeps track of how many seconds each CPU core (\texttt{0} and \texttt{1})
+spent in each mode, \texttt{node\_memory\_MemTotal\_bytes} is the total amount of
+physical memory (in bytes), and \texttt{node\_memory\_MemFree\_bytes} is the total
+amount of physical memory (in bytes) that is not in use.
 
 \begin{lstlisting}[language=prometheus, xleftmargin=\parindent, alsoletter={_}, morekeywords={node_cpu_seconds_total, node_memory_MemTotal_bytes, node_memory_MemFree_bytes}, morekeywords={[2]{cpu, mode}}, label={lst:node_exporter}, caption=Example section of a Node Exporter response with \texttt{cpu} and \texttt{meminfo} collectors enabled]
   # HELP node_cpu_seconds_total Seconds the CPUs spent in each mode.
@@ -1149,40 +1150,44 @@ is the total amount of physical memory (in bytes) that is not in use.
 \subsubsection{Installer}
 \label{subsubsec:implementation_dependencies_node_exporter_installer}
 
-To represent diverse organizations' goals and preferences, the cluster's
-installation procedure on a system node, as detailed in the section \ref{sec:implementation_installer},
-requires complete automation and configuration when installing a dependency. Despite
-being a very popular and widely used application, Node Exporter lacks a fully
-featured installation script, such as \texttt{install.sh}\footnote{\url{https://github.com/k3s-io/k3s/blob/master/install.sh}}
-provided by K3s, which can simply automate every operation. As a solution, a side
-project called Node Exporter Installer was established to address the latter issue(s).
-The installation script is completely POSIX-compliant, highly customizable, \texttt{OpenRC}
-and \texttt{systemd} Init Systems compatible, and requires only basic
-applications as dependencies that are ubiquitous in almost all \texttt{*NIX}
-systems. The project is completely Open Source, and other users may use it to
-easily and rapidly configure and install Node Exporter. Attachment \ref{sec:corollary_projects_node_exporter_installer}
-has a detailed description of the Node Exporter Installer project.
+To represent diverse organizations' goals and preferences, the cluster's installation
+procedure on a system node, as detailed in the section
+\ref{sec:implementation_installer}, requires complete automation and configuration
+when installing a dependency. Despite being a very popular and widely used
+application, Node Exporter lacks a fully featured installation script, such as
+\texttt{install.sh}\footnote{\url{https://github.com/k3s-io/k3s/blob/master/install.sh}}
+provided by K3s, which can simply automate every operation. As a solution, a
+side project called Node Exporter Installer was established to address the
+latter issue(s). The installation script is completely POSIX-compliant, highly customizable,
+\texttt{OpenRC} and \texttt{systemd} Init Systems compatible, and requires only basic
+applications as dependencies that are ubiquitous in almost all \texttt{*NIX} systems.
+The project is completely Open Source, and other users may use it to easily and rapidly
+configure and install Node Exporter. Attachment
+\ref{sec:corollary_projects_node_exporter_installer} has a detailed description
+of the Node Exporter Installer project.
 
 \subsubsection{Graphics Processing Unit metrics}
 \label{subsubsec:implementation_dependencies_node_exporter_graphics_processing_unit_metrics}
 
 Node Exporter does not support exporting Graphics Processing Unit\footnote{\url{https://wikipedia.org/wiki/Graphics_processing_unit}}
-(GPU) metrics. In general, supporting systems equipped with GPU(s) in a uniform and
-easily accessible manner is a fairly hard undertaking that necessitates a significant
-amount of work in terms of initial setup and overall administration. Furthermore,
-GPU-equipped systems require availability and compatibility with a per GPU model-specific
-Kernel driver to be efficient without scarifying precious performance and wasting
-resources. Nevertheless, exporter implementations such as \texttt{DCGM-Exporter}\footnote{\url{https://github.com/NVIDIA/dcgm-exporter}}
+(GPU) metrics. In general, supporting systems equipped with GPU(s) in a uniform
+and easily accessible manner is a fairly hard undertaking that necessitates a
+significant amount of work in terms of initial setup and overall administration.
+Furthermore, GPU-equipped systems require availability and compatibility with a
+per GPU model-specific Kernel driver to be efficient without scarifying precious
+performance and wasting resources. Nevertheless, exporter implementations such
+as \texttt{DCGM-Exporter}\footnote{\url{https://github.com/NVIDIA/dcgm-exporter}}
 and \texttt{nvidia\_gpu\_exporter}\footnote{\url{https://github.com/utkuozdemir/nvidia_gpu_exporter}}
 are specifically designed to provide just GPU metrics that can be used alongside
 Node Exporter metrics. However, all current GPU exporters only support NVIDIA\footnote{\url{https://www.nvidia.com}}
-GPUs and require extra dependencies to be deployed. Moreover, because of its intrinsic
-heterogeneity, purpose, and complexity of supporting GPU systems, the cluster
-implementation currently does not offer any GPU data, metrics, or statistics. Furthermore,
-because the cluster is primarily composed of consumer hardware rather than high-end
-enterprise solutions, there is a high possibility that some systems would be equipped
-with AMD\footnote{\url{https://www.amd.com}} GPUs, which, as previously stated,
-are currently not supported by any official and/or reliable exporter program.
+GPUs and require extra dependencies to be deployed. Moreover, because of its
+intrinsic heterogeneity, purpose, and complexity of supporting GPU systems, the cluster
+implementation currently does not offer any GPU data, metrics, or statistics.
+Furthermore, because the cluster is primarily composed of consumer hardware rather
+than high-end enterprise solutions, there is a high possibility that some
+systems would be equipped with AMD\footnote{\url{https://www.amd.com}} GPUs, which,
+as previously stated, are currently not supported by any official and/or reliable
+exporter program.
 
 \subsection{Docker Registry}
 \label{subsec:implementation_dependencies_docker_registry}
@@ -1195,43 +1200,44 @@ are currently not supported by any official and/or reliable exporter program.
   \caption{Docker Registry logo}
 \end{wrapfigure}
 
-Docker Registry is a stateless, highly scalable server-side service for storing and
-distributing container-based application images\cite{docker_registry}. A registry
-is a storage and content delivery system that holds container images in different
-tagged versions\cite{docker_registry_about}. \\ %
-The Docker Registry, thus the name, has a direct mapping to the Registry
-component of the cluster architecture.
+Docker Registry is a stateless, highly scalable server-side service for storing
+and distributing container-based application images\cite{docker_registry}. A
+registry is a storage and content delivery system that holds container images in
+different tagged versions\cite{docker_registry_about}. \\ %
+The Docker Registry, thus the name, has a direct mapping to the Registry component
+of the cluster architecture.
 
 \subsubsection{Image Naming}
 \label{subsubsec:implementation_dependencies_docker_registry_image_naming}
 
 \texttt{[REGISTRY\_HOSTNAME][:REGISTRY\_PORT]IMAGE[:TAG]} \\ %
-An image name is made up of slash-separated name fields that are optionally
-prefixed with a registry hostname, complying with standard DNS\footnote{\url{https://wikipedia.org/wiki/Domain_Name_System}}
-(Domain Name System) rules, and optionally postfixed with a tag name that
-identifies different versions of the same series of images. If a hostname is specified,
-it may be followed by a port number in the format \texttt{:PORT}. If the registry
-hostname is not provided, Docker, Kubernetes, Podman, and practically every other
-software that deals with container images by default utilizes Docker's public registry
-(Docker Hub\footnote{\url{https://hub.docker.com}}, which is hosted at \texttt{docker.io}
-at port \texttt{443})\cite{k8s_image_names}. If no tag name is supplied, the value
-\texttt{latest} is automatically assigned, indicating that the image is designated
-as the most recent available release version\cite{docker_tag}. \\ %
+An image name is made up of slash-separated name fields that are optionally prefixed
+with a registry hostname, complying with standard DNS\footnote{\url{https://wikipedia.org/wiki/Domain_Name_System}}
+(Domain Name System) rules, and optionally postfixed with a tag name that identifies
+different versions of the same series of images. If a hostname is specified, it may
+be followed by a port number in the format \texttt{:PORT}. If the registry
+hostname is not provided, Docker, Kubernetes, Podman, and practically every
+other software that deals with container images by default utilizes Docker's
+public registry (Docker Hub\footnote{\url{https://hub.docker.com}}, which is
+hosted at \texttt{docker.io} at port \texttt{443})\cite{k8s_image_names}. If no tag
+name is supplied, the value \texttt{latest} is automatically assigned,
+indicating that the image is designated as the most recent available release
+version\cite{docker_tag}. \\ %
 For example, the image name \texttt{node:18} (short for \texttt{docker.io:443/node:18})
-indicates the container image of Node.js version 18 accessible on the Docker public
-registry at port \texttt{443}. Instead, the name \texttt{registry.recluster.local:5000/node:18}
-also identifies the container image of Node.js version 18 but available on the local
-private registry \texttt{registry.recluster.local} at port \texttt{5000}.
-Therefore, if there is a requirement in the cluster to refer to container images
-on a registry different from the default one, the full image name must be
-provided.
+indicates the container image of Node.js version 18 accessible on the Docker
+public registry at port \texttt{443}. Instead, the name \texttt{registry.recluster.local:5000/node:18}
+also identifies the container image of Node.js version 18 but available on the
+local private registry \texttt{registry.recluster.local} at port \texttt{5000}. Therefore,
+if there is a requirement in the cluster to refer to container images on a
+registry different from the default one, the full image name must be provided.
 
 \subsubsection{Hostname To IP Address Mapping}
 \label{subsubsec:implementation_dependencies_docker_registry_hostname_to_ip_address_mapping}
 
-A local registry deployment requires that there be a known mapping in the cluster
-between the registry hostname and the IP address where the registry instance is executing.
-There are three options available, as indicated in the list below:
+A local registry deployment requires that there be a known mapping in the
+cluster between the registry hostname and the IP address where the registry
+instance is executing. There are three options available, as indicated in the
+list below:
 \begin{enumerate}
   \item Use a custom Kubernetes distribution configuration file/entry to instruct
     the container runtime about the mapping. Moreover, if the Kubernetes distribution
@@ -1258,45 +1264,45 @@ There are three options available, as indicated in the list below:
     file or automatically via DHCP\footnote{\url{https://wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol}}
     (Dynamic Host Configuration Protocol).
 \end{enumerate}
-Each of the three options has pros and cons. If the cluster size is relatively small
-and the IP address of the local registry does not vary over time, the first or
-second (depending on whether the chosen Kubernetes distribution supports the functionality)
-solutions are recommended. However, if the cluster consists of numerous nodes, or
-if the IP address of the registry changes regularly, or if further hostname to
-IP mappings are required, then having a DNS component is by far the best approach.
-Nonetheless, the organization operating the cluster makes the final decision on what
-is the best solution: nothing prevents the deployment of a DNS component even in
-a very small cluster. \\ %
-Because reCluster is based on K3s, has a modest number of nodes, and the IP
-address of the registry never changes thanks to MetalLB (see section \ref{subsec:implementation_dependencies_metallb}),
-the decision fell almost naturally on the first alternative. Section
-\ref{subsec:implementation_installer_configuration_files} goes into further
-detail on this.
+Each of the three options has pros and cons. If the cluster size is relatively
+small and the IP address of the local registry does not vary over time, the first
+or second (depending on whether the chosen Kubernetes distribution supports the
+functionality) solutions are recommended. However, if the cluster consists of numerous
+nodes, or if the IP address of the registry changes regularly, or if further hostname
+to IP mappings are required, then having a DNS component is by far the best
+approach. Nonetheless, the organization operating the cluster makes the final
+decision on what is the best solution: nothing prevents the deployment of a DNS component
+even in a very small cluster. \\ %
+Because reCluster is based on K3s, has a modest number of nodes, and the IP address
+of the registry never changes thanks to MetalLB (see section
+\ref{subsec:implementation_dependencies_metallb}), the decision fell almost
+naturally on the first alternative. Section \ref{subsec:implementation_installer_configuration_files}
+goes into further detail on this.
 
 \subsubsection{Image Storage}
 \label{subsubsec:implementation_dependencies_docker_registry_image_storage}
 
-The registry must store the available container images in persistent storage in order
-to keep them if a failure occurs or the registry instance is restarted. Storage
-operation and management are not handled by the registry itself but are
-delegated to specialized drivers, the default driver of which is the local POSIX
-file system of the node executing the registry instance\cite{docker_registry_about}.
+The registry must store the available container images in persistent storage in
+order to keep them if a failure occurs or the registry instance is restarted. Storage
+operation and management are not handled by the registry itself but are delegated
+to specialized drivers, the default driver of which is the local POSIX file
+system of the node executing the registry instance\cite{docker_registry_about}.
 \\ %
 Saving all container images on a single node is considered bad practice since it
-creates a single point of failure that might result in the loss of all images. Therefore,
-the cluster should be equipped with extra and more powerful storage drivers
-intended to tolerate multiple storage device failures at the same time as well
-as automated data recovery. It should be noted, however, that the driver(s)
-chosen must be compatible with the cluster environment, nodes hardware, and/or
-meet certain extra requirements. Almost every cloud provider supplies its customized
-driver that is compatible with the underlying high-performance and distributed data
-center storage system. Implementing a custom storage driver for the cluster
-implementation that meets all of the above requirements is extremely difficult
-owing to the overall complexity. Thankfully, a storage driver, Longhorn, from
-the same creators of K3s, already exists to address the latter with extra features
-and customization. Thankfully, a storage driver that addresses the latter problem
-with extra features and customization already exist: Longhorn, developed by the same
-team that created K3s.
+creates a single point of failure that might result in the loss of all images.
+Therefore, the cluster should be equipped with extra and more powerful storage drivers
+intended to tolerate multiple storage device failures at the same time as well as
+automated data recovery. It should be noted, however, that the driver(s) chosen must
+be compatible with the cluster environment, nodes hardware, and/or meet certain extra
+requirements. Almost every cloud provider supplies its customized driver that is
+compatible with the underlying high-performance and distributed data center
+storage system. Implementing a custom storage driver for the cluster implementation
+that meets all of the above requirements is extremely difficult owing to the overall
+complexity. Thankfully, a storage driver, Longhorn, from the same creators of K3s,
+already exists to address the latter with extra features and customization. Thankfully,
+a storage driver that addresses the latter problem with extra features and
+customization already exist: Longhorn, developed by the same team that created
+K3s.
 
 \begin{wrapfigure}
   {r}{.25\textwidth} %
@@ -1306,16 +1312,16 @@ team that created K3s.
   \caption{Longhorn logo}
 \end{wrapfigure}
 
-Longhorn\footnote{\url{https://longhorn.io}} is an Open Source and CNCF
-Incubating project\footnote{\url{https://www.cncf.io/projects/longhorn}} that
-provides a lightweight, reliable, and simple distributed block storage system
-for Kubernetes\cite{longhorn}. A block storage system stores data in fixed-size
-blocks, with each block identified by a memory address\cite{block_storage}. Longhorn
-provides a dedicated storage controller for each volume and replicates it synchronously
-across multiple replicas stored on multiple nodes. Kubernetes is used to
-orchestrate and manage the storage controller and replicas\cite{longhorn_architecture}.
-Figure \ref{fig:longhorn} depicts Longhorn's architecture overview and Read/Write
-Data Flow between the Volume, Longhorn Engine, Replica Instances, and Disks.
+Longhorn\footnote{\url{https://longhorn.io}} is an Open Source and CNCF Incubating
+project\footnote{\url{https://www.cncf.io/projects/longhorn}} that provides a lightweight,
+reliable, and simple distributed block storage system for Kubernetes\cite{longhorn}.
+A block storage system stores data in fixed-size blocks, with each block
+identified by a memory address\cite{block_storage}. Longhorn provides a
+dedicated storage controller for each volume and replicates it synchronously
+across multiple replicas stored on multiple nodes. Kubernetes is used to orchestrate
+and manage the storage controller and replicas\cite{longhorn_architecture}. Figure
+\ref{fig:longhorn} depicts Longhorn's architecture overview and Read/Write Data Flow
+between the Volume, Longhorn Engine, Replica Instances, and Disks.
 
 \begin{figure}[htbp]
   \centering
@@ -1341,9 +1347,9 @@ Data Flow between the Volume, Longhorn Engine, Replica Instances, and Disks.
 \end{figure}
 
 It should be mentioned that having an underlying reliable persistent storage for
-the whole cluster benefits not just the registry component but also every other
-Kubernetes application deployment that requires any type of persistent storage, such
-as database and media services.
+the whole cluster benefits not just the registry component but also every other Kubernetes
+application deployment that requires any type of persistent storage, such as
+database and media services.
 
 \subsection{MetalLB}
 \label{subsec:implementation_dependencies_metallb}
@@ -1356,33 +1362,31 @@ as database and media services.
   \caption{MetalLB logo}
 \end{wrapfigure}
 
-MetalLB is a load-balancer implementation for bare-metal Kubernetes clusters that
-leverages standard networking and routing protocols\cite{metallb}. \\ %
-MetalLB has a direct mapping to the cluster architecture's Load Balancer
-component, and because it is operated directly on and managed by Kubernetes, it
-is also regarded as an internal Load Balancer that does not require any external
-system to work.
+MetalLB is a load-balancer implementation for bare-metal Kubernetes clusters
+that leverages standard networking and routing protocols\cite{metallb}. \\ %
+MetalLB has a direct mapping to the cluster architecture's Load Balancer component,
+and because it is operated directly on and managed by Kubernetes, it is also regarded
+as an internal Load Balancer that does not require any external system to work.
 
 \subsubsection{LoadBalancer Service Type}
 \label{subsubsec:implementation_dependencies_metallb__loadbalancer_service_type}
 
-By default, Kubernetes does not provide a fully functional implementation of a
-network load balancer (Service of type \texttt{LoadBalancer}\footnote{\url{https://kubernetes.io/docs/concepts/services-networking/service/\#loadbalancer}})
+By default, Kubernetes does not provide a fully functional implementation of a network
+load balancer (Service of type \texttt{LoadBalancer}\footnote{\url{https://kubernetes.io/docs/concepts/services-networking/service/\#loadbalancer}})
 for bare-metal clusters\footnote{\url{https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer}}.
-The native Kubernetes implementation of network load balancers is just a
-collection of predefined interfaces that are explicitly designed/mapped to be
-compatible with the external and sophisticated load balancers running within the
-different cloud providers' large and energy-hungry data centers. These
-interfaces are not a real network load balancer implementations, but rather proxies
-that translate different API/function calls from the Kubernetes ecosystem to the
-individual cloud provider's load balancer and vice versa. As a result, all Kubernetes
-Services of type \texttt{LoadBalancer} on bare-metal clusters remain in a
-\texttt{pending} state indefinitely, making any deployments that rely on the
-latter services unavailable from outside the Kubernetes network\cite{metallb}.
-\\ %
-Without the capability of using Kubernetes services of LoadBalancer type, the
-only alternatives for enabling external traffic to establish connections with
-internal deployments are primarily two; they are briefly described below.
+The native Kubernetes implementation of network load balancers is just a collection
+of predefined interfaces that are explicitly designed/mapped to be compatible with
+the external and sophisticated load balancers running within the different cloud
+providers' large and energy-hungry data centers. These interfaces are not a real
+network load balancer implementations, but rather proxies that translate
+different API/function calls from the Kubernetes ecosystem to the individual
+cloud provider's load balancer and vice versa. As a result, all Kubernetes
+Services of type \texttt{LoadBalancer} on bare-metal clusters remain in a \texttt{pending}
+state indefinitely, making any deployments that rely on the latter services unavailable
+from outside the Kubernetes network\cite{metallb}. \\ %
+Without the capability of using Kubernetes services of LoadBalancer type, the only
+alternatives for enabling external traffic to establish connections with internal
+deployments are primarily two; they are briefly described below.
 \begin{itemize}
   \item \texttt{NodePort}\footnote{\url{https://kubernetes.io/docs/concepts/services-networking/service/\#type-nodeport}}
     \newline
@@ -1406,46 +1410,46 @@ internal deployments are primarily two; they are briefly described below.
     of the cluster administrator\cite{k8s_service_external_ips}.
 \end{itemize}
 
-Both of these service types have considerable disadvantages, making bare-metal
-clusters unsuitable for production environments. \\ %
+Both of these service types have considerable disadvantages, making bare-metal clusters
+unsuitable for production environments. \\ %
 MetalLB provides a network load balancer implementation (service of type \texttt{LoadBalancer})
-that directly resides within the Kubernetes environment/network and easily integrates
-with standard network devices and protocols, allowing Kubernetes deployments/services
+that directly resides within the Kubernetes environment/network and easily
+integrates with standard network devices and protocols, allowing Kubernetes deployments/services
 to be accessible from external network traffic.
 
 \subsubsection{Address Allocation}
 \label{subsubsec:implementation_dependencies_metallb_address_allocation}
 
-MetalLB is responsible for allocating and assigning IP addresses to services based
-on predefined IP address pools that have been manually created by the organization
-in charge of cluster administration. If the IP addresses in the pool range are
-already assigned and/or reachable within the (Internal) cluster network, an IP address
-conflict occurs\footnote{\url{https://www.linksys.com/support-article?articleNum=132159}}.
+MetalLB is responsible for allocating and assigning IP addresses to services
+based on predefined IP address pools that have been manually created by the
+organization in charge of cluster administration. If the IP addresses in the pool
+range are already assigned and/or reachable within the (Internal) cluster network,
+an IP address conflict occurs\footnote{\url{https://www.linksys.com/support-article?articleNum=132159}}.
 \\ %
-After MetalLB is deployed and configured, it will automatically assign and
-unassign individual addresses within the pools' range to Kubernetes services of type
-\texttt{LoadBalancer}. Furthermore, a service deployment may be arbitrarily set
-to be allocated with a certain IP address, ensuring that it is always externally
-accessible with the same IP address. The latter is only possible if the IP
-address is available within the range of a MetalLB pool and is not already
-assigned to another service. \\ %
-It should be noted that if all available IP addresses have already been
-allocated, subsequent \texttt{LoadBalancer} services remain in the \texttt{pending}
-state until an IP address from a pool becomes available for assignment or a newer
-pool is created\cite{metallb_address_allocation}.
+After MetalLB is deployed and configured, it will automatically assign and unassign
+individual addresses within the pools' range to Kubernetes services of type
+\texttt{LoadBalancer}. Furthermore, a service deployment may be arbitrarily set to
+be allocated with a certain IP address, ensuring that it is always externally
+accessible with the same IP address. The latter is only possible if the IP address
+is available within the range of a MetalLB pool and is not already assigned to another
+service. \\ %
+It should be noted that if all available IP addresses have already been allocated,
+subsequent \texttt{LoadBalancer} services remain in the \texttt{pending} state
+until an IP address from a pool becomes available for assignment or a newer pool
+is created\cite{metallb_address_allocation}.
 
 \subsubsection{External Announcement}
 \label{subsubsec:implementation_dependencies_metallb__external_announcement}
 
-Once MetalLB has allocated a pool's IP address to a \texttt{LoadBalancer}
-service type, the network outside Kubernetes, i.e. the Internal Network, must be
-aware that the IP address has been assigned and is accessible ("\textit{lives}"
-in the network) for any kind of communication to take place. To accomplish this,
-MetalLB deploys a \texttt{DaemonSet}\footnote{\url{https://kubernetes.io/docs/concepts/workloads/controllers/daemonset}}
+Once MetalLB has allocated a pool's IP address to a \texttt{LoadBalancer} service
+type, the network outside Kubernetes, i.e. the Internal Network, must be aware that
+the IP address has been assigned and is accessible ("\textit{lives}" in the network)
+for any kind of communication to take place. To accomplish this, MetalLB deploys
+a \texttt{DaemonSet}\footnote{\url{https://kubernetes.io/docs/concepts/workloads/controllers/daemonset}}
 component called \texttt{Speaker} on each cluster node, which is in charge of IP
 address announcements on the network\cite{metallb_installation}. \\ %
-MetalLB supports two external IP announcement modes, which are explained below
-and are based on common networking or routing protocols\cite{metallb_external_announcement}.
+MetalLB supports two external IP announcement modes, which are explained below and
+are based on common networking or routing protocols\cite{metallb_external_announcement}.
 \begin{itemize}
   \item \texttt{BGP mode}\footnote{\url{https://metallb.universe.tf/concepts/bgp}}
     \newline
@@ -1475,17 +1479,17 @@ and are based on common networking or routing protocols\cite{metallb_external_an
     node if it fails for any reason.\cite{metallb_layer2}
 \end{itemize}
 Due to the inability of using \texttt{BGP mode} and its inherent universality to
-operate on any Ethernet network without the need for additional hardware,
-configurations, or routers, the cluster implementation is completely based on
-\texttt{Layer 2 mode}. Furthermore, because \texttt{Layer 2 mode}, as the name implies,
-operates directly on Layer 2 of the ISO/OSI model, it is fully compatible with the
-cluster's Internal Network Architecture (see section
-\ref{subsec:architecture_network_internal_network}). Both MetalLB and the
-Internal Network's Layer 2 capabilities meet the criteria for a fully functional
-Wake-on-LAN (WoL) feature (see section \ref{subsubsec:implementation_server_scale_up_wake_on_lan}).
+operate on any Ethernet network without the need for additional hardware, configurations,
+or routers, the cluster implementation is completely based on \texttt{Layer 2 mode}.
+Furthermore, because \texttt{Layer 2 mode}, as the name implies, operates directly
+on Layer 2 of the ISO/OSI model, it is fully compatible with the cluster's
+Internal Network Architecture (see section \ref{subsec:architecture_network_internal_network}).
+Both MetalLB and the Internal Network's Layer 2 capabilities meet the criteria for
+a fully functional Wake-on-LAN (WoL) feature (see section
+\ref{subsubsec:implementation_server_scale_up_wake_on_lan}).
 
-Figure \ref{fig:metallb} depicts an example schema of a MetalLB cluster with
-distinct Kubernetes namespaces, services, and pods, as well as network connections.
+Figure \ref{fig:metallb} depicts an example schema of a MetalLB cluster with distinct
+Kubernetes namespaces, services, and pods, as well as network connections.
 
 \begin{figure}[htbp]
   \centering
@@ -1521,31 +1525,31 @@ distinct Kubernetes namespaces, services, and pods, as well as network connectio
 
 Prometheus is an Open Source system that is specifically designed for monitoring
 and alerting. It is the only system that Kubernetes natively supports and the de
-facto standard across the Cloud Native ecosystem\cite{prometheus_overview_faq}. Prometheus
-joined CNCF in 2016 as the second hosted project with a Graduated maturity level,
-only after Kubernetes itself\footnote{\url{https://www.cncf.io/projects/prometheus}}\cite{prometheus_overview}.
-Prometheus has no mapping to a cluster component, and the architecture overview indicates
-no monitoring component at all. This is because having Prometheus deployed and
-continually operating in the cluster is a choice of the organization operating
+facto standard across the Cloud Native ecosystem\cite{prometheus_overview_faq}.
+Prometheus joined CNCF in 2016 as the second hosted project with a Graduated
+maturity level, only after Kubernetes itself\footnote{\url{https://www.cncf.io/projects/prometheus}}\cite{prometheus_overview}.
+Prometheus has no mapping to a cluster component, and the architecture overview
+indicates no monitoring component at all. This is because having Prometheus deployed
+and continually operating in the cluster is a choice of the organization operating
 the cluster rather than a hard necessity; even if the Metrics Server is required
-on each Node. Furthermore, Prometheus may be deployed outside of the cluster environment
-and configured to access node metrics from the external network, or it can be
-run exclusively for certain periods, allowing monitoring of the cluster for testing
-or performance evaluation. Nonetheless, Prometheus remains an important tool for
-monitoring and analyzing how the cluster is behaving, which is why it is
-specified as a dependency and is also included in the final archive bundle.
+on each Node. Furthermore, Prometheus may be deployed outside of the cluster
+environment and configured to access node metrics from the external network, or it
+can be run exclusively for certain periods, allowing monitoring of the cluster
+for testing or performance evaluation. Nonetheless, Prometheus remains an
+important tool for monitoring and analyzing how the cluster is behaving, which is
+why it is specified as a dependency and is also included in the final archive bundle.
 
-As previously stated, Prometheus' primary function is to collect metrics data
-generated by exporters and query/interpolate this data. Moreover, Prometheus can
-monitor itself since, like Node Exporter, it provides its metrics via an HTTP
-endpoint. There is a plethora of available exporters and possible integrations\footnote{\url{https://prometheus.io/docs/instrumenting/exporters}}.
-In addition to the default exporter installed on each node in the cluster
-implementation, an organization managing the cluster can choose to add as many exporters
-as the number of components and applications running on it, resulting in a
-better, clearer, and finer-grained overview of the entire cluster status both in
-real-time and over a period. For example, in addition to the Database component,
-it is possible to install its corresponding exporter, which allows the
-monitoring of Database metrics such as health, performance and resource usage.
+As previously stated, Prometheus' primary function is to collect metrics data generated
+by exporters and query/interpolate this data. Moreover, Prometheus can monitor itself
+since, like Node Exporter, it provides its metrics via an HTTP endpoint. There
+is a plethora of available exporters and possible integrations\footnote{\url{https://prometheus.io/docs/instrumenting/exporters}}.
+In addition to the default exporter installed on each node in the cluster implementation,
+an organization managing the cluster can choose to add as many exporters as the
+number of components and applications running on it, resulting in a better,
+clearer, and finer-grained overview of the entire cluster status both in real-time
+and over a period. For example, in addition to the Database component, it is
+possible to install its corresponding exporter, which allows the monitoring of Database
+metrics such as health, performance and resource usage.
 
 \subsubsection{Features}
 \label{subsubsec:implementation_dependencies_prometheus_features}
@@ -1613,22 +1617,22 @@ but the two most essential for the cluster implementation are described below\ci
     the HTTP API\cite{prometheus_promql}.
 \end{enumerate}
 
-Two examples of \texttt{PromQL} queries that have been widely used for cluster monitoring
-are shown below. Note of how the various metrics and labels are used for
+Two examples of \texttt{PromQL} queries that have been widely used for cluster
+monitoring are shown below. Note of how the various metrics and labels are used for
 filtering and aggregation.
 
-Listing \ref{lst:promql_1} illustrates an example of a \texttt{PromQL} query to obtain
-the overall CPU usage in percent (\texttt{0} to \texttt{100}). Because the
+Listing \ref{lst:promql_1} illustrates an example of a \texttt{PromQL} query to
+obtain the overall CPU usage in percent (\texttt{0} to \texttt{100}). Because the
 metric \lstinline[language=prometheus, alsoletter={_}, morekeywords={node_cpu_seconds_total}]{node_cpu_seconds_total}
-is of type \texttt{counter}, the considered value is limited to the last one
-minute (\texttt{1m}).
+is of type \texttt{counter}, the considered value is limited to the last one minute
+(\texttt{1m}).
 
 \begin{lstlisting}[language=promql, numbers=none, alsoletter={_01}, morekeywords={[2]{node_cpu_seconds_total}}, morekeywords={[3]{cpu, mode}}, morekeywords={[4]{100, 1, 1m}}, xleftmargin=\parindent, label={lst:promql_1}, caption=\texttt{PromQL} query to obtain overall CPU usage in percent]
   100 * (avg without (mode, cpu) (1 - rate(node_cpu_seconds_total{mode="idle"}[1m])))
 \end{lstlisting}
 
-Listing \ref{lst:promql_2} illustrates an example of a \texttt{PromQL} query to obtain
-the amount of memory usage in percent (\texttt{0} to \texttt{100}).
+Listing \ref{lst:promql_2} illustrates an example of a \texttt{PromQL} query to
+obtain the amount of memory usage in percent (\texttt{0} to \texttt{100}).
 
 \begin{lstlisting}[language=promql, numbers=none, alsoletter={_, 0, 1}, morekeywords={[2]{node_memory_MemTotal_bytes, node_memory_MemFree_bytes}}, morekeywords={[4]{100}}, xleftmargin=\parindent, label={lst:promql_2}, caption=\texttt{PromQL} query to obtain the amount of memory usage in percent]
   100 * ((node_memory_MemTotal_bytes - node_memory_MemFree_bytes) / node_memory_MemTotal_bytes)
@@ -1648,46 +1652,44 @@ the amount of memory usage in percent (\texttt{0} to \texttt{100}).
 Prometheus is frequently used in conjunction with Grafana\footnote{\url{https://grafana.com/grafana}},
 an interactive data visualization platform\cite{grafana}. \\ %
 Prometheus collects metrics and provides the sophisticated \texttt{PromQL} query
-language; Grafana then translates these metrics and/or query results into
-relevant charts and graphs that may be consolidated into one or more dashboards.
-\\ %
-It should be noted that Grafana is not considered a dependency in the cluster
-implementation and therefore is not distributed in the release archive bundle.
+language; Grafana then translates these metrics and/or query results into relevant
+charts and graphs that may be consolidated into one or more dashboards. \\ %
+It should be noted that Grafana is not considered a dependency in the cluster implementation
+and therefore is not distributed in the release archive bundle.
 
 \subsection{Management}
 \label{subsec:implementation_dependencies_management}
 
-To create a cluster release bundle, all of the dependencies must be managed and
-downloaded (see section \ref{sec:good_practices_bundle}). Furthermore, as stated
-in previous sections, having all of the required dependencies locally during cluster
-initialization without the need for an internet connection is essential for an Air-Gap
-environment but can also be beneficial for speeding up the overall installation time
-because there is no need to download them from the Internet. It should be noted
-that if the cluster is made up of many systems with various architectures, such as
-\texttt{amd64} or \texttt{arm64}, the necessary dependencies must be downloaded
-for all architectures, otherwise, the installation procedure will fail with an
-error. \\ %
+To create a cluster release bundle, all of the dependencies must be managed and downloaded
+(see section \ref{sec:good_practices_bundle}). Furthermore, as stated in previous
+sections, having all of the required dependencies locally during cluster
+initialization without the need for an internet connection is essential for an
+Air-Gap environment but can also be beneficial for speeding up the overall
+installation time because there is no need to download them from the Internet. It
+should be noted that if the cluster is made up of many systems with various architectures,
+such as \texttt{amd64} or \texttt{arm64}, the necessary dependencies must be downloaded
+for all architectures, otherwise, the installation procedure will fail with an error.
+\\ %
 The management of dependencies should be as straightforward as possible, with as
-few manual tasks as possible. As a result, the entire procedure has been entirely
-automated using a simple configuration file called \texttt{dependencies.config.yaml}
-and detailed in the section
-\ref{subsec:implementation_dependencies_management_configuration}, as well as a POSIX
-script called \texttt{dependencies.sh} and explained in section
+few manual tasks as possible. As a result, the entire procedure has been
+entirely automated using a simple configuration file called \texttt{dependencies.config.yaml}
+and detailed in the section \ref{subsec:implementation_dependencies_management_configuration},
+as well as a POSIX script called \texttt{dependencies.sh} and explained in section
 \ref{subsec:implementation_dependencies_management_script}. \\ %
-It should be mentioned that dependencies management has been designed to be as
-compatible as possible, with no restrictions on what dependency and version must
-be downloaded. The procedure is compatible with any publicly accessible software
-on \texttt{GitHub}\footnote{\url{https://github.com}} that has at least one release\footnote{\url{docs.github.com/repositories/releasing-projects-on-github/managing-releases-in-a-repository}}.
-Because compatibility with just GitHub is due to certain API calls, future versions
-will also include support for custom solutions as well as both \texttt{GitLab}\footnote{\url{gitlab.com}}
+It should be mentioned that dependencies management has been designed to be as compatible
+as possible, with no restrictions on what dependency and version must be
+downloaded. The procedure is compatible with any publicly accessible software on
+\texttt{GitHub}\footnote{\url{https://github.com}} that has at least one release\footnote{\url{docs.github.com/repositories/releasing-projects-on-github/managing-releases-in-a-repository}}.
+Because compatibility with just GitHub is due to certain API calls, future
+versions will also include support for custom solutions as well as both \texttt{GitLab}\footnote{\url{gitlab.com}}
 and \texttt{Bitbucket}\footnote{\url{https://bitbucket.org}}.
 \subsubsection{Configuration}
 \label{subsec:implementation_dependencies_management_configuration}
 
 The dependencies management configuration file, \texttt{dependencies.config.yaml},
 is written in YAML\footnote{\url{https://yaml.org}} format. \\ %
-The attributes for each dependency declared as a root object, are defined in table
-\ref{tbl:dependency_attributes}.
+The attributes for each dependency declared as a root object, are defined in
+table \ref{tbl:dependency_attributes}.
 
 \begin{xltabular}
   {\textwidth} { >{\ttfamily}l | >{\ttfamily}l | X }
@@ -1737,10 +1739,10 @@ The attributes for each dependency declared as a root object, are defined in tab
   \label{tbl:dependency_attributes}
 \end{xltabular}
 
-Listing \ref{lst:dependencies_config} displays the content of the dependencies
-configuration file, \texttt{dependencies.config.yaml}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/dependencies/dependencies.config.yaml}},
-which is used in the cluster implementation. It is worth noting the use of the
-\texttt{latest} value in the \texttt{releases} attribute, as well as the use of Regular
+Listing \ref{lst:dependencies_config} displays the content of the dependencies configuration
+file, \texttt{dependencies.config.yaml}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/dependencies/dependencies.config.yaml}},
+which is used in the cluster implementation. It is worth noting the use of the \texttt{latest}
+value in the \texttt{releases} attribute, as well as the use of Regular
 Expression in the \texttt{prometheus} and \texttt{node\_exporter} \texttt{assets}
 attribute. Furthermore, the \texttt{files} attribute specifies the corresponding
 \texttt{LICENSE} file for each dependency.
@@ -1804,12 +1806,12 @@ attribute. Furthermore, the \texttt{files} attribute specifies the corresponding
 
 A POSIX script named \texttt{dependencies.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/dependencies/dependencies.sh}}
 is used to automate all dependencies-related procedures. Its primary function is
-to read the dependencies configuration file and synchronize (download) the
-dependencies listed therein. \\ %
-The script requires some \texttt{coreutils} package's utility programs and the \texttt{yq}
-application to correctly handle \texttt{YAML} file and syntax. \\ %
-Dependencies' script behavior is customizable by using argument flags, which begin
-with a double dash followed by the property name and an optional value (\texttt{--NAME
+to read the dependencies configuration file and synchronize (download) the dependencies
+listed therein. \\ %
+The script requires some \texttt{coreutils} package's utility programs and the
+\texttt{yq} application to correctly handle \texttt{YAML} file and syntax. \\ %
+Dependencies' script behavior is customizable by using argument flags, which
+begin with a double dash followed by the property name and an optional value (\texttt{--NAME
 [VALUE]}). \\ %
 The accepted configuration parameters are listed in the table below.
 
@@ -1865,85 +1867,84 @@ The accepted configuration parameters are listed in the table below.
   \caption{Dependencies script parameters}
 \end{xltabular}
 
-To synchronize (force) all of the dependencies listed in the configuration file with
-the script, just execute: \lstinline[language=shell, alsoletter={.-}, morekeywords={[2]{dependencies.sh}},
-morekeywords={[3]{--sync-force}}]{./dependencies.sh --sync-force}
+To synchronize (force) all of the dependencies listed in the configuration file
+with the script, just execute: \lstinline[language=shell, alsoletter={.-},
+morekeywords={[2]{dependencies.sh}}, morekeywords={[3]{--sync-force}}]{./dependencies.sh --sync-force}
 
 \section{Server}
 \label{sec:implementation_server}
 
 Server\footnote{\url{https://github.com/carlocorradini/reCluster/tree/main/server}}
-is a completely custom implementation that manages all low-level cluster
-operations, such as turning on and off nodes, as well as user operations, such as
+is a completely custom implementation that manages all low-level cluster operations,
+such as turning on and off nodes, as well as user operations, such as
 authentication and authorization. The server is written entirely in \texttt{TypeScript},
 a strongly typed programming language that is compiled/transpiled\footnote{\url{https://wikipedia.org/wiki/Source-to-source_compiler}}
 to \texttt{JavaScript}\footnote{\url{https://developer.mozilla.org/docs/Web/JavaScript}}\cite{typescript},
-and executed by the \texttt{Node.js} \texttt{JavaScript} runtime\cite{nodejs}. When
-dealing with particular cluster processes, it has a strong policy of resource-waste
-minimization, attempting to reduce overall cluster power consumption while also enhancing
-the resource utilization of active nodes. It is intended to be completely
-interoperable with a Kubernetes cluster composed of heterogeneous systems. It provides
-a rich, type-safe, and secure \texttt{GraphQL API} (see section \ref{subsec:implementation_server_graphql})
-that can be utilized manually by administrators and basic users or automatically
-by scripts and other cluster components, such as the Cluster Autoscaler (see
-section \ref{subsec:implementation_autoscaling_cluster_autoscaler}). Server, as the
-name implies, has a direct mapping to the cluster architecture's Server
+and executed by the \texttt{Node.js} \texttt{JavaScript} runtime\cite{nodejs}.
+When dealing with particular cluster processes, it has a strong policy of resource-waste
+minimization, attempting to reduce overall cluster power consumption while also
+enhancing the resource utilization of active nodes. It is intended to be completely
+interoperable with a Kubernetes cluster composed of heterogeneous systems. It
+provides a rich, type-safe, and secure \texttt{GraphQL API} (see section
+\ref{subsec:implementation_server_graphql}) that can be utilized manually by administrators
+and basic users or automatically by scripts and other cluster components, such
+as the Cluster Autoscaler (see section \ref{subsec:implementation_autoscaling_cluster_autoscaler}).
+Server, as the name implies, has a direct mapping to the cluster architecture's Server
 component. \\ %
-To query, monitor (see section \ref{subsec:implementation_server_monitoring}),
-and manipulate the state of the Kubernetes cluster, server implementation mainly
+To query, monitor (see section \ref{subsec:implementation_server_monitoring}), and
+manipulate the state of the Kubernetes cluster, server implementation mainly
 relies on the Kubernetes API. The Kubernetes API server, which is operating on a
-Controller node, listens on port \texttt{6443} and is secured with TLS. TLS
-certificates can be signed using a private Certificate Authority\footnote{\url{https://wikipedia.org/wiki/Certificate_authority}}
+Controller node, listens on port \texttt{6443} and is secured with TLS. TLS certificates
+can be signed using a private Certificate Authority\footnote{\url{https://wikipedia.org/wiki/Certificate_authority}}
 (CA) or with a Public Key Infrastructure\footnote{\url{https://wikipedia.org/wiki/Public_key_infrastructure}}
-(PKI) linked to a well-known CA\cite{k8s_api_access}. Because the cluster
-implementation supports deployment in an Air-Gap environment, without any connection
-to an external network, and leveraging a fully-fledged certificate
-infrastructure for most of the conceivable use-case scenarios might be regarded
-a waste of resources and an unnecessary effort, it is recommended to utilize the
-solution with the private Certificate Authority, which is also the default one. If
-the Kubernetes cluster implementation is configured to work with a certificate signed
-by a private CA, then any K8s client, including the one employed by the Server,
-must have a local copy of the certificate, which is available within the corresponding
-\texttt{kubeconfig} file generated by the Controller, to mutually trust the connection
-(client-controller and controller-client) and be confident that it is not intercepted\cite{k8s_api_access}.
-The overall cluster implementation is meant to operate with a certificate signed
-by a private CA by default, hence the Server requires a copy of the \texttt{kubeconfig}
-file (see section
-\ref{subsubsec:implementation_installer_cluster_initialization_kubeconfig}). If
-the Kubernetes Server and the Server are deployed on the same node, as is the case
-with reCluster, the latter is completely automated by the installation script (see
-section \ref{sec:implementation_installer}). \\ %
-The server resource-waste reduction strategy is maintained automatically and in
-conjunction with the Cluster Autoscaler component implementation, without any human/physical
+(PKI) linked to a well-known CA\cite{k8s_api_access}. Because the cluster implementation
+supports deployment in an Air-Gap environment, without any connection to an
+external network, and leveraging a fully-fledged certificate infrastructure for most
+of the conceivable use-case scenarios might be regarded a waste of resources and
+an unnecessary effort, it is recommended to utilize the solution with the
+private Certificate Authority, which is also the default one. If the Kubernetes
+cluster implementation is configured to work with a certificate signed by a
+private CA, then any K8s client, including the one employed by the Server, must have
+a local copy of the certificate, which is available within the corresponding
+\texttt{kubeconfig} file generated by the Controller, to mutually trust the
+connection (client-controller and controller-client) and be confident that it is
+not intercepted\cite{k8s_api_access}. The overall cluster implementation is
+meant to operate with a certificate signed by a private CA by default, hence the
+Server requires a copy of the \texttt{kubeconfig} file (see section \ref{subsubsec:implementation_installer_cluster_initialization_kubeconfig}).
+If the Kubernetes Server and the Server are deployed on the same node, as is the
+case with reCluster, the latter is completely automated by the installation script
+(see section \ref{sec:implementation_installer}). \\ %
+The server resource-waste reduction strategy is maintained automatically and in conjunction
+with the Cluster Autoscaler component implementation, without any human/physical
 interaction. As stated in chapter \ref{cha:architecture}, the Server and Cluster
-Autoscaler are required and operate as a single entity. Because it only has a
-low-level understanding of the cluster, the Server does not know when to scale (automatically)
-without the Cluster Autoscaler, which monitors the overall cluster workload and
-each active node resource utilization. Vice versa, without the Server, which has
-global low-level knowledge of the whole cluster, including active and inactive
-nodes, the Cluster Autoscaler only knows when to scale nodes up or down but not how
-to do so.
+Autoscaler are required and operate as a single entity. Because it only has a low-level
+understanding of the cluster, the Server does not know when to scale (automatically)
+without the Cluster Autoscaler, which monitors the overall cluster workload and each
+active node resource utilization. Vice versa, without the Server, which has
+global low-level knowledge of the whole cluster, including active and inactive nodes,
+the Cluster Autoscaler only knows when to scale nodes up or down but not how to
+do so.
 
-This section is split into five segments, each of which requires the knowledge
-provided by the previous segment to be completely understood. The first segment depicts
-the Database structure, its tables, and their relationships. The schema, which contains
-the core knowledge of the cluster and users, is constantly updated and
-persistently stored. The second segment depicts the GraphQL API and its queries (queries
-and mutations). The API provides advanced knowledge, the foundation of which is the
-database and its schema, in that certain queryable data are not available in the
-database but are calculated using multiple raw data from persistent storage. The
-latter is prominent throughout the autoscaling procedure. Certain queries are
-secured by authentication, authorization, or both, while others are exposed to any
-entity making the request (users, nodes, etc...). The third segment focuses on the
-autoscaling technique, illustrating how nodes are automatically powered on (from
-an inactive to active state) or powered off (from an active to inactive state). The
-latter are fully automated procedures that are triggered via specific GraphQL queries
-and consumed by either automatic entities like the Cluster Autoscaler or human entities
-like an administrator. The fourth segment demonstrates how the server
-continuously monitors the Kubernetes cluster using a specialized node informer
-that checks to see whether a node resource is added, deleted, or updated. The latter
-aids in keeping the cluster's knowledge consistent and up to date by using the Kubernetes
-heartbeat and resource systems. The final segment is about server configuration:
+This section is split into five segments, each of which requires the knowledge provided
+by the previous segment to be completely understood. The first segment depicts
+the Database structure, its tables, and their relationships. The schema, which
+contains the core knowledge of the cluster and users, is constantly updated and persistently
+stored. The second segment depicts the GraphQL API and its queries (queries and mutations).
+The API provides advanced knowledge, the foundation of which is the database and
+its schema, in that certain queryable data are not available in the database but
+are calculated using multiple raw data from persistent storage. The latter is
+prominent throughout the autoscaling procedure. Certain queries are secured by authentication,
+authorization, or both, while others are exposed to any entity making the
+request (users, nodes, etc...). The third segment focuses on the autoscaling
+technique, illustrating how nodes are automatically powered on (from an inactive
+to active state) or powered off (from an active to inactive state). The latter
+are fully automated procedures that are triggered via specific GraphQL queries
+and consumed by either automatic entities like the Cluster Autoscaler or human
+entities like an administrator. The fourth segment demonstrates how the server continuously
+monitors the Kubernetes cluster using a specialized node informer that checks to
+see whether a node resource is added, deleted, or updated. The latter aids in
+keeping the cluster's knowledge consistent and up to date by using the
+Kubernetes heartbeat and resource systems. The final segment is about server configuration:
 how it may be configured and the many available parameters.
 
 \subsection{Database}
