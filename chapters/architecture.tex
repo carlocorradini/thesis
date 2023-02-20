@@ -34,7 +34,7 @@ how they are interconnected, as well as a potential connection to an external ne
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=.9\textwidth]{images/recluster/architecture.png}
+  \includegraphics[width=.9\textwidth]{images/architecture/architecture.png}
   \caption{Architecture overview}
   \label{fig:architecture}
 \end{figure}
@@ -79,7 +79,7 @@ that follow.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/recluster/worker.png}
+  \includegraphics[width=.2\textwidth]{images/architecture/worker.png}
 \end{wrapfigure}
 
 A worker node is designed to handle only deployable units of computation and services
@@ -109,7 +109,7 @@ the conclusion remains the same since it has the lowest power consumption.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/recluster/controller.png}
+  \includegraphics[width=.2\textwidth]{images/architecture/controller.png}
 \end{wrapfigure}
 
 A controller node is an essential component of the cluster, acting as a coordinator
@@ -179,7 +179,7 @@ their number and hardware requirements must be carefully balanced.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/recluster/server.png}
+  \includegraphics[width=.2\textwidth]{images/architecture/server.png}
 \end{wrapfigure}
 
 A server handles all cluster nodes, user authentication and authorization, and much
@@ -236,7 +236,7 @@ the server component is implemented.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/recluster/database.png}
+  \includegraphics[width=.2\textwidth]{images/architecture/database.png}
 \end{wrapfigure}
 
 The database component is strictly related to the server component. Its primary
@@ -295,7 +295,7 @@ reducing disk utilization. The cached data is stored in the main volatile memory
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/recluster/registry.png}
+  \includegraphics[width=.2\textwidth]{images/architecture/registry.png}
 \end{wrapfigure}
 
 % TODO Air-Gap reference
@@ -375,7 +375,9 @@ a registry request.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/recluster/cluster_autoscaler.png}
+  \includegraphics[width=.2\textwidth]{
+    images/architecture/cluster_autoscaler.png
+  }
 \end{wrapfigure}
 
 % TODO K8s reference
@@ -453,7 +455,7 @@ outlined below:
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/recluster/load_balancer.png}
+  \includegraphics[width=.2\textwidth]{images/architecture/load_balancer.png}
 \end{wrapfigure}
 
 % K8s reference
@@ -508,7 +510,7 @@ in reality, it is deployed directly on each active node.
 \begin{figure}[htbp]
   \centering
   \includegraphics
-  [width=.7\textwidth]{images/recluster/load_balancer_example.png}
+  [width=.7\textwidth]{images/architecture/load_balancer_example.png}
   \caption{Internal Load Balancer schema example}
   \label{fig:load_balancer}
 \end{figure}
@@ -566,7 +568,7 @@ network in relation to the cluster.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/recluster/external_network.png}
+  \includegraphics[width=.2\textwidth]{images/architecture/external_network.png}
 \end{wrapfigure}
 
 The external network is any network that does not directly connect to the
@@ -609,7 +611,7 @@ such a broad and complicated topic.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/recluster/internal_network.png}
+  \includegraphics[width=.2\textwidth]{images/architecture/internal_network.png}
 \end{wrapfigure}
 
 The Internal Network uses one or more layer 2 network switches to connect each physical
@@ -676,7 +678,7 @@ with the hostname \texttt{controller.recluster.local}.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/recluster/k8s_network.png}
+  \includegraphics[width=.2\textwidth]{images/architecture/k8s_network.png}
 \end{wrapfigure}
 
 \textit{"Kubernetes is all about sharing machines between applications"}\cite{k8s_cluster_networking}
@@ -693,7 +695,7 @@ not change in future releases.
 \begin{wrapfigure}
   {r}{.5\textwidth}
   \centering
-  \includegraphics[width=.5\textwidth]{images/recluster/overlay_network.png}
+  \includegraphics[width=.5\textwidth]{images/architecture/overlay_network.png}
   \caption{Comparison
   between
   the
@@ -814,13 +816,14 @@ is destroyed\cite{cni}.
 \section{Cluster}
 \label{sec:architecture_cluster}
 
-The architecture has a real-world implementation in the reCluster project. It
-employs several hardware components decommissioned by the University of Trento\footnote{\url{https://www.unitn.it}}
-that were formerly utilized by students in the computer classroom.
+The architecture has a real-world implementation in the reCluster project\footnote{\url{https://github.com/carlocorradini/reCluster}}.
+It employs several hardware components decommissioned by the University of
+Trento\footnote{\url{https://www.unitn.it}} that were formerly utilized by
+students in the computer classroom.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=.5\textwidth]{images/recluster/cluster.png}
+  \includegraphics[width=.5\textwidth]{images/architecture/cluster.png}
   \caption{reCluster cluster}
 \end{figure}
 
