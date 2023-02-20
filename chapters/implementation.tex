@@ -766,6 +766,30 @@ user-friendly POSIX script.
 \subsection{Air-Gap Environment}
 \label{subsec:implementation_dependencies_air_gap_environment}
 
+All devices in an Air-Gap environment have no physical connectivity to the public
+internet or any other Local Area Network (LAN) that is not itself in an Air-Gap environment.
+Email clients, browsers, SSH, and other communication applications are all physically
+and logically isolated from the outside world. \\ %
+Systems in an Air-Gap environment are permanently separated from the outside world
+by default. However, if possible, the network can communicate with other
+physically isolated devices. Any data transfer outside of the network must take place
+via external hardware that is temporarily connected to the network. USB flash
+drives, Hotspot devices and other removable media are examples of such hardware.
+Importantly, these external devices must be physically connected to and disconnected
+from the Air-Gap environment network by human intervention. \\ %
+Figure \ref{fig:airgap} depicts an example overview of an Air-Gap environment consisting
+of two distinct Air-Gap networks that can connect with one another. Because they
+are on separate networks, each network resembles a hypothetical cluster implementation
+where communication between the two does not directly involve cluster operations
+and administration (see section
+\ref{subsec:architecture_network_internal_network}). Every machine in the
+environment is unable to exchange data, connect to any external network, or
+connect to the internet in general. The only mechanism to move data between the Air-Gap
+environment and the outside world is through the use of a USB flash drive, and
+the only way to connect the Air-Gap networks to an external network and/or the
+internet is through the use of a personal hotspot. Because no automated mechanisms
+are involved, both of the latter actions need human interaction.
+
 \begin{wrapfigure}
   {r}{.5\textwidth}
   \centering
@@ -794,29 +818,6 @@ user-friendly POSIX script.
   \label{fig:airgap}
 \end{wrapfigure}
 
-All devices in an Air-Gap environment have no physical connectivity to the
-public internet or any other Local Area Network (LAN) that is not itself in an
-Air-Gap environment. Email clients, browsers, SSH, and other communication
-applications are all physically and logically isolated from the outside world. \\ %
-Systems in an Air-Gap environment are permanently separated from the outside
-world by default. However, if possible, the network can communicate with other physically
-isolated devices. Any data transfer outside of the network must take place via
-external hardware that is temporarily connected to the network. USB flash drives,
-Hotspot devices and other removable media are examples of such hardware. Importantly,
-these external devices must be physically connected to and disconnected from the
-Air-Gap environment network by human intervention. \\ %
-Figure \ref{fig:airgap} depicts an example overview of an Air-Gap environment
-consisting of two distinct Air-Gap networks that can connect with one another. Because
-they are on separate networks, each network resembles a hypothetical cluster
-implementation where communication between the two does not directly involve
-cluster operations and administration (see section \ref{subsec:architecture_network_internal_network}).
-Every machine in the environment is unable to exchange data, connect to any
-external network, or connect to the internet in general. The only mechanism to
-move data between the Air-Gap environment and the outside world is through the
-use of a USB flash drive, and the only way to connect the Air-Gap networks to an
-external network and/or the internet is through the use of a personal hotspot.
-Because no automated mechanisms are involved, both of the latter actions need human
-interaction. \\ %
 Air-Gap environments are frequently employed in Network Security scenarios where
 security is a top priority. In an Air-Gap scenario, a correctly designed network
 mandates that devices within the network be invisible to and successfully isolated
@@ -1950,19 +1951,128 @@ how it may be configured and the many available parameters.
 \subsection{Database}
 \label{subsec:implementation_server_database}
 
-\subsubsection{Prisma}
-\label{subsubsec:implementation_server_database_prisma}
+This section is concerned with the Database, its structure (schema), and the interactions
+between it and the Server. \\ %
+To interface with the Database, the Server implementation does not directly
+involve any raw SQL queries but instead depends on a kind of middleware layer
+that automatically translates any Database specific \texttt{TypeScript} functions
+and data structures into raw \texttt{SQL} queries and vice versa. Section \ref{subsubsec:implementation_server_database_object_relational_mapping}
+explains the latter, as well as the procedures and technologies involved. \\ %
+Section \ref{subsubsec:implementation_server_database_schema} depicts the
+Database schema, which is a pure mapping of the cluster's low-level knowledge in
+the form of raw data, its many nodes (both active and inactive), and the various
+registered users. The schema not only illustrates how the various data are
+defined and organized in the Database, but it also reflects the cluster's knowledge
+and what data and information constitute it.
+
+\subsubsection{Object-Relational Mapping}
+\label{subsubsec:implementation_server_database_object_relational_mapping}
 
 \begin{wrapfigure}
-  {r}{.25\textwidth} %
+  {l}{.35\textwidth} %
   \centering
-  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/logos/prisma.png} } %
+  \def\stackalignment{l}\stackunder{ \includegraphics[width=\linewidth]{images/implementation/orm.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://www.educative.io/answers/what-is-object-relational-mapping}} }
+  \caption{Relationship between Objects, ORM, and Relational Database}
+  \label{fig:orm}
+\end{wrapfigure}
+
+Prisma ORM\footnote{\url{https://www.prisma.io}} manages all database-related operations
+in the Server implementation, removing the need for raw \texttt{SQL} queries and
+replacing them with more natural, easy-to-use, and maintainable \texttt{TypeScript}
+functions and data structures. \\ %
+Object-Relational Mapping (ORM) is a logical data bridge (middleware) that
+connects a relational database to an object-oriented programming language. The ORM
+converts the logical representation of the objects into an atomized form that can
+be saved in the database while keeping the characteristics and relationships of the
+objects so that they may be reloaded as objects/data structures\cite{orm}. Figure
+\ref{fig:orm} represents this relationship and illustrates how the objects of an
+object-oriented programming language, the ORM, and the relational database are related
+together. \\ %
+Consider a database with a table that represents the nodes in the cluster and has
+a structure similar to the one shown in section \ref{subsubsec:implementation_server_database_schema}.
+The \texttt{name} and \texttt{memory} properties of the node with the identifier
+\texttt{e2b87848-bba0-46d5-923b-403f7141564f} should be selected. The raw
+\texttt{SQL} query looks like the following code:
+
+\begin{lstlisting}[language=typescript, xleftmargin=\parindent, morekeywords={[2]{id, result}}, morekeywords={[3]{query}}, caption=Raw SQL query to retrieve the \texttt{name} and \texttt{memory} attributes of the node with the identifier \texttt{e2b87848-bba0-46d5-923b-403f7141564f}]
+  const id = "e2b87848-bba0-46d5-923b-403f7141564f";
+
+  const result = await query("SELECT name, memory FROM node WHERE id = $1", [id]);
+\end{lstlisting}
+
+In contrast, the same query using the Prisma ORM looks like the following code:
+
+\begin{lstlisting}[language=typescript, xleftmargin=\parindent, morekeywords={[2]{id, result, prisma, node, select, name, memory, where}}, morekeywords={[3]{findUnique}}, caption=Prisma ORM query to retrieve the \texttt{name} and \texttt{memory} attributes of the node with the identifier \texttt{e2b87848-bba0-46d5-923b-403f7141564f}]
+  const id = "e2b87848-bba0-46d5-923b-403f7141564f";
+
+  const result = await prisma.node.findUnique({
+    select: {
+      name: true,
+      memory: true
+    },
+    where: {
+      id: id
+    }
+  });
+\end{lstlisting}
+
+\begin{wrapfigure}
+  {r}{.35\textwidth} %
+  \centering
+  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/implementation/orm_productivity_control.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://www.prisma.io/docs/concepts/overview/why-prisma}} }
+  \caption{\texttt{Productivity}
+  vs.
+  \texttt{Control}
+  tradeoff
+  between
+  various
+  database
+  tools}
+  \label{fig:orm_productivity_control}
+\end{wrapfigure}
+
+Take note of the differences, particularly how the ORM query is simpler, type-safe,
+and does not directly involve any \texttt{SQL} code but rather pure programming language
+primitives. \\ %
+ORMs are not the only tool for interfacing with a Relational Database;
+alternative options, such as Raw SQL and SQL query builders, are available; nonetheless,
+ORMs provide the finest balance between application productivity and database
+control. Raw SQL provides complete control over database operations, but
+productivity suffers since interacting with raw SQL in code is time-consuming, error-prone,
+and produces a lot of overhead and maintainability issues. SQL query builders maintain
+a high level of control over database operations and give somewhat higher productivity,
+but they do it by relying on logical thinking in SQL rather than programming
+objects, functions, and primitives\cite{prisma_why}. Figure
+\ref{fig:orm_productivity_control} depicts the productivity vs control tradeoff
+of the various database tools, including Prisma.
+
+\begin{wrapfigure}
+  {l}{.25\textwidth} %
+  \centering
+  \def\stackalignment{l}\stackunder{ \includegraphics[width=\linewidth]{images/logos/prisma.png} } %
   {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://www.prisma.io}} }
   \caption{Prisma logo}
 \end{wrapfigure}
 
+Prisma is an open-source next-generation ORM that defines the database data
+model structure using a Prisma Schema file\footnote{\url{https://www.prisma.io/docs/concepts/components/prisma-schema}}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/prisma/schema.prisma}},
+which is then used to construct the mapping between the database and the programming
+language with a rich and user-friendly API. Furthermore, because Prisma is not designed
+as a standard ORM but instead employs an intermediary Schema file, it can
+improve overall productivity and control over traditional ORMs\cite{prisma}.
+Figure \ref{fig:orm_productivity_control} reflects the latter.
+
 \subsubsection{Schema}
 \label{subsubsec:implementation_server_database_schema}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=.9\linewidth]{images/implementation/erm.png}
+  \caption{TODO}
+  \label{fig:erm}
+\end{figure}
 
 \subsection{GraphQL API}
 \label{subsec:implementation_server_graphql}

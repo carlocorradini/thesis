@@ -79,6 +79,11 @@
 \definecolor{yamlOrange}{RGB}{209,154,102}
 \definecolor{yamlGreen}{RGB}{80,161,79}
 \definecolor{yamlGray}{RGB}{160,161,167}
+\definecolor{typescriptGreen}{RGB}{80,161,79}
+\definecolor{typescriptGray}{RGB}{160,161,167}
+\definecolor{typescriptRed}{RGB}{228,86,73}
+\definecolor{typescriptBlue}{RGB}{64,120,242}
+\definecolor{typescriptPurple}{RGB}{166,38,164}
 \definecolor{graphqlPurple}{RGB}{166,38,164}
 \definecolor{graphqlGreen}{RGB}{80,161,79}
 \definecolor{graphqlOrange}{RGB}{209,154,102}
@@ -179,6 +184,20 @@ stringstyle=\color{yamlGreen}, %
 comment=[l]{\#}, %
 morecomment=[s]{/*}{*/}, %
 commentstyle=\color{yamlGray}\upshape %
+}
+
+\lstdefinelanguage{typescript}
+{ %
+keywords={await, typeof, const, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break, class, export, boolean, throw, implements, import, this}, %
+keywordstyle=\color{typescriptPurple}, %
+keywordstyle=[2]\color{typescriptBlue}, %
+keywordstyle=[3]\color{typescriptRed}, %
+morestring=[b]', %
+morestring=[b]", %
+stringstyle=\color{typescriptGreen}, %
+comment=[l]{//}, %
+morecomment=[s]{/*}{*/}, %
+commentstyle=\color{typescriptGray}\upshape %
 }
 
 \lstdefinelanguage{graphql}
