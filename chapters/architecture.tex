@@ -79,7 +79,7 @@ that follow.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/architecture/worker.png}
+  \includegraphics[width=\linewidth]{images/architecture/worker.png}
 \end{wrapfigure}
 
 A worker node is designed to handle only deployable units of computation and services
@@ -109,7 +109,7 @@ the conclusion remains the same since it has the lowest power consumption.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/architecture/controller.png}
+  \includegraphics[width=\linewidth]{images/architecture/controller.png}
 \end{wrapfigure}
 
 A controller node is an essential component of the cluster, acting as a coordinator
@@ -179,7 +179,7 @@ their number and hardware requirements must be carefully balanced.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/architecture/server.png}
+  \includegraphics[width=\linewidth]{images/architecture/server.png}
 \end{wrapfigure}
 
 A server handles all cluster nodes, user authentication and authorization, and much
@@ -236,7 +236,7 @@ the server component is implemented.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/architecture/database.png}
+  \includegraphics[width=\linewidth]{images/architecture/database.png}
 \end{wrapfigure}
 
 The database component is strictly related to the server component. Its primary
@@ -295,7 +295,7 @@ reducing disk utilization. The cached data is stored in the main volatile memory
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/architecture/registry.png}
+  \includegraphics[width=\linewidth]{images/architecture/registry.png}
 \end{wrapfigure}
 
 % TODO Air-Gap reference
@@ -375,9 +375,7 @@ a registry request.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{
-    images/architecture/cluster_autoscaler.png
-  }
+  \includegraphics[width=\linewidth]{images/architecture/cluster_autoscaler.png}
 \end{wrapfigure}
 
 % TODO K8s reference
@@ -455,7 +453,7 @@ outlined below:
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/architecture/load_balancer.png}
+  \includegraphics[width=\linewidth]{images/architecture/load_balancer.png}
 \end{wrapfigure}
 
 % K8s reference
@@ -568,7 +566,7 @@ network in relation to the cluster.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/architecture/external_network.png}
+  \includegraphics[width=\linewidth]{images/architecture/external_network.png}
 \end{wrapfigure}
 
 The external network is any network that does not directly connect to the
@@ -611,7 +609,7 @@ such a broad and complicated topic.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/architecture/internal_network.png}
+  \includegraphics[width=\linewidth]{images/architecture/internal_network.png}
 \end{wrapfigure}
 
 The Internal Network uses one or more layer 2 network switches to connect each physical
@@ -678,7 +676,7 @@ with the hostname \texttt{controller.recluster.local}.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=.2\textwidth]{images/architecture/k8s_network.png}
+  \includegraphics[width=\linewidth]{images/architecture/k8s_network.png}
 \end{wrapfigure}
 
 \textit{"Kubernetes is all about sharing machines between applications"}\cite{k8s_cluster_networking}
@@ -695,7 +693,7 @@ not change in future releases.
 \begin{wrapfigure}
   {r}{.5\textwidth}
   \centering
-  \includegraphics[width=.5\textwidth]{images/architecture/overlay_network.png}
+  \includegraphics[width=\linewidth]{images/architecture/overlay_network.png}
   \caption{Comparison
   between
   the
@@ -823,7 +821,7 @@ students in the computer classroom.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=.5\textwidth]{images/architecture/cluster.png}
+  \includegraphics[width=.9\textwidth]{images/architecture/cluster.png}
   \caption{reCluster cluster}
 \end{figure}
 

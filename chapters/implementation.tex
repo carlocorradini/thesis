@@ -2067,12 +2067,206 @@ Figure \ref{fig:orm_productivity_control} reflects the latter.
 \subsubsection{Schema}
 \label{subsubsec:implementation_server_database_schema}
 
+This section depicts and describes the database schema structure, as well as how
+the various entities (tables) are connected. Figure \ref{fig:erm} displays the overall
+high-level representation of the database schema as an Entity Relationship Model\footnote{\url{https://wikipedia.org/wiki/Entity-relationship_model}}
+(ERM), where \fcolorbox{black}{ermGray}{\rule{0pt}{6pt}\rule{6pt}{0pt}}
+represents an Entity, \fcolorbox{black}{ermBlue}{\rule{0pt}{6pt}\rule{6pt}{0pt}}
+an Enum, and \textbf{---} a relation between two entities. An Entity has a
+header and a body, with the header representing the entity's name and the body representing
+the attributes that make it up. The body is divided into three columns: the first
+column provides the attribute names, the second column is the type of the
+related attributes, and the third column contains extra information and context about
+the corresponding attribute (e.g. \texttt{PK} indicates that the attribute is a
+Primary Key\footnote{\url{https://wikipedia.org/wiki/Primary_key}} of the entity).
+An enum has the same form as an entity, with a header and a body, but the body
+has a single column that represents all of the Enum's possible values. \\ %
+Following the schema, each entity is extensively described, as are the
+attributes that comprise it, as well as the relation(s) cardinality and why it
+is important. \\ %
+This part's information is crucial for gaining a better understanding of the
+data that the server requires and the installation script (see section \ref{sec:implementation_installer})
+collects from a node. Additionally, the latter is necessary for comprehending
+the raw data provided and processed by the GraphQL API (see section \ref{subsec:implementation_server_graphql}).
+
+\pagebreak
+
+
+% TODO Center vertically
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=.9\linewidth]{images/implementation/erm.png}
-  \caption{TODO}
+  \includegraphics[width=\linewidth]{images/implementation/erm.png}
+  \caption{Database Entity Relationship Model (ERM)}
   \label{fig:erm}
 \end{figure}
+
+\pagebreak
+
+
+\subsubsection{User}
+\label{subsubsec:implementation_server_database_user}
+
+\begin{wrapfigure}
+  {l}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/implementation/erm_user.png}
+\end{wrapfigure}
+
+The user entity represents all of the cluster's registered users. \\ %
+A user can logically be a real person, such as an administrator, or an automation
+system, such as the Cluster Autoscaler. \\ %
+The user entity is currently solely used for authentication and authorization in
+the GraphQL API. Certain queries are only available to authenticated users,
+while others are only available to users with specified roles and/or permissions,
+or both. Yet, nothing prevents the future implementation of additional capabilities
+or the extension of the entity with extra attributes and/or relationships with other
+(new) entities. Because of the latter, this entity differs from the others in that
+it exists independently of other entities. \\ %
+The user entity attributes are as follows:
+\begin{itemize}
+  \item \texttt{id}
+    \newline
+    Uniquely identify (\texttt{PK}) a user record.
+    \newline
+    The attribute is of the type Universally Unique Identifier\footnote{\url{https://wikipedia.org/wiki/Universally_unique_identifier}}
+    (\texttt{UUID}) version 4, and it is a 128-bit alphanumeric value generated
+    by a (secure) random number generator. Unless otherwise specified, the UUID
+    value is generated automatically whenever a new user record is added to the
+    entity.
+    \newline
+    The \texttt{UUID} type is widely used in database schema to uniquely
+    identify all entity records.
+
+  \item \texttt{username}
+    \newline
+    A string of characters that uniquely (\texttt{UNIQUE}) identifies a user record.
+    \newline
+    The \texttt{username} and \texttt{id} attributes are interchangeable
+    logically since they both uniquely identify the same user record. Yet,
+    memorizing a personalized and simple sequence of characters (\texttt{username})
+    is significantly simpler than remembering a 128-bit alphanumerical (\texttt{UUID}).
+    \newline
+    During the authentication method in the GraphQL API, the \texttt{username} attribute
+    is utilized in combination with the \texttt{password} attribute to guarantee
+    that the user exists and is who it claims to be.
+
+  \item \texttt{password}
+    \newline
+    A (secret) string of letters, numbers, and symbols used to identify the user
+    during the authentication procedure.
+    \newline
+    The password has rigorous criteria that can be changed in the server configuration
+    (see section \ref{subsec:implementation_server_configuration}): A minimum of
+    eight characters (inclusive), one capital letter, one number, and one symbol
+    are required.
+    \newline
+    The password stored in the database is not in plain text; rather, it is
+    derived from the original one provided by the user during the registration
+    process using a password-hashing function\footnote{\url{https://wikipedia.org/wiki/Password-hashing_function}}.
+    The password-hashing function employed in the implementation is \texttt{bcrypt}\footnote{\url{https://wikipedia.org/wiki/Bcrypt}},
+    which is based on the \texttt{Blowfish}\footnote{\url{https://wikipedia.org/wiki/Blowfish_(cipher)}}
+    cipher and includes a \texttt{salt}\footnote{\url{https://wikipedia.org/wiki/Salt_(cryptography)}}
+    (random data used as an additional input). The \texttt{bcrypt} function is an
+    industry-standard that can withstand brute-force attacks and other threats\cite{bcrypt}.
+
+  \item \texttt{roles}
+    \newline
+    User's roles.
+    \newline
+    Roles are used to logically group users into established categories, with
+    various roles indicating varying levels of privilege.
+    \newline
+    The \texttt{roles} attribute is of type \texttt{array} (\texttt{[]}) of \texttt{user\_role}
+    enum since a user might have multiple/different responsibilities at the same
+    time.
+    \newline
+    The \texttt{user\_role} enum has the following possible values/constants:
+    \begin{itemize}
+      \item \texttt{ADMIN}
+        \newline
+        Identifies administrators and/or automation systems.
+        \newline
+        It is the highest currently available role that permits the execution of
+        any operation (query).
+
+      \item \texttt{SIMPLE}
+        \newline
+        Identifies users who do not have any extra privileges.
+        \newline
+        When a new user is added to the database, the role assigned by default
+        is \texttt{SIMPLE}.
+    \end{itemize}
+    It should be noted that a \texttt{SIMPLE} user cannot perform any operations
+    that an ADMIN can't. Also, the \texttt{roles} attribute must always include at
+    least one value.
+
+  \item \texttt{permissions}
+    \newline
+    User's permissions.
+    \newline
+    Identifies the possible actions that a user is allowed to execute.
+    \newline
+    The \texttt{permissions} attribute is directly tied to the \texttt{roles}
+    attribute and the context in which a query is executed. For example, two
+    \texttt{ADMIN} users can change data on a node in the cluster (both have the
+    \texttt{UPDATE} permission), but only the first user can delete a node record
+    from the entity since it has the \texttt{DELETE} permission, while the second
+    does not.
+    \newline
+    The type of the attribute is an \texttt{array} of \texttt{user\_permission}
+    enum since a user might have multiple/different permissions depending on the
+    role(s) and context.
+    \newline
+    The \texttt{user\_permission} enum is currently empty (hence the default
+    value as an empty array) since no queries require rigorous authentication/authorization.
+    Still, future implementations are completely supported.
+
+  \item \texttt{created\_at}
+    \newline
+    Date and time of creation.
+    \newline
+    The attribute indicates when the user record was created.
+    \newline
+    The type is \texttt{timestamptz}\footnote{\url{https://www.postgresql.org/docs/current/datatype-datetime.html}}
+    because it specifies a timestamp that also includes timezone information for
+    the database's deployment location. It should be noted that the timezone is
+    set to Coordinated Universal Time\footnote{\url{https://wikipedia.org/wiki/Coordinated_Universal_Time}}
+    (UTC) by default, therefore it is not tied to a specific timezone and hence the
+    value may be readily converted to a specific timezone.
+    \newline
+    The attribute is automatically set thanks to \texttt{DEFAULT} which gets the
+    value from the \texttt{NOW()} function that returns the current timestamp
+    and timezone.
+
+  \item \texttt{updated\_at}
+    \newline
+    Date and time of the most recent update.
+    \newline
+    The attribute specifies the most recent timestamp the user record was updated.
+    \newline
+    The attribute has the \texttt{timestamptz} data type. The value is
+    controlled by the server rather than the database. The latter is owing to differing
+    database implementations, some of which support the feature natively while
+    others do not.
+\end{itemize}
+
+\subsubsection{Node}
+\label{subsubsec:implementation_server_database_node}
+
+\subsubsection{Cpu}
+\label{subsubsec:implementation_server_database_cpu}
+
+\subsubsection{Storage}
+\label{subsubsec:implementation_server_database_storage}
+
+\subsubsection{Interface}
+\label{subsubsec:implementation_server_database_interface}
+
+\subsubsection{Status}
+\label{subsubsec:implementation_server_database_status}
+
+\subsubsection{Node Pool}
+\label{subsubsec:implementation_server_database_node_pool}
 
 \subsection{GraphQL API}
 \label{subsec:implementation_server_graphql}
