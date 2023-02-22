@@ -2122,13 +2122,13 @@ or both. Yet, nothing prevents the future implementation of additional capabilit
 or the extension of the entity with extra attributes and/or relationships with other
 (new) entities. Because of the latter, this entity differs from the others in that
 it exists independently of other entities. \\ %
-The user entity attributes are as follows:
+The \texttt{user} entity attributes are as follows:
 \begin{itemize}
   \item \texttt{id}
     \newline
     Uniquely identify (\texttt{PK}) a user record.
     \newline
-    The attribute is of the type Universally Unique Identifier\footnote{\url{https://wikipedia.org/wiki/Universally_unique_identifier}}
+    The attribute is of type Universally Unique Identifier\footnote{\url{https://wikipedia.org/wiki/Universally_unique_identifier}}
     (\texttt{UUID}) version 4, and it is a 128-bit alphanumeric value generated
     by a (secure) random number generator. Unless otherwise specified, the UUID
     value is generated automatically whenever a new user record is added to the
@@ -2139,35 +2139,46 @@ The user entity attributes are as follows:
 
   \item \texttt{username}
     \newline
-    A string of characters that uniquely (\texttt{UNIQUE}) identifies a user record.
+    User's username.
     \newline
-    The \texttt{username} and \texttt{id} attributes are interchangeable
-    logically since they both uniquely identify the same user record. Yet,
-    memorizing a personalized and simple sequence of characters (\texttt{username})
-    is significantly simpler than remembering a 128-bit alphanumerical (\texttt{UUID}).
+    A string of characters that uniquely (\texttt{UNIQUE}) identifies a user
+    record.
     \newline
-    During the authentication method in the GraphQL API, the \texttt{username} attribute
-    is utilized in combination with the \texttt{password} attribute to guarantee
-    that the user exists and is who it claims to be.
+    The \texttt{username} and \texttt{id} attributes are interchangeable logically
+    since they both uniquely identify the same user record. Yet, memorizing a personalized
+    and simple sequence of characters (\texttt{username}) is significantly
+    simpler than remembering a 128-bit alphanumerical (\texttt{UUID}).
+    \newline
+    During the authentication method in the GraphQL API, the \texttt{username}
+    attribute is utilized in combination with the \texttt{password} attribute to
+    guarantee that the user exists and is who it claims to be.
 
   \item \texttt{password}
+    \newline
+    User's password.
     \newline
     A (secret) string of letters, numbers, and symbols used to identify the user
     during the authentication procedure.
     \newline
-    The password has rigorous criteria that can be changed in the server configuration
-    (see section \ref{subsec:implementation_server_configuration}): A minimum of
-    eight characters (inclusive), one capital letter, one number, and one symbol
-    are required.
+    The password has rigorous criteria that can be changed in the server
+    configuration (see section \ref{subsec:implementation_server_configuration}):
+    A minimum of eight characters (inclusive), one capital letter, one number,
+    and one symbol are required.
     \newline
-    The password stored in the database is not in plain text; rather, it is
-    derived from the original one provided by the user during the registration
-    process using a password-hashing function\footnote{\url{https://wikipedia.org/wiki/Password-hashing_function}}.
+    The password stored in the database is not in plain text; rather, it is derived
+    from the original one provided by the user during the registration process using
+    a password-hashing function\footnote{\url{https://wikipedia.org/wiki/Password-hashing_function}}.
     The password-hashing function employed in the implementation is \texttt{bcrypt}\footnote{\url{https://wikipedia.org/wiki/Bcrypt}},
     which is based on the \texttt{Blowfish}\footnote{\url{https://wikipedia.org/wiki/Blowfish_(cipher)}}
     cipher and includes a \texttt{salt}\footnote{\url{https://wikipedia.org/wiki/Salt_(cryptography)}}
-    (random data used as an additional input). The \texttt{bcrypt} function is an
-    industry-standard that can withstand brute-force attacks and other threats\cite{bcrypt}.
+    (random data used as an additional input). The \texttt{bcrypt} function is
+    an industry-standard that can withstand brute-force attacks and other
+    threats\cite{bcrypt}.
+    \newline
+    It should be noted that, for security reasons, the \texttt{password} attribute
+    is never returned by the GraphQL API (there is no mapping at all in the
+    GraphQL schema) or by default by the Prisma ORM unless specifically provided
+    in the \texttt{select} object.
 
   \item \texttt{roles}
     \newline
@@ -2244,29 +2255,561 @@ The user entity attributes are as follows:
     \newline
     The attribute specifies the most recent timestamp the user record was updated.
     \newline
-    The attribute has the \texttt{timestamptz} data type. The value is
-    controlled by the server rather than the database. The latter is owing to differing
-    database implementations, some of which support the feature natively while
-    others do not.
+    The attribute is of type \texttt{timestamptz}.
+    \newline
+    The value is controlled automatically by the server rather than the database.
+    The latter is owing to differing database implementations, some of which
+    support the feature natively while others do not.
 \end{itemize}
+
+% TODO Change
+\pagebreak
+
 
 \subsubsection{Node}
 \label{subsubsec:implementation_server_database_node}
 
+\begin{wrapfigure}
+  {l}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/implementation/erm_node.png}
+\end{wrapfigure}
+
+The node entity represents all of the cluster's physical nodes, both active and inactive.
+It holds critical information about a node, and from this entity, other
+information like the current status or the hardware components may be obtained. \\ %
+Certain GraphQL API queries can only be performed by an authorized node. The node
+lacks a \texttt{password} attribute like the user entity, both because it is bad
+practice keeping the plain password in the node system and also because it is an
+entirely new kind of object that must handle the various operations differently.
+When the node record is created in the database for the first time, the auth token
+(in the user returned when it is successfully authenticated after providing the
+correct \texttt{username} and \texttt{password} attributes, see section \ref{subsec:implementation_server_graphql})
+is returned only once and it cannot be obtained again. As a result, the auth
+token is securely stored only in the corresponding node, and if it is lost for any
+reason, indicating that the node is faulty or compromised, the only way to retrieve
+a new token and perform secure operations on the specific node is to register the
+node in the cluster again (removing the old record). \\ %
+The \texttt{node} entity attributes are as follows:
+\begin{itemize}
+  \item \texttt{id}
+    \newline
+    Uniquely identify (\texttt{PK}) a node record.
+    \newline
+    The attribute is of type \texttt{UUID}.
+    \newline
+    The \texttt{id} attribute is related to multiple entities. A node can only
+    have one status (see section \ref{subsubsec:implementation_server_database_status}),
+    and the status record belongs to only one unique node, hence the relation is
+    one (\texttt{1}) to one (\texttt{1}). A node can have several storages (see
+    section \ref{subsubsec:implementation_server_database_storage}), but each
+    storage corresponds to a single and distinct node, hence the relation is one
+    (\texttt{1}) to many (\texttt{*}). Lastly, like with the previous relation,
+    a node might have several interfaces (see section \ref{subsubsec:implementation_server_database_interface}),
+    but each interface corresponds to a single and unique node, therefore the
+    relation is one (\texttt{1}) to many (\texttt{*}).
+
+  \item \texttt{node\_pool\_id}
+    \newline
+    Node pool identifier.
+    \newline
+    Uniquely identify a node pool record (\texttt{FK}).
+    \newline
+    The attribute is of type \texttt{UUID}.
+    \newline
+    When a new node joins the cluster, it is automatically assigned to a node
+    pool (see section \ref{subsubsec:implementation_server_database_node_pool})
+    based on its roles and hardware. If there is no node pool for the node, one
+    is automatically created. The relation is many (\texttt{*}) to one (\texttt{1}),
+    indicating that a node may only be allocated to one node pool, but a node pool
+    can be assigned to several nodes.
+
+  \item \texttt{cpu\_id}
+    \newline
+    Cpu identifier.
+    \newline
+    Uniquely identify a CPU record (\texttt{FK}).
+    \newline
+    The attribute is of type \texttt{UUID}.
+    \newline
+    During the registration phase for a new node in the cluster, it is first
+    verified to determine if the same CPU type is already registered in the
+    database (see section \ref{subsubsec:implementation_server_database_cpu}); if
+    not, a new CPU record is created using the information supplied by the node
+    and then assigned to it.
+    \newline
+    The relation is many (\texttt{*}) to one (\texttt{1}), indicating that a
+    node may only have one CPU, although the same CPU can be present on several nodes.
+
+  \item \texttt{name}
+    \newline
+    Node's name.
+    \newline
+    A string of characters that uniquely (\texttt{UNIQUE}) identifies a node
+    record.
+    \newline
+    It serves the same purpose as the user entity's \texttt{username} attribute:
+    it allows users/administrators to easily identify a node by using a shorter name
+    rather than the 128-bit alphanumerical identifier (\texttt{id}). As a result,
+    the \texttt{name} and \texttt{id} attributes are interchangeable because
+    they both uniquely identify the same node entry.
+    \newline
+    A default value is automatically assigned by the Server during the node registration
+    procedure and consists of two sections separated by a dot (\texttt{.}). The first
+    section provides a high-level overview of the node's role, which can be
+    either \texttt{Controller} or \texttt{Worker} (if a node is both, \texttt{Controller}
+    is preferred since it has the highest logical importance). The node's identifier
+    is the second element. As an example, a node with the id \texttt{e2b87848-bba0-46d5-923b-403f7141564f}
+    and both roles will be given the name \texttt{controller.e2b87848-bba0-46d5-923b-403f7141564f}.
+    \newline
+    Because this attribute is only deemed as a helper, its value can be modified
+    by administrators (via the \texttt{updateNode} GraphQL query) to fit a more
+    appropriate name that better represents the node in the cluster.
+
+  \item \texttt{roles}
+    \newline
+    Node's roles.
+    \newline
+    This attribute is nearly similar to that of the user entity, but it is
+    unique to nodes rather than users. Roles are used to logically categorize nodes,
+    with different roles indicating various degrees of privilege.
+    \newline
+    Because a node may have multiple/different responsibilities at the same time,
+    the \texttt{roles} attribute is of the form array (\texttt{[]}) of \texttt{node\_role}
+    enum.
+    \newline
+    The \texttt{node\_role} enum has the following possible values/constants:\
+
+    \begin{itemize}
+      \item \texttt{RECLUSTER\_CONTROLLER}
+        \newline
+        The corresponding node has an instance of a reCluster component that
+        controls (monitors) the cluster and thus must be operational at all
+        times.
+        \newline
+        The Server component is currently the only reCluster component that can be
+        deployed outside of the K8s environment and needs to be always active.
+
+      \item \texttt{K8S\_CONTROLLER}
+        \newline
+        The node is a Kubernetes Controller that must be maintained functioning
+        at all times.
+        \newline
+        It must not be autoscaled by the Cluster Autoscaler component and the only
+        entities authorized to deactivate it are administrators via a specific protected
+        GraphQL query.
+
+      \item \texttt{K8S\_WORKER}
+        \newline
+        The node is a Kubernetes Worker that can be autoscaled by the Server
+        component in combination with the Cluster Autoscaler component.
+        \newline
+        It is important to note that if a node is also a Controller, it is not
+        autoscaled.
+    \end{itemize}
+    A node can have multiple roles assigned to it, but the \texttt{roles}
+    attribute must always have at least one value. A node can be a Kubernetes Controller
+    (\texttt{K8S\_CONTROLLER}) and Worker (\texttt{K8S\_WORKER}) that monitors the
+    K8s cluster but also accepts workload, as well as a reCluster Controller (\texttt{RECLUSTER\_CONTROLLER})
+    that enables physical node autoscaling and provides the GraphQL API.
+    \newline
+    The generic Controller component in reCluster is both a Kubernetes
+    Controller and a reCluster Controller, but not a Worker.
+
+  \item \texttt{permissions}
+    \newline
+    Node's permissions.
+    \newline
+    This attribute is comparable to that of the user entity, but it is specific
+    to nodes rather than users. The \texttt{roles} attribute and the context in
+    which a query is performed are both directly related to the \texttt{permissions}
+    attribute. Furthermore, and this is where the \texttt{permissions} in the
+    node entity differ, it can be used within the node during some predefined actions
+    such as before termination or after bootstrap.
+    \newline
+    Because a node may have multiple/different \texttt{permissions} depending on
+    the role(s), context, and action, the attribute's type is an array of \texttt{node\_permission}
+    enum.
+    \newline
+    Even though the cluster implementation supports it out of the box, there are
+    currently no available permissions for nodes (hence the empty array as the default
+    value). The latter enables future implementations to easily add and modify the
+    \texttt{node\_permission} enum and \texttt{permissions} attribute without changing
+    the implementation.
+
+  \item \texttt{address}
+    \newline
+    Node's IP address.
+    \newline
+    The IP address of the node in the Internal Network. There must be no nodes
+    with the same IP address in the Internal Network. The latter is reflected in
+    the database schema, which specifies that the property value must be \texttt{UNIQUE},
+    and thus two nodes cannot have the same IP address. As a result, this
+    property can also be used to uniquely distinguish a node record in the nodes
+    entity.
+    \newline
+    Because each database implementation has its own specific/custom datatype for
+    encoding an IP address, the attribute is of type text.
+    \newline
+    During the downscaling procedure (see section
+    \ref{subsec:implementation_server_downscaling}), the node's IP address is
+    used to establish an SSH connection (from Server to Node) and remotely
+    terminate the node. Furthermore, the IP address is available on multiple
+    GraphQL queries and can be used by users or scripts. The latter is especially
+    helpful when using Prometheus because it requires the IP addresses of the nodes
+    where the metrics are published to monitor them.
+    \newline
+    The attribute's value is constantly updated using the K8s informer provided
+    by the Kubernetes API (see section \ref{subsec:implementation_server_monitoring}).
+    Because of this, the Database and thus the Server always have the most
+    recent available IP address of the node, even though (technically) it should
+    never change.
+
+  \item \texttt{memory}
+    \newline
+    Node's memory size in bytes.
+    \newline
+    Because a large amount of memory does not fit into the smaller \texttt{integer}
+    type, the attribute is of type \texttt{bigint}\footnote{\url{https://www.postgresql.org/docs/current/datatype-numeric.html}}.
+    \newline
+    The unit is in \texttt{byte} because it is the smallest on which memory can
+    be represented (\texttt{bit} unit is almost useless and the conversion is
+    straightforward). The latter is especially useful when dealing with
+    conversions (which are directly supported by the GraphQL API) and
+    comparisons because the unit is always the same and thus no further
+    adjustments are needed.
+    \newline
+    Every attribute in the database that defines a quantity is represented in its
+    smallest unit. The installation script or the server automatically converts
+    a larger value to its smallest unit.
+
+  \item \texttt{node\_pool\_assigned}
+    \newline
+    A Boolean flag that indicates whether the node is allocated to the
+    corresponding node pool.
+    \newline
+    The attribute is of type \texttt{boolean}, with \texttt{true} indicating
+    that the node is allocated to the node pool (visible to Kubernetes) and
+    \texttt{false} indicating that the node is not allocated to the node pool (not
+    visible to Kubernetes).
+    \newline
+    As previously stated, a node is always related to a node pool upon registration.
+    This attribute is used in combination with the status entity (see section \ref{subsubsec:implementation_server_database_status})
+    to decide whether the node is appropriate for autoscaling. A node in the \texttt{inactive}
+    state that is not allocated to a node pool can be selected for automatic
+    bootstrap. A node that is not allocated to the node pool but is in a state other
+    than \texttt{inactive} indicates that the node is bootstrapping, terminating,
+    or experiencing a problem.
+    \newline
+    The default value (\texttt{DEFAULT}) is \texttt{false} because the node has not
+    yet initiated any Kubernetes-related processes and thus cannot be allocated to
+    the pool when it is registered for the first time in the cluster. Only when
+    the installation procedure has been completed successfully and the node
+    sends a request to a specific and protected GraphQL API along with the auth
+    token the value can be set to \texttt{true}.
+
+  \item \texttt{min\_power\_consumption}
+    \newline
+    Minimum power consumption in \texttt{Watt}\footnote{\url{https://wikipedia.org/wiki/Watt}}
+    (\texttt{W}).
+    \newline
+    The node's minimum power consumption when there is no workload and the running
+    processes are the bare minimum.
+    \newline
+    The unit is in \texttt{Watt} rather than a lower one because the device used
+    to measure the power consumption of the different nodes has a minimum sensitivity
+    of \texttt{Watt} (see section \ref{subsubsec:implementation_installer_node_power_consumption_cloudfree_smart_plug}).
+    Furthermore, because the read values are always integers (i.e., no decimal point/float),
+    the attribute's type can be securely set to \texttt{integer}. To represent that
+    the device can read units well below the \texttt{Watt}, the type can be set to
+    \texttt{bigint} in different implementations to prevent overflow. Nonetheless,
+    because the maximum value of an \texttt{integer} is approximately \texttt{2}
+    or \texttt{4} billions (depending on whether the sign can be ignored or not
+    depending on the database implementation) and there are no systems that utilize
+    this much, the \texttt{integer} type is well above the needs for the implementation.
+    \newline
+    The latter affects every attribute in the database that denotes a value for
+    power consumption.
+
+  \item \texttt{max\_efficiency\_power\_consumption}
+    \newline
+    Maximum power consumption in \texttt{Watt} (\texttt{W}) when in a power-efficient
+    state.
+    \newline
+    Modern systems are beginning to include hybrid components that, when under
+    low workload conditions, are more power efficient, consuming less energy at
+    the expense of performance, while when under high workload conditions, are
+    more energy-hungry (less power efficient), but with higher performance and reactiveness.
+    With efficiency and performance cores, the latter is becoming more prevalent
+    in the CPU ecosystem (see section
+    \ref{subsubsec:implementation_server_database_cpu}).
+    \newline
+    Because hybrid systems are still in their early stages and the
+    implementation does not yet recognize when and how the threshold is reached,
+    causing the system to transition from an efficiency to a performance state,
+    the attribute is \texttt{NULLABLE}. Furthermore, a \texttt{NULL} value can
+    determine whether or not the node is hybrid.
+
+  \item \texttt{min\_performance\_power\_consumption}
+    \newline
+    Minimum power consumption in \texttt{Watt} (\texttt{W}) when in a
+    performance state.
+    \newline
+    It is closely related to the previous attribute \texttt{max\_efficiency\_power\_consumption},
+    but in this case, the attribute reflects the minimum power consumption when
+    the hybrid system is in the performance state and has the lowest workload. Simply
+    put, it is the minimum power consumption when switching from a power-efficient
+    to a performance state.
+    \newline
+    This attribute, like the prior one, is \texttt{NULLABLE} due to the present
+    lack of tools and the effort needed to monitor hybrid systems, and a \texttt{NULL}
+    value can identify whether or not the node is hybrid.
+    \newline
+    It is important to note that whenever the node is registered or updated,
+    both the attributes \texttt{max\_efficiency\_power\_consumption} and \texttt{min\_performance\_power\_consumption}
+    must be provided; otherwise, an error is generated and the operation is
+    terminated.
+
+  \item \texttt{max\_power\_consumption}
+    \newline
+    Maximum power consumption in \texttt{Watt} (\texttt{W}).
+    \newline
+    The node's maximum power consumption when under full workload, and thus its
+    hardware resources are under intense stress.
+    \newline
+    It is the opposite of the \texttt{min\_power\_consumption} attribute, and its
+    value is read when the node is under extreme stress.
+
+  \item \texttt{created\_at}
+    \newline
+    Date and time of creation.
+    \newline
+    The attribute indicates when the node record was created.
+    \newline
+    The attribute is of type \texttt{timestamptz}.
+
+  \item \texttt{updated\_at}
+    \newline
+    Date and time of the most recent update.
+    \newline
+    The attribute specifies the most recent timestamp the node record was updated.
+    \newline
+    The attribute is of type \texttt{timestamptz}.
+\end{itemize}
+
+% TODO Check
+\pagebreak
+
+
 \subsubsection{Cpu}
 \label{subsubsec:implementation_server_database_cpu}
+
+\begin{wrapfigure}
+  {l}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/implementation/erm_cpu.png}
+\end{wrapfigure}
+
+% TODO https://www.arm.com/technologies/big-little
+% TODO https://www.intel.com/content/www/us/en/gaming/resources/how-hybrid-design-works.html
+
+The \texttt{CPU} entity attributes are as follows:
+
+\begin{itemize}
+  \item \texttt{id}
+    \newline
+    Uniquely identify (\texttt{PK}) a CPU record.
+    \newline
+    The attribute is of the \texttt{UUID} type.
+
+  \item \texttt{name}
+    \newline
+
+  \item \texttt{vendor}
+    \newline
+
+  \item \texttt{family}
+    \newline
+
+  \item \texttt{model}
+    \newline
+
+  \item \texttt{architecture}
+    \newline
+
+  \item \texttt{flags}
+    \newline
+
+  \item \texttt{cores}
+    \newline
+
+  \item \texttt{cache\_l1d}
+    \newline
+
+  \item \texttt{cache\_l1i}
+    \newline
+
+  \item \texttt{cache\_l2}
+    \newline
+
+  \item \texttt{cache\_l3}
+    \newline
+
+  \item \texttt{vulnerabilities}
+    \newline
+
+  \item \texttt{single\_thread\_score}
+    \newline
+
+  \item \texttt{multi\_thread\_score}
+    \newline
+
+  \item \texttt{efficiency\_threshold}
+    \newline
+
+  \item \texttt{performance\_threshold}
+    \newline
+
+  \item \texttt{created\_at}
+    \newline
+    Date and time of creation.
+    \newline
+    The attribute indicates when the CPU record was created.
+    \newline
+    The attribute is of the \texttt{timestamptz} type.
+
+  \item \texttt{updated\_at}
+    \newline
+    Date and time of the most recent update.
+    \newline
+    The attribute specifies the most recent timestamp the CPU record was updated.
+    \newline
+    The attribute is of the \texttt{timestamptz} type.
+\end{itemize}
 
 \subsubsection{Storage}
 \label{subsubsec:implementation_server_database_storage}
 
+\begin{wrapfigure}
+  {l}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/implementation/erm_storage.png}
+\end{wrapfigure}
+
+\begin{itemize}
+  \item \texttt{id}
+    \newline
+    Uniquely identify (\texttt{PK}) a storage record.
+    \newline
+    The attribute is of type \texttt{UUID}.
+
+  \item \texttt{created\_at}
+    \newline
+    Date and time of creation.
+    \newline
+    The attribute indicates when the storage record was created.
+    \newline
+    The attribute is of type \texttt{timestamptz}.
+
+  \item \texttt{updated\_at}
+    \newline
+    Date and time of the most recent update.
+    \newline
+    The attribute specifies the most recent timestamp the storage record was updated.
+    \newline
+    The attribute is of type \texttt{timestamptz}.
+\end{itemize}
+
 \subsubsection{Interface}
 \label{subsubsec:implementation_server_database_interface}
+
+\begin{wrapfigure}
+  {l}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/implementation/erm_interface.png}
+\end{wrapfigure}
+
+\begin{itemize}
+  \item \texttt{id}
+    \newline
+    Uniquely identify (\texttt{PK}) an interface record.
+    \newline
+    The attribute is of type \texttt{UUID}.
+
+  \item \texttt{created\_at}
+    \newline
+    Date and time of creation.
+    \newline
+    The attribute indicates when the interface record was created.
+    \newline
+    The attribute is of type \texttt{timestamptz}.
+
+  \item \texttt{updated\_at}
+    \newline
+    Date and time of the most recent update.
+    \newline
+    The attribute specifies the most recent timestamp the interface record was updated.
+    \newline
+    The attribute is of type \texttt{timestamptz}.
+\end{itemize}
 
 \subsubsection{Status}
 \label{subsubsec:implementation_server_database_status}
 
+\begin{wrapfigure}
+  {l}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/implementation/erm_status.png}
+\end{wrapfigure}
+
+\begin{itemize}
+  \item \texttt{id}
+    \newline
+    Uniquely identify (\texttt{PK}) a status record.
+    \newline
+    The attribute is of type \texttt{UUID}.
+
+  \item \texttt{updated\_at}
+    \newline
+    Date and time of the most recent update.
+    \newline
+    The attribute specifies the most recent timestamp the status record was updated.
+    \newline
+    The attribute is of type \texttt{timestamptz}.
+\end{itemize}
+
 \subsubsection{Node Pool}
 \label{subsubsec:implementation_server_database_node_pool}
+
+\begin{wrapfigure}
+  {l}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/implementation/erm_node_pool.png}
+\end{wrapfigure}
+
+\begin{itemize}
+  \item \texttt{id}
+    \newline
+    Uniquely identify (\texttt{PK}) a node pool record.
+    \newline
+    The attribute is of type \texttt{UUID}.
+
+  \item \texttt{created\_at}
+    \newline
+    Date and time of creation.
+    \newline
+    The attribute indicates when the node pool record was created.
+    \newline
+    The attribute is of type \texttt{timestamptz}.
+
+  \item \texttt{updated\_at}
+    \newline
+    Date and time of the most recent update.
+    \newline
+    The attribute specifies the most recent timestamp the node pool record was updated.
+    \newline
+    The attribute is of type \texttt{timestamptz}.
+\end{itemize}
 
 \subsection{GraphQL API}
 \label{subsec:implementation_server_graphql}
@@ -2276,9 +2819,6 @@ The user entity attributes are as follows:
 
 \subsubsection{JSON Web Token}
 \label{subsubsec:implementation_server_graphql_json_web_token}
-
-\subsection{Node Pool}
-\label{subsec:implementation_server_node_pool}
 
 \subsection{Upscaling}
 \label{subsec:implementation_server_upscaling}
