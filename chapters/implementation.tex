@@ -2610,10 +2610,33 @@ The \texttt{node} entity attributes are as follows:
   \includegraphics[width=\linewidth]{images/implementation/erm_cpu.png}
 \end{wrapfigure}
 
-% TODO https://www.arm.com/technologies/big-little
-% TODO https://www.intel.com/content/www/us/en/gaming/resources/how-hybrid-design-works.html
-
-The \texttt{CPU} entity attributes are as follows:
+The cpu entity contains information about the CPU\footnote{\url{https://wikipedia.org/wiki/CPU}}
+(Central Processing Unit).
+\newline
+The entity includes the most important information about a particular CPU model obtained
+from the Linux Kernel data available at the virtual path \texttt{/proc/cpuinfo}\footnote{\url{https://www.kernel.org/doc/html/latest/filesystems/proc.html\#kernel-data}}.
+\newline
+Because a particular CPU model can be present in numerous nodes (as is the case with
+worker nodes in reCluster), it is checked before registering a node that the CPU
+is already listed in the database. If not, it is registered using the provided information;
+otherwise, the information is combined with certain attributes to minimize potential
+deviation errors (i.e. \texttt{benchmarks}) or to update the attribute with the most
+recent known information (i.e. \texttt{vulnerabilities}).
+\newline
+As stated in the node entity, modern Processors, such as Arm Big.LITTLE\footnote{\url{https://www.arm.com/technologies/big-little}}
+or Intel Performance Hybrid Architecture\footnote{\url{https://www.intel.com/content/www/us/en/gaming/resources/how-hybrid-design-works.html}},
+are beginning to include hybrid technology (heterogeneous processing
+architecture) which employs two kinds of processor. The first type of processor
+is intended for maximum power efficiency, which reduces overall performance,
+whereas the second type of processor is designed for maximum compute performance,
+which increases power consumption. This form of Processor can instantly adapt to
+the variable workload by switching from one type to the other\cite{cpu_arm}\cite{cpu_intel}.
+Even though the latter technology is new and difficult to monitor (understanding
+when the CPU decides to transition from one type to the other and vice versa),
+it is represented in the entity with two dedicated attributes (\texttt{efficiency\_threshold}
+and \texttt{performance\_threshold}).
+\newline
+The \texttt{cpu} entity attributes are as follows:
 
 \begin{itemize}
   \item \texttt{id}
@@ -2621,54 +2644,254 @@ The \texttt{CPU} entity attributes are as follows:
     Uniquely identify (\texttt{PK}) a CPU record.
     \newline
     The attribute is of the \texttt{UUID} type.
+    \newline
+    Because multiple nodes can share the same CPU type, the id attribute is associated
+    with the node entity. As a result, the relation is one (\texttt{1}) to many
+    (\texttt{*}).
 
   \item \texttt{name}
     \newline
+    CPU name.
+    \newline
+    The Processor's common name, including its project name.
+    \newline
+    The \texttt{name} attribute, like some of the previous attributes, can be
+    used by users and administrators to easily and uniquely (\texttt{UNIQUE}) identify
+    the processor without relying on one or more complicated alphanumerical attribute(s).
+    \newline
+    This attribute, along with the \texttt{vendor}, \texttt{family}, and \texttt{model}
+    attributes, specifically defines a CPU record (\texttt{UNIQUE(name,vendor,family,model)}).
+    The quadruplet is used during the node registration procedure to uniquely identify
+    if the same CPU has already been registered. It should be noted that if a
+    CPU has the same \texttt{name} attribute value but a different value for the
+    other attributes, registration fails because something in the received data
+    is incorrect.
+    \newline
+    An example \texttt{name} attribute value is \texttt{Intel(R) Core(TM) i7-6700HQ
+    CPU @ 2.60GHz}, which identifies the model \texttt{i7-6700HQ} with a basic
+    frequency of \texttt{2.60GHz} manufactured by \texttt{Intel Corporation}\footnote{\url{www.intel.com}}.
 
   \item \texttt{vendor}
     \newline
+    CPU vendor identifier.
+    \newline
+    Identifies the Processor manufacturer identifier.
+    \newline
+    The attribute is of type \texttt{cpu\_vendor} enum. It was decided to use a
+    preset set of values because almost every desktop CPU processor is
+    manufactured by a very limited number of vendors, and knowing the possible values
+    ahead of time aids in the development of a more powerful and robust GraphQL API.
+    Nonetheless, if a CPU has a manufacturer that is not available, an \texttt{UNKNOWN}
+    value exists, enabling future implementations to easily add and support more
+    manufacturers.
+    \newline
+    The \texttt{cpu\_vendor} enum has the following possible values/constants:
+    \begin{itemize}
+      \item \texttt{AMD}
+        \newline
+        Advanced Micro Devices\footnote{\url{https://www.amd.com}} (AMD).
+
+      \item \texttt{INTEL}
+        \newline
+        Intel Corporation.
+
+      \item \texttt{UNKNOWN}
+        \newline
+        Identifies an unknown manufacturer.
+    \end{itemize}
+    Due to historical reasons, the original manufacturer identifier string value
+    read from \texttt{/proc/cpuinfo} is slightly different\footnote{\url{https://wikipedia.org/wiki/CPUID}}:
+    \texttt{INTEL} is \texttt{GenuineIntel} and \texttt{AMD} is \texttt{AuthenticAMD}.
+    They have been changed/standardized to be more easily identified, with a shorter
+    name as well.
 
   \item \texttt{family}
     \newline
+    CPU family.
+    \newline
+    Identifies the Processor's microarchitectural lineage.
+    \newline
+    Following the example CPU in the \texttt{name} attribute, it has a family
+    value of \texttt{6}\footnote{\url{https://wikipedia.org/wiki/P6_(microarchitecture)}},
+    indicating that it is a descendant of the Pentium Pro\footnote{\url{https://wikipedia.org/wiki/Pentium_Pro}}
+    and thus uses the same microarchitecture.
 
   \item \texttt{model}
     \newline
+    CPU model.
+    \newline
+    Identifies the model of the Processor as specified by the manufacturer.
+    \newline
+    It should be noted that the unique quadruplet (\texttt{UNIQUE(name,vendor,family,model)})
+    must include the \texttt{name} attribute because the other three attributes (\texttt{vendor},
+    \texttt{family}, \texttt{model}) distinguish only a collection of processors
+    rather than a single specific one.
+    \newline
+    Following the example CPU in the \texttt{name} attribute, it has a model value
+    of \texttt{94} indicating that it is a \texttt{Skylake}\footnote{\url{https://www.intel.com/content/www/us/en/products/platforms/details/skylake-s.html}}
+    generation (model) Processor.
 
   \item \texttt{architecture}
     \newline
+    CPU architecture.
+    \newline
+    Identifies the Processor Instruction Set Architecture implementation\footnote{\url{https://wikipedia.org/wiki/Instruction_set_architecture}}.
+    \newline
+    The attribute is of type \texttt{cpu\_architecture} enum. The possible
+    values reflect the CPU architectures supported by the cluster. The latter is
+    critical because some components only support specific architectures, and
+    downloaded dependencies ignore files that are not present in the
+    configuration (commonly unsupported architectures). It should be noted that the
+    installation script detects if it is operating on an unsupported architecture.
+    Nonetheless, the verification occurs also in the GraphQL API during the registration
+    process.
+    \newline
+    The \texttt{cpu\_architecture} enum has the following possible values/constants:
+    \begin{itemize}
+      \item \texttt{AMD64}\footnote{\url{https://wikipedia.org/wiki/X86-64}}
+        \newline
+        \texttt{64-bit} version of the \texttt{x86}\footnote{\url{https://wikipedia.org/wiki/X86}}
+        instruction set.
+        \newline
+        This architecture is also known as \texttt{x64}, \texttt{x86\_64}, \texttt{x86-64},
+        and \texttt{Intel 64}.
+
+      \item \texttt{ARM64}\footnote{\url{https://wikipedia.org/wiki/AArch64}}
+        \newline
+        \texttt{64-bit} extension of the ARM architecture family\footnote{\url{https://wikipedia.org/wiki/ARM_architecture_family}}.
+        \newline
+        This architecture is also known as \texttt{AArch64}.
+    \end{itemize}
+    It should be noted that the names of the enum values are subjective, and thus
+    they can be (easily) changed to better fit the organization administering the
+    cluster's favored choice.
 
   \item \texttt{flags}
     \newline
+    CPU feature flags.
+    \newline
+    Determines the features that the Processor implements (identified by a
+    distinct flag name). One example is the \texttt{fpu}\footnote{\url{https://wikipedia.org/wiki/Floating-point_unit}}
+    (floating-point unit) flag, which indicates that the CPU has a dedicated
+    coprocessor for working with floating-point numbers.
+    \newline
+    The attribute is of the type array (\texttt{[]}) of text, and it contains
+    all of the feature flags. The latter enables a robust and complex GraphQL API
+    for filtering and searching particular CPUs with a specified set of flags.
+    \newline
+    An application can be built to support a particular set of feature flags (normally
+    improving overall performance thanks to compiler optimizations) and then
+    scheduled only on worker nodes whose Processor implements these flags. The selection
+    of nodes is based solely on the node(s) identification number (\texttt{id}
+    attribute) that is available in the Kubernetes environment under the label \texttt{recluster.io/id=<ID>}.
 
   \item \texttt{cores}
     \newline
+    CPU core count.
+    \newline
+    Almost every modern CPU is a multi-core processor\footnote{\url{https://wikipedia.org/wiki/Multi-core_processor}},
+    which combines multiple processing units (two or more) to enable parallel
+    work. This attribute indicates how many core units the CPU has.
+    \newline
+    It should be noted that this value takes into consideration the CPU's
+    multithreading\footnote{\url{https://wikipedia.org/wiki/Multithreading_(computer_architecture)}}
+    capability, so it is common for this value to be twice the real physical number
+    of cores.
+    \newline
+    Following the example CPU in the \texttt{name} attribute, the attribute has
+    a value of \texttt{8}, even though the actual physical cores are \texttt{4}.
 
   \item \texttt{cache\_l1d}
     \newline
+    CPU \texttt{L1d} (data) cache\footnote{\url{https://wikipedia.org/wiki/CPU_cache}}
+    size in bytes (\texttt{B}).
+    \newline
+    Because of their small sizes, all cache attributes are of the type \texttt{integer}
+    rather than \texttt{bigint}.
 
   \item \texttt{cache\_l1i}
     \newline
+    CPU \texttt{L1i} (instructions) cache size in bytes (\texttt{B}).
 
   \item \texttt{cache\_l2}
     \newline
+    CPU \texttt{L2} cache size in bytes (\texttt{B}).
 
   \item \texttt{cache\_l3}
     \newline
+    CPU \texttt{L3} cache size in bytes (\texttt{B}).
 
   \item \texttt{vulnerabilities}
     \newline
+    Known CPU vulnerabilities.
+    \newline
+    A collection of known vulnerabilities that affect the Processor.
+    \newline
+    Because the Processor is vulnerable to numerous vulnerabilities, the attribute's
+    type is an array (\texttt{[]}) of \texttt{text}. If the CPU is already registered,
+    the previous value of the \texttt{vulnerabilities} attribute is combined with
+    the new value obtained during the registration procedure, with the result
+    that if newer vulnerabilities are discovered, the database and server components
+    are immediately updated with the information. Furthermore, because it is an array
+    type, the GraphQL API allows advanced filtering and searching.
+    \newline
+    The vulnerabilities attribute can be used to evaluate applications on known vulnerable
+    dedicated nodes. The latter is particularly helpful in an offensive security
+    class, where students can experiment with various vulnerabilities to take control
+    of the node or execute arbitrary code.
 
   \item \texttt{single\_thread\_score}
     \newline
+    CPU single-thread score.
+    \newline
+    This attribute indicates the performance score of a single CPU core.
+    \newline
+    It should be noted that the evaluation, as well as the final score for this attribute
+    and \texttt{multi\_thread\_score} attribute, are carried out using the sysbench\footnote{\url{https://github.com/akopytov/sysbench}}
+    application (see section
+    \ref{subsubsec:implementation_installer_node_benchmarks_sysbench})
 
   \item \texttt{multi\_thread\_score}
     \newline
+    CPU multi-thread score.
+    \newline
+    This attribute indicates the performance score of all CPU cores combined.
+    \newline
+    It should be noted that hyperthreading capability is taken into
+    consideration, and the tests are performed on highly parallelizable algorithms.
 
   \item \texttt{efficiency\_threshold}
     \newline
+    CPU power-efficiency threshold (inclusive).
+    \newline
+    The workload threshold value (upper) beyond which it is no longer certain that
+    the Processor will stay in a power-efficient condition.
+    \newline
+    The threshold value is a number between \texttt{1} (inclusive) and \texttt{99}
+    (inclusive), where \texttt{1} indicates that the CPU is executing at \texttt{1\%}
+    of its total capacity (almost idle) and \texttt{99} indicates that the CPU is
+    operating at \texttt{99\%} of its total capacity (full load).
+    \newline
+    Due to the difficulty of monitoring the threshold value, the attribute allows
+    a \texttt{NULL} value (\texttt{NULLABLE}).
 
   \item \texttt{performance\_threshold}
     \newline
+    CPU performance threshold (inclusive).
+    \newline
+    The workload threshold value (lower) beyond which it is no longer certain that
+    the Processor will stay in a performance condition.
+    \newline
+    By combining the attributes \texttt{efficiency\_threshold} and \texttt{performance\_threshold},
+    a workload range is obtained that indicates an area of uncertainty where the
+    Processor can transition from one state to the other or remain in the current
+    one. For example, if a CPU has the attribute \texttt{efficiency\_threshold}
+    set to \texttt{45} and the attribute \texttt{performance\_threshold} set to
+    \texttt{55}, then the workload range between \texttt{45} and \texttt{55} (\texttt{10}
+    workload range) is uncertain, and the Processor can transition or not.
+    \newline
+    Due to the difficulty of monitoring the threshold value, the attribute
+    allows a \texttt{NULL} value (\texttt{NULLABLE}).
 
   \item \texttt{created\_at}
     \newline
@@ -2687,6 +2910,10 @@ The \texttt{CPU} entity attributes are as follows:
     The attribute is of the \texttt{timestamptz} type.
 \end{itemize}
 
+% TODO Check
+\pagebreak
+
+
 \subsubsection{Storage}
 \label{subsubsec:implementation_server_database_storage}
 
@@ -2696,12 +2923,72 @@ The \texttt{CPU} entity attributes are as follows:
   \includegraphics[width=\linewidth]{images/implementation/erm_storage.png}
 \end{wrapfigure}
 
+The storage entity represents the persistence storage(s) accessible on the
+associated node.
+\newline
+The information is obtained by reading the block devices identified by the Linux
+kernel and made available via the virtual path \texttt{/sys/block}\footnote{\url{https://www.kernel.org/doc/html/next/filesystems/sysfs.html}}.
+Block devices, such as a Hard Disk, SSD, CD-ROM, and RAM disk, are distinguished
+by random access to data organized in fixed-size blocks\cite{block_device}. Because
+the implementation only requires persistent storage(s), the collection of block devices
+is filtered to retrieve only Disk(s)/SSD(s) block devices that are not removable
+devices\footnote{\url{https://wikipedia.org/wiki/Removable_media}} (i.e. USB flash
+drive). The latter is done automatically by the installation script while reading
+the node information.
+\newline
+A node can have zero or multiple storage devices. Nonetheless, it is usual for a
+consumer system to include at least one storage device, and modern (consumer) systems
+may include a combination of a Hard Disk (cheap with large capacity but slow) and
+an SSD (expensive but faster than a Hard Disk). Using a multi-SSD configuration
+can significantly improve cluster performance. Furthermore, if certain nodes
+have three or more storage devices, Longhorn (see section
+\ref{subsubsec:implementation_dependencies_docker_registry_image_storage}) can utilize
+them to create a distributed block storage system.
+\newline
+Even though \texttt{Sysbench} (see section
+\ref{subsubsec:implementation_installer_node_benchmarks_sysbench}) supports it,
+the application currently does not support a scoring system for a storage device
+that can help determine its performance under various conditions.
+
 \begin{itemize}
   \item \texttt{id}
     \newline
     Uniquely identify (\texttt{PK}) a storage record.
     \newline
     The attribute is of type \texttt{UUID}.
+
+  \item \texttt{node\_id}
+    \newline
+    Node identifier.
+    \newline
+    Uniquely identify a node record (\texttt{FK}).
+    \newline
+    The attribute is of type \texttt{UUID}.
+    \newline
+    A node can have multiple storage devices, but each storage device is
+    associated with one unique node. As a result, the relation is many (\texttt{*})
+    to one (\texttt{1}).
+
+  \item \texttt{name}
+    \newline
+    Storage name.
+    \newline
+    The name of the storage device on the associated node.
+    \newline
+    Despite its appearance as a helper for users or administrators, this attribute
+    is also used in conjunction with the \texttt{node\_id} attribute to uniquely
+    (\texttt{UNIQUE(node\_id,name)}) identify the storage device on the node and
+    to prevent the registration of two devices with the same name on the same
+    node.
+
+  \item \texttt{size}
+    \newline
+    Storage memory size in bytes (\texttt{B}).
+    \newline
+    The total quantity of memory that the storage device can store.
+    \newline
+    Because the overall memory of common storage devices is quite large and their
+    counterpart in bytes is quite massive, the attribute is of type \texttt{bigint}.
 
   \item \texttt{created\_at}
     \newline
@@ -2736,6 +3023,21 @@ The \texttt{CPU} entity attributes are as follows:
     \newline
     The attribute is of type \texttt{UUID}.
 
+  \item \texttt{node\_id}
+    \newline
+
+  \item \texttt{name}
+    \newline
+
+  \item \texttt{address}
+    \newline
+
+  \item \texttt{speed}
+    \newline
+
+  \item \texttt{wol}
+    \newline
+
   \item \texttt{created\_at}
     \newline
     Date and time of creation.
@@ -2769,6 +3071,21 @@ The \texttt{CPU} entity attributes are as follows:
     \newline
     The attribute is of type \texttt{UUID}.
 
+  \item \texttt{status}
+    \newline
+
+  \item \texttt{reason}
+    \newline
+
+  \item \texttt{message}
+    \newline
+
+  \item \texttt{last\_threshold}
+    \newline
+
+  \item \texttt{last\_transition}
+    \newline
+
   \item \texttt{updated\_at}
     \newline
     Date and time of the most recent update.
@@ -2793,6 +3110,15 @@ The \texttt{CPU} entity attributes are as follows:
     Uniquely identify (\texttt{PK}) a node pool record.
     \newline
     The attribute is of type \texttt{UUID}.
+
+  \item \texttt{name}
+    \newline
+
+  \item \texttt{min\_nodes}
+    \newline
+
+  \item \texttt{auto\_scale}
+    \newline
 
   \item \texttt{created\_at}
     \newline
@@ -3245,7 +3571,7 @@ collector:
 \subsection{Node Benchmarks}
 \label{subsec:implementation_installer_node_benchmarks}
 
-\subsubsection{SysBench}
+\subsubsection{Sysbench}
 \label{subsubsec:implementation_installer_node_benchmarks_sysbench}
 
 \subsection{Node Power Consumption}
