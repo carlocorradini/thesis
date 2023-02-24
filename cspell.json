@@ -91,6 +91,7 @@
     "loadbalancer",
     "lungu",
     "macaddress",
+    "macchanger",
     "maurizio",
     "metallb",
     "microarchitectural",
@@ -104,6 +105,8 @@
     "nierstrasz",
     "nonstopmode",
     "numbersep",
+    "numfmt",
+    "nvme",
     "openrc",
     "outdir",
     "pacman",
@@ -153,6 +156,7 @@
     "upscales",
     "upscaling",
     "uquote",
+    "wlan",
     "xleftmargin",
     "ztailpacking"
   ]

@@ -2443,10 +2443,10 @@ The \texttt{node} entity attributes are as follows:
     \newline
     The IP address of the node in the Internal Network. There must be no nodes
     with the same IP address in the Internal Network. The latter is reflected in
-    the database schema, which specifies that the property value must be \texttt{UNIQUE},
-    and thus two nodes cannot have the same IP address. As a result, this
-    property can also be used to uniquely distinguish a node record in the nodes
-    entity.
+    the database schema, which specifies that the attribute value must be
+    \texttt{UNIQUE}, and thus two nodes cannot have the same IP address. As a result,
+    this attribute can also be used to uniquely distinguish a node record in the
+    nodes entity.
     \newline
     Because each database implementation has its own specific/custom datatype for
     encoding an IP address, the attribute is of type text.
@@ -2948,7 +2948,8 @@ them to create a distributed block storage system.
 Even though \texttt{Sysbench} (see section
 \ref{subsubsec:implementation_installer_node_benchmarks_sysbench}) supports it,
 the application currently does not support a scoring system for a storage device
-that can help determine its performance under various conditions.
+that can help determine its performance under various conditions. The \texttt{storage}
+entity attributes are as follows:
 
 \begin{itemize}
   \item \texttt{id}
@@ -2973,7 +2974,12 @@ that can help determine its performance under various conditions.
     \newline
     Storage name.
     \newline
-    The name of the storage device on the associated node.
+    The name of the storage device on the associated node. In GNU/Linux, typical
+    storage device names are \texttt{sda}, \texttt{sdb}, \texttt{sdc}, and so on
+    for Hard Disks/SSDs and \texttt{nvme0}, \texttt{nvme1}, \texttt{nvme2}, and so
+    on for NVMEs\footnote{\url{https://wikipedia.org/wiki/NVM_Express}}.
+    Nonetheless, the organization in charge of the cluster can choose to modify the
+    default name by using arbitrary names to better identify the storage device.
     \newline
     Despite its appearance as a helper for users or administrators, this attribute
     is also used in conjunction with the \texttt{node\_id} attribute to uniquely
@@ -3016,6 +3022,35 @@ that can help determine its performance under various conditions.
   \includegraphics[width=\linewidth]{images/implementation/erm_interface.png}
 \end{wrapfigure}
 
+The interface entity depicts the network interface(s) accessible within the
+cluster's Internal Network that are associated with the node.
+\newline
+The \texttt{ip}\footnote{\url{https://linux.die.net/man/8/ip}} command/application
+is used to obtain a node's available network interfaces (\texttt{ip -details
+link show}). However, the returned list contains both logical interfaces (such as
+\texttt{lo}\footnote{\url{https://tldp.org/LDP/nag/node66.html}}) and physical interfaces
+(such as \texttt{eth0} or \texttt{wlan0}\footnote{\url{https://wiki.debian.org/NetworkInterfaceNames}}),
+and must be filtered to retrieve only the physical one. The latter action is performed
+automatically by the installation script that discards all network interfaces that
+have the \texttt{info\_kind} information object and is of type \texttt{loopback}.
+\newline
+A physical interface is a Network Interface Card (NIC) that is installed on the
+node and can thus be used to acquire information about the NIC as well as be
+configured to modify some key parameters (i.e. Wake-on-Lan flags) to function properly
+in the cluster environment. The information obtained is critical for
+understanding which nodes are available for automated bootstrapping by the
+Server (see section \ref{subsec:implementation_server_upscaling}) and to which
+specific physical address (MAC address) the magic wake-up message must be sent.
+\newline
+A node must have at least one NIC to communicate with/from it. The latter
+verification is done by both the installation script and the Server component
+when the registration query is executed. Nonetheless, (almost) every system is
+equipped with at least one NIC and, if possible/needed, can have also extra NICs.
+It is standard practice in data centers and almost every enterprise environment to
+have a system with multiple NICs.
+\newline
+The \texttt{interface} entity attributes are as follows:
+
 \begin{itemize}
   \item \texttt{id}
     \newline
@@ -3025,18 +3060,150 @@ that can help determine its performance under various conditions.
 
   \item \texttt{node\_id}
     \newline
+    Node identifier.
+    \newline
+    Uniquely identify a node record (\texttt{FK}).
+    \newline
+    The attribute is of type \texttt{UUID}.
+    \newline
+    A node can have multiple network interfaces, but each network interface is
+    associated with a single and unique node. As a result, the relation is many
+    (\texttt{*}) to one (\texttt{1}).
 
   \item \texttt{name}
     \newline
+    Interface name.
+    \newline
+    The network interface name on the associated node. In GNU/Linux, common network
+    interface names for wired network interfaces are \texttt{eth0}, \texttt{eth1},
+    and so on, and for wireless network interfaces are \texttt{wlan0}, \texttt{wlan1},
+    and so on. The network interface name, like block devices, can be changed by
+    the organization in control of the cluster from the one automatically assigned
+    by the Kernel. The latter procedure, while supported, is strongly
+    discouraged to prevent potential confusion. Furthermore, modifying it
+    necessitates reconfiguring and restarting all applications/programs that are
+    configured to interact with the particular interface (i.e. \texttt{SSH}).
+    \newline
+    The interface \texttt{name} attribute is used in conjunction with the
+    \texttt{node\_id} attribute to uniquely identify (\texttt{UNIQUE(node\_id,name)})
+    an interface record and to avoid two interfaces with the same name from being
+    registered for the same node. Moreover, identifying a NIC by its name for a related
+    node is also helpful to users and administrators.
 
   \item \texttt{address}
     \newline
+    Interface MAC address.
+    \newline
+    The MAC address assigned to the NIC and used for Internal Network communication
+    (see section \ref{subsec:architecture_network_internal_network}). There must
+    be no interfaces in the Internal Network with the same MAC address. The latter
+    is reflected in the database schema, which states that the attribute value
+    must be \texttt{UNIQUE}, implying that no two interfaces can have the same
+    MAC address. This attribute can be used to uniquely identify an interface record
+    as a result of the latter, and it is known to be particularly helpful when
+    dealing with networking problems in understanding from which node certain
+    packets are sent/lost in the cluster.
+    \newline
+    Each database implementation, like the \texttt{address} attribute in the node
+    entity, has its own specific/custom datatype for encoding a MAC address, therefore
+    the attribute type is defined as plain text.
+    \newline
+    Each database implementation, like the address attribute in the node entity,
+    has its own specific/custom datatype for encoding a MAC address, therefore the
+    attribute type is defined to plain text.
+    \newline
+    It should be noted that the NIC's MAC address is assigned by the
+    corresponding manufacturer. Nonetheless, there are software tools, such as \texttt{macchanger}\footnote{\url{https://www.kali.org/tools/macchanger}},
+    that enable the MAC address to be arbitrarily modified with any (valid) value.
 
   \item \texttt{speed}
     \newline
+    Interface speed in bit-per-second (\texttt{b/s}).
+    \newline
+    The NIC's speed/performance in bit-per-second. The value is read with the \texttt{ethtool}
+    (see section \ref{subsec:implementation_distributions_packages}) program by
+    specifying the network interface name and is thus used in conjunction with
+    the \texttt{ip} program output. Because the obtained value/unit is not in
+    \texttt{b/s} but in a base 10 multiple unit, such as \texttt{100 Mb/s} or\texttt{
+    1 Gb/s} (common speed values/units for consumer NICs), the installation script
+    converts to \texttt{b/s} using the \texttt{numfmt}\footnote{\url{https://www.gnu.org/software/coreutils/manual/html_node/numfmt-invocation.html}}
+    application, which understands the unit and applies the corresponding
+    multiplication value.
+    \newline
+    Although some speed values of consumer NICs can fit in an \texttt{integer}
+    type, this is not always the case (for example, enterprise NICs, which can
+    easily reach \texttt{10 Gb/s} and beyond), therefore the attribute's type has
+    been set to \texttt{bigint}.
 
   \item \texttt{wol}
     \newline
+    Interface Wake-on-Lan (\texttt{WoL}) flags supported.
+    \newline
+    An interface can be triggered to bootstrap the node by multiple distinct
+    \texttt{WoL} activities and this attribute determines which \texttt{WoL}
+    flags (each flag mapping to a particular trigger) are supported by the
+    interface.
+    \newline
+    The \texttt{wol} attribute is an array (\texttt{[]}) of \texttt{wol\_flag} enum
+    because an interface can accept different \texttt{WoL} triggers/flags. The array
+    is empty if an interface does not support \texttt{WoL}. The latter is reflected
+    in the schema by the default value (\texttt{DEFAULT([])}) provided by the
+    database to the attribute.
+    \newline
+    The \texttt{wol} attribute is intrinsically tied to the \texttt{address} attribute
+    because both are used during the Server's (up)scaling procedure (see section
+    \ref{subsec:implementation_server_upscaling}). To begin, the \texttt{wol} attribute
+    is used to filter inactive nodes to obtain only a list of nodes that can be automatically
+    bootstrapped using \texttt{WoL} (search where \texttt{wol} is not an empty
+    array). Then, for each node that needs to be bootstrapped (select \texttt{n}
+    nodes from the list), the associated MAC address of the interface is used as
+    the destination address of the \texttt{WoL} special message. It should be noted
+    that the current implementation only allows basic \texttt{WoL}, even though some
+    nodes in the cluster may support advanced \texttt{WoL} configurations. Nevertheless,
+    future implementations may support more sophisticated logic and
+    deterministically apply specific configurations based on the interface's
+    supported \texttt{WoL} flags.
+    \newline
+    The node \texttt{wol\_flag} enum has the following possible values/constants:
+    \begin{itemize}
+      \item \texttt{a}
+        \newline
+        Wake on \texttt{ARP} activity.
+
+      \item \texttt{b}
+        \newline
+        Wake on \texttt{Broadcast} activity.
+
+      \item \texttt{g}
+        \newline
+        Wake on \texttt{MagicPacket} activity.
+
+      \item \texttt{m}
+        \newline
+        Wake on \texttt{Multicast} activity.
+
+      \item \texttt{p}
+        \newline
+        Wake on \texttt{PHY} (Physical) activity.
+
+      \item \texttt{s}
+        \newline
+        Enable \texttt{SecureOn} password for \texttt{MagicPacket}.
+
+      \item \texttt{u}
+        \newline
+        Wake on \texttt{Unicast} activity.
+    \end{itemize}
+    It is worth noting that there is an additional possible value for the
+    \texttt{WoL} flags, which is the value \texttt{d}, which indicates that
+    \texttt{WoL} is disabled on the interface. Because the installation script
+    checks to determine whether or not all \texttt{WoL} capable NICs have \texttt{WoL}
+    enabled (if not, an error is generated), the \texttt{d} value cannot be accepted
+    by the GraphQL API and is thus omitted.
+    \newline
+    The \texttt{g} flag is the basic configuration for a \texttt{WoL} interface,
+    allowing the node to be automatically bootstrapped with \texttt{WoL}. As previously
+    stated, the latter is the current (only) supported configuration.
 
   \item \texttt{created\_at}
     \newline
