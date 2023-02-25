@@ -3231,23 +3231,290 @@ The \texttt{interface} entity attributes are as follows:
   \includegraphics[width=\linewidth]{images/implementation/erm_status.png}
 \end{wrapfigure}
 
+The status entity, as the name implies, represents the node's current status, as
+updated with the most recently available information.
+\newline
+The status entity's information is critical for gaining a better understanding
+of the node, its condition, and if any potential problems, such as a crash or an
+anomaly/unprogrammed shutdown, arise. Furthermore, it is widely used in
+autoscaling procedures (see section \ref{subsec:implementation_server_upscaling}
+and section \ref{subsec:implementation_server_downscaling}). When upscaling, the
+Server determines what are the list of nodes that are in an inactive status and,
+vice versa, when downscaling, the Server determines what are the list of nodes that
+are in an active status. It should be emphasized that the status entity is
+composed of multiple attributes, not just one, each of which specifies a
+particular knowledge that can also be correlated to other attributes.
+\newline
+A node must have only one (unique) status record, and a status record must
+identify only one (unique) node record. When a node successfully registers, the
+status record is automatically created, and it is continuously updated while the
+node is operational. Because there are no status information updates sent by the
+node when it is inactive, all of the attribute's values reflect the most recent status
+information before the node is shut down.
+\newline
+The status information is automatically updated by leveraging the Kubernetes API\footnote{\url{https://kubernetes.io/docs/concepts/architecture/nodes/\#node-status}},
+which provides access to the node's status information, which is constantly
+updated by periodic Heartbeats\footnote{\url{https://kubernetes.io/docs/concepts/architecture/nodes/\#heartbeats}}
+sent by the Kubernetes node to the API Server (Controllers). The information (attributes)
+of the status entity is only a subset of the multitude made available by the Kubernetes
+API, as most of them are unnecessary for low-level cluster operation and
+administration. Furthermore, some status updates are performed without
+leveraging the Kubernetes API, either because the latter is unavailable or because
+the node autonomously sends a request (i.e. after successfully bootstrapping and
+before starting all cluster services) to specific protected GraphQL queries, generating
+intrinsic knowledge that the node is somewhat active and performing a status update.
+\newline
+The \texttt{status} entity attributes are as follows:
+
 \begin{itemize}
   \item \texttt{id}
     \newline
     Uniquely identify (\texttt{PK}) a status record.
     \newline
     The attribute is of type \texttt{UUID}.
+    \newline
+    A node must have only one status, and a status must be assigned to only one/unique
+    node. As a result, the relation is one (\texttt{1}) to one (\texttt{1}).
+    \newline
+    The \texttt{id} attribute is also the Node identifier, which allows a node
+    record to be uniquely identified (\texttt{FK}). The \texttt{id} and node identifier
+    (\texttt{node\_id}) attributes are separated in the previous entities to
+    represent the fact that the corresponding node can be associated with
+    multiple records of the entity. In the status entity, however, the \texttt{id}
+    attribute serves as both the primary key (\texttt{PK}) and the foreign key (\texttt{FK})
+    to a distinct node record. The latter ensures that a status record is unique,
+    easy to identify, and related to a single/unique node record automatically at
+    the database schema level (without the need for Server checks). When a
+    status record is created (during the installation process), its \texttt{id}
+    is not derived from a default value (in fact, the \texttt{DEFAULT(UUID)}
+    metadata is missing), but it is the same as the associated node. The latter is
+    also very useful for preventing complex and expensive joins between the two entities
+    because identifying a node's status record requires only its id because they
+    are the same value.
 
   \item \texttt{status}
     \newline
+    Node status.
+    \newline
+    Identify the node's high-level status.
+    \newline
+    It is one of the most essential data that correlates to a node, and it is continuously
+    updated when the node is powered on. It can be used by users/administrators
+    to gain a better understanding of the node's current state, such as determining
+    whether or not the node is properly working/healthy. It is widely used in
+    autoscaling procedures in conjunction with other attributes to identify
+    which nodes are inactive (upscaling) or active (downscaling).
+    \newline
+    The attribute is of type \texttt{node\_status} enum. Understanding each status
+    is critical, and the general perspective resembles a finite-state machine\footnote{\url{https://wikipedia.org/wiki/Finite-state_machine}}
+    machine. Some statuses are only used to transition from one to the next,
+    whereas others designate a permanent status that varies only in response to
+    specific actions.
+    \newline
+    The \texttt{node\_status} enum has the following possible values/constants:
+    \begin{itemize}
+      \item \texttt{ACTIVE}
+        \newline
+        Node is active and healthy, with no Kubernetes orchestrator operating.
+        \newline
+        It is a transitory status that is assigned in one of the two situations
+        listed below:
+        \begin{enumerate}
+          \item \texttt{BOOTING} \faicon{arrow-circle-o-right} \texttt{ACTIVE}
+            \faicon{arrow-circle-o-right} \texttt{ACTIVE\_NOT\_READY}
+            \newline
+            The node has successfully booted (\texttt{BOOTING}) and has sent an update
+            status request to the Server's protected GraphQL API (\texttt{ACTIVE}).
+            After receiving a successful response from the Server, the Node
+            begins to initialize all necessary cluster services, such as Node Exporter
+            and K3s, by leveraging the corresponding installed Init System (\texttt{ACTIVE\_NOT\_READY}).
+
+          \item \texttt{ACTIVE\_DELETING} \faicon{arrow-circle-o-right} \texttt{ACTIVE}
+            \faicon{arrow-circle-o-right} \texttt{INACTIVE}
+            \newline
+            The node has been successfully removed (\texttt{ACTIVE\_DELETING}) from
+            the Kubernetes cluster (\texttt{ACTIVE}), and the Server begins the shutdown
+            procedure (\texttt{INACTIVE}).
+        \end{enumerate}
+
+      \item \texttt{ACTIVE\_READY}
+        \newline
+        Node is active, healthy and the Kubernetes orchestrator is operating and
+        accepting pods.
+        \newline
+        It is a permanent status that is constantly monitored by the Heartbeat
+        system.
+        \newline
+        The status is assigned in the following situation:
+        \begin{enumerate}
+          \item \texttt{ACTIVE\_NOT\_READY} \faicon{arrow-circle-o-right} \texttt{ACTIVE\_READY}
+            \newline
+            The Kubernetes orchestrator on the node (\texttt{ACTIVE\_NOT\_ READY})
+            has finished the initialization and is ready to accept workloads (\texttt{ACTIVE\_READY}).
+        \end{enumerate}
+        The status is unassigned in the following situation:
+        \begin{enumerate}
+          \item \texttt{ACTIVE\_READY} \faicon{arrow-circle-o-right} \texttt{ACTIVE\_DELETING}
+            \newline
+            The node should be turned off because the Cluster Autoscaler has
+            monitored it and determined that its overall workload is less than
+            the predefined threshold, or because an administrator has sent a request
+            to the GraphQL API (\texttt{ACTIVE\_READY}).
+        \end{enumerate}
+
+      \item \texttt{ACTIVE\_NOT\_READY}
+        \newline
+        Node is active, healthy and the Kubernetes orchestrator is initializing (it
+        cannot accept pods).
+        \newline
+        It is a transitory status that is assigned in the following situation:
+        \begin{enumerate}
+          \item \texttt{ACTIVE} \faicon{arrow-circle-o-right} \texttt{ACTIVE\_NOT\_READY}
+            \faicon{arrow-circle-o-right} \texttt{ACTIVE\_READY}
+            \newline
+            The node has received a successful response from the Server (\texttt{ACTIVE})
+            and is starting all cluster-related services via the node's corresponding
+            Init System. When most services start, they are still in a transitory
+            phase known as initialization, in which they are not immediately
+            ready to accomplish their primary purposes (\texttt{ACTIVE\_NOT\_
+            READY}). After initialization, the services are available to be
+            utilized and fulfill their purposes (\texttt{ACTIVE\_READY}).
+            \newline
+            For example, the Kubernetes orchestrator takes nearly \texttt{15} to
+            \texttt{30} seconds to initialize, and during this time it is unable
+            to receive any workload from the Controller nodes because all of its
+            components are also initializing.
+        \end{enumerate}
+
+      \item \texttt{ACTIVE\_DELETING}
+        \newline
+        Node is active and healthy and it is being removed from the Kubernetes
+        cluster.
+        \newline
+        It is a transitory status that is assigned in the following situation:
+        \begin{enumerate}
+          \item \texttt{ACTIVE\_READY} \faicon{arrow-circle-o-right} \texttt{ACTIVE\_DELETING}
+            \faicon{arrow-circle-o-right} \texttt{ACTIVE}
+            \newline
+            After receiving the request to power off the node, the Server instructs
+            the Kubernetes cluster to drain\footnote{\url{https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node}}
+            the node (safely remove/evict all pods from the node) so that it can
+            be successfully removed from the Kubernetes cluster (\texttt{ACTIVE\_DELETING}).
+            After successfully removing the node from the Kubernetes cluster,
+            the associated Kubernetes operator on the deleted node is terminated
+            (\texttt{ACTIVE}).
+            \newline
+            Since this status is executed because the node needs to be turned
+            off, the Server automatically shuts down the node after the node status
+            is changed to \texttt{ACTIVE}. The latter is to indicate that if the
+            \texttt{ACTIVE} status is assigned after this status, it will only be
+            effective for a very short time before the node becomes \texttt{INACTIVE}.
+        \end{enumerate}
+
+      \item \texttt{BOOTING}
+        \newline
+        Node is booting.
+        \newline
+        It is a transitory status that is assigned in the following situation:
+        \begin{enumerate}
+          \item \texttt{INACTIVE} \faicon{arrow-circle-o-right} \texttt{BOOTING}
+            \faicon{arrow-circle-o-right} \texttt{ACTIVE}
+            \newline
+            The Server has received a GraphQL request from the Cluster
+            Autoscaler or an administrator to turn on a server in the cluster (\texttt{INACTIVE}).
+            The Server then sends the associated \texttt{Wake-on-Lan} magic message
+            to the corresponding \texttt{MAC} address of the node's interface to
+            automatically boot it up (\texttt{BOOTING}). After the booting
+            period, which differs depending on the hardware of the node, the
+            node sends the previously mentioned update status message, which changes
+            its status to \texttt{ACTIVE}.
+            \newline
+            It should be noted that if a node is powered on manually by a user or
+            an administrator using the power button, the \texttt{BOOTING} status
+            is omitted in the transition because the Server has no awareness of the
+            action until the node sends the update status request message transitioning
+            from an \texttt{INACTIVE} to \texttt{ACTIVE} status.
+        \end{enumerate}
+
+      \item \texttt{INACTIVE}
+        \newline
+        Node is inactive (powered off).
+        \newline
+        It is a permanent status.
+        \newline
+        The status is assigned in the following situation:
+        \begin{enumerate}
+          \item \texttt{ACTIVE} \faicon{arrow-circle-o-right} \texttt{INACTIVE}
+            \newline
+        \end{enumerate}
+        The status is unassigned in the following situation:
+        \begin{enumerate}
+          \item \texttt{INACTIVE} \faicon{arrow-circle-o-right} \texttt{BOOTING}
+            \newline
+            The node is in the \texttt{INACTIVE} status until the Server (via
+            \texttt{Wake-on-Lan}) or a user/administrator (via the power button)
+            turns it on (\texttt{BOOTING}).
+            \newline
+            The node is in \texttt{ACTIVE} status, and the Server terminated it
+            remotely via SSH (\texttt{INACTIVE}).
+            \newline
+            It should be noted that the latter can also be executed manually by
+            a user/administrator using the power button, but the Server does not
+            know anything about the current status because there is no predefined
+            transition between the various statuses, and thus, after a period of
+            time is set to an error status (\texttt{UNKNOWN}).
+        \end{enumerate}
+
+      \item \texttt{UNKNOWN}
+        \newline
+        Unknown/Error status.
+        \newline
+        This status is special in that it identifies a node that is in an error condition
+        due to an issue that must be resolved.
+        \newline
+        All statuses can transition to (error discovered) and from (error resolved)
+        this status.
+        \newline
+        For example, when this status is set for a node, it means that the Kubernetes
+        orchestrator has crashed and no Heartbeats have been received by the Controllers
+        for a specified amount of time.
+    \end{itemize}
+    Figure \ref{fig:status_machine} depicts all of the possible statuses and the
+    transitions between them. \par
+    \begin{minipage}{\linewidth}
+      \centering
+      \includegraphics
+      [width=.75\textwidth]{images/implementation/status_machine.png}
+      \label{fig:status_machine} \captionof{figure}{Statuses and their transitions}
+    \end{minipage}
 
   \item \texttt{reason}
     \newline
+    Status' reason.
+    \newline
+    Determine briefly why the \texttt{status} attribute has the corresponding value.
+    The \texttt{reason} attribute value is typically one word or a sequence of very
+    few words that briefly describe the cause for the node's \texttt{status}
+    attribute value. In transitional statuses (i.e. no persistent) that
+    transition from one status to another, the value of this attribute can be assigned
+    with various and distinct values, defining the logical path to the final
+    status. The latter is particularly obvious during the Kubernetes initialization
+    (from \texttt{ACTIVE} to \texttt{ACTIVE\_READY}), which continues to change
+    the attribute's value to represent the fact that the various Kubernetes
+    components are starting. For example, if the node's status value is \texttt{ACTIVE\_READY}
+    and the Kubernetes process is running smoothly, the value of this attribute
+    is set to \texttt{KubeletReady}, indicating that the Kubernetes \texttt{kubelet}\footnote{\url{https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet}}
+    component is functioning properly.
+    \newline
+    Because the reason why the status has the corresponding value is not always
+    known, this attribute can take a \texttt{NULL} value (\texttt{NULLABLE}),
+    indicating that the reason is undetermined. This is prevalent if the status value
+    is \texttt{UNKNOWN} and the cause of what happened is obscure.
 
   \item \texttt{message}
     \newline
 
-  \item \texttt{last\_threshold}
+  \item \texttt{last\_heartbeat}
     \newline
 
   \item \texttt{last\_transition}
@@ -3328,11 +3595,11 @@ The \texttt{interface} entity attributes are as follows:
 \subsection{Monitoring}
 \label{subsec:implementation_server_monitoring}
 
+% TODO Node Informer!
+% TODO https://aly.arriqaaq.com/kubernetes-informers
+
 \subsection{Configuration}
 \label{subsec:implementation_server_configuration}
-
-% TODO Node Informer!
-% TODO https://aly.arriqaaq.com/kubernetes-informers/
 
 \section{Installer}
 \label{sec:implementation_installer}
