@@ -2144,7 +2144,7 @@ The \texttt{user} entity attributes are as follows:
     A string of characters that uniquely (\texttt{UNIQUE}) identifies a user
     record.
     \newline
-    The \texttt{username} and \texttt{id} attributes are interchangeable logically
+    The \texttt{username} and \texttt{id} attributes are logically interchangeable
     since they both uniquely identify the same user record. Yet, memorizing a personalized
     and simple sequence of characters (\texttt{username}) is significantly
     simpler than remembering a 128-bit alphanumerical (\texttt{UUID}).
@@ -3264,6 +3264,10 @@ the node autonomously sends a request (i.e. after successfully bootstrapping and
 before starting all cluster services) to specific protected GraphQL queries, generating
 intrinsic knowledge that the node is somewhat active and performing a status update.
 \newline
+It should be noted that this entity lacks the \texttt{created\_at} attribute because
+it is created automatically when the associated node is created, and thus the
+two timestamps will have the same value.
+\newline
 The \texttt{status} entity attributes are as follows:
 
 \begin{itemize}
@@ -3352,14 +3356,21 @@ The \texttt{status} entity attributes are as follows:
             The Kubernetes orchestrator on the node (\texttt{ACTIVE\_NOT\_ READY})
             has finished the initialization and is ready to accept workloads (\texttt{ACTIVE\_READY}).
         \end{enumerate}
-        The status is unassigned in the following situation:
+        The status is unassigned in the following situations:
         \begin{enumerate}
           \item \texttt{ACTIVE\_READY} \faicon{arrow-circle-o-right} \texttt{ACTIVE\_DELETING}
             \newline
-            The node should be turned off because the Cluster Autoscaler has
-            monitored it and determined that its overall workload is less than
-            the predefined threshold, or because an administrator has sent a request
-            to the GraphQL API (\texttt{ACTIVE\_READY}).
+            The node (\texttt{ACTIVE\_READY}) should be turned off (\texttt{ACTIVE\_DELETING})
+            because the Cluster Autoscaler has monitored it and determined that
+            its overall workload is less than the predefined threshold, or because
+            an administrator has sent a request to the GraphQL API.
+
+          \item \texttt{ACTIVE\_READY} \faicon{arrow-circle-o-right} \texttt{ACTIVE\_NOT\_READY}
+            \newline
+            The node has not sent any Heartbeat messages for more than the
+            predefined duration threshold value. When the threshold time value is
+            reached, the node status changes from \texttt{ACTIVE\_READY} to \texttt{ACTIVE\_NOT\_READY},
+            and Kubernetes stops scheduling workloads (pods) on the node.
         \end{enumerate}
 
       \item \texttt{ACTIVE\_NOT\_READY}
@@ -3367,7 +3378,7 @@ The \texttt{status} entity attributes are as follows:
         Node is active, healthy and the Kubernetes orchestrator is initializing (it
         cannot accept pods).
         \newline
-        It is a transitory status that is assigned in the following situation:
+        It is a transitory status that is assigned in the following situations:
         \begin{enumerate}
           \item \texttt{ACTIVE} \faicon{arrow-circle-o-right} \texttt{ACTIVE\_NOT\_READY}
             \faicon{arrow-circle-o-right} \texttt{ACTIVE\_READY}
@@ -3384,6 +3395,20 @@ The \texttt{status} entity attributes are as follows:
             \texttt{30} seconds to initialize, and during this time it is unable
             to receive any workload from the Controller nodes because all of its
             components are also initializing.
+
+          \item \texttt{ACTIVE\_READY} \faicon{arrow-circle-o-right} \texttt{ACTIVE\_NOT\_READY}
+            \faicon{arrow-circle-o-right} \texttt{ACTIVE\_READY}
+            \newline
+            Because the node has not sent any Heartbeat messages for more than
+            the threshold time value, its status is changed from \texttt{ACTIVE\_READY},
+            indicating that the node is working and accepting pods, to \texttt{ACTIVE\_NOT\_READY},
+            indicating that the node is not working/unknown, and Controller nodes
+            cease scheduling pods to the node. If the node resumes sending
+            Heartbeat messages periodically, the status returns to \texttt{ACTIVE\_READY}.
+            Otherwise, if the node's most recent Heartbeat message has been
+            received for more than a second (longer) threshold, the node status changes
+            to \texttt{UNKNOWN} with the attributes \texttt{reason} and \texttt{message}
+            properly set, indicating that the node is unreachable and thus in error.
         \end{enumerate}
 
       \item \texttt{ACTIVE\_DELETING}
@@ -3446,6 +3471,14 @@ The \texttt{status} entity attributes are as follows:
         \begin{enumerate}
           \item \texttt{ACTIVE} \faicon{arrow-circle-o-right} \texttt{INACTIVE}
             \newline
+            The node is in \texttt{ACTIVE} status, and the Server terminated it
+            remotely via SSH (\texttt{INACTIVE}).
+            \newline
+            It should be noted that the latter can also be executed manually by
+            a user/administrator using the power button, but the Server does not
+            know anything about the current status because there is no predefined
+            transition between the various statuses, and thus, after a period of
+            time is set to an error status (\texttt{UNKNOWN}).
         \end{enumerate}
         The status is unassigned in the following situation:
         \begin{enumerate}
@@ -3455,14 +3488,10 @@ The \texttt{status} entity attributes are as follows:
             \texttt{Wake-on-Lan}) or a user/administrator (via the power button)
             turns it on (\texttt{BOOTING}).
             \newline
-            The node is in \texttt{ACTIVE} status, and the Server terminated it
-            remotely via SSH (\texttt{INACTIVE}).
-            \newline
-            It should be noted that the latter can also be executed manually by
-            a user/administrator using the power button, but the Server does not
-            know anything about the current status because there is no predefined
-            transition between the various statuses, and thus, after a period of
-            time is set to an error status (\texttt{UNKNOWN}).
+            As previously stated, if the node is started using the power button,
+            the status transitions directly from \texttt{INACTIVE} to \texttt{ACTIVE},
+            skipping the \texttt{BOOTING} status because the Server does not
+            know anything about the manual operation.
         \end{enumerate}
 
       \item \texttt{UNKNOWN}
@@ -3480,7 +3509,9 @@ The \texttt{status} entity attributes are as follows:
         for a specified amount of time.
     \end{itemize}
     Figure \ref{fig:status_machine} depicts all of the possible statuses and the
-    transitions between them. \par
+    transitions between them. Take note of the manual transition from \texttt{INACTIVE}
+    to \texttt{ACTIVE}, as well as the bidirectional transition between \texttt{ACTIVE\_NOT\_READY}
+    and \texttt{ACTIVE\_READY}. \par
     \begin{minipage}{\linewidth}
       \centering
       \includegraphics
@@ -3501,9 +3532,11 @@ The \texttt{status} entity attributes are as follows:
     status. The latter is particularly obvious during the Kubernetes initialization
     (from \texttt{ACTIVE} to \texttt{ACTIVE\_READY}), which continues to change
     the attribute's value to represent the fact that the various Kubernetes
-    components are starting. For example, if the node's status value is \texttt{ACTIVE\_READY}
-    and the Kubernetes process is running smoothly, the value of this attribute
-    is set to \texttt{KubeletReady}, indicating that the Kubernetes \texttt{kubelet}\footnote{\url{https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet}}
+    components are starting.
+    \newline
+    For example, if the node's status value is \texttt{ACTIVE\_READY} and the Kubernetes
+    process is running smoothly, the value of this attribute is set to \texttt{KubeletReady},
+    indicating that the Kubernetes \texttt{kubelet}\footnote{\url{https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet}}
     component is functioning properly.
     \newline
     Because the reason why the status has the corresponding value is not always
@@ -3513,12 +3546,121 @@ The \texttt{status} entity attributes are as follows:
 
   \item \texttt{message}
     \newline
+    Status' message.
+    \newline
+    Describes why the \texttt{status}/\texttt{reason} attributes have the
+    corresponding value using a longer string. This attribute is intrinsically tied
+    to the other two attributes; if the value of one of them changes, this attribute
+    will probably be updated as well. It can be considered an extended
+    description message for the \texttt{reason} value, and it is particularly
+    useful for users and administrators who want to understand the current node's
+    status. If the node status is set to \texttt{UNKNOWN} and the cause is known,
+    the latter can be extremely beneficial: the \texttt{reason} attribute describes
+    the issue in brief with a high-level perspective, whereas the \texttt{message}
+    attribute is more detailed in explaining the cause of the problem with a low-level
+    perspective. As for the \texttt{reason} attribute, the value of the \texttt{message}
+    attribute during transitional statuses can vary arbitrarily depending on the
+    logical path between the two statuses, whereas it remains nearly constant
+    during persistent statuses.
+    \newline
+    For example, if the node's status is \texttt{ACTIVE\_READY} and the Kubernetes
+    process is functioning properly, this attribute's value is set to \texttt{kubelet
+    is posting ready status}, indicating that the Kubernetes \texttt{kubelet} is
+    accepting pods (working) and sending periodic Heartbeat messages to the corresponding
+    Controller node. The combination of the \texttt{reason} and \texttt{message}
+    attributes indicate that the Kubernetes node is operating properly and why.
+    \newline
+    Because the content of the \texttt{message} attribute is not always known, it
+    can accept \texttt{NULL} values (\texttt{NULLABLE}). If the value of the
+    \texttt{reason} attribute is \texttt{NULL}, it is almost certain that the value
+    of the \texttt{message} attribute is also \texttt{NULL}.
 
   \item \texttt{last\_heartbeat}
     \newline
+    Date and time of the most recent Heartbeat message.
+    \newline
+    The attribute indicates the most recent timestamp at which a Controller node
+    received a HeartBeat message sent by the associated node (Kubernetes \texttt{kubelet}).
+    The attribute is of type \texttt{timestamptz}.
+    \newline
+    A HeartBeat message is sent whenever the node's Kubernetes status changes or
+    there is no update in the defined HeartBeat interval\cite{k8s_heartbeat}. During
+    the initialization phase, Kubernetes bootstraps numerous components, and the
+    \texttt{reason} and \texttt{message} attributes are constantly changed,
+    resulting in frequent updates to the \texttt{last\_heartbeat} attribute. Far
+    from it, when the node is finally ready/working and accepting pods (\texttt{ACTIVE\_READY}
+    status), the frequency of Heartbeat messages is much slower, but constant, and
+    follows the specified interval, defined as \texttt{node-status-update-frequency}.
+    If the node's Heartbeat messages are not received after a second time
+    threshold, defined as \texttt{node-monitor-grace-period} and higher than the
+    \texttt{node-status-update-frequency}, the node status is changed from
+    \texttt{ACTIVE\_READY} to \texttt{ACTIVE\_NOT\_READY}, and the Controller cease
+    assigning workload (pods) to the node. If the node becomes reachable again
+    and resumes transmitting periodic Heartbeat messages, the node status is immediately
+    revert to \texttt{ACTIVE\_READY}, and the Controller node resume scheduling pods
+    to the node. If no Heartbeat messages are received after a third time
+    threshold, defined as \texttt{pod-eviction-timeout} and higher than \texttt{node-monitor-grace-period},
+    the Controller begins evicting\footnote{\url{https://kubernetes.io/docs/concepts/scheduling-eviction/api-eviction}}
+    all deployments (pods) that are scheduled on the node and the node's status
+    is changed to \texttt{UNKNOWN}. Note that the pods scheduled on the node may
+    still operate, and because the Controller is unable to communicate with the disconnected
+    node, the pods status is also set to \texttt{Terminating} or \texttt{Unknown}\cite{k8s_heartbeat}.
+    \newline
+    To summarize, the previously mentioned threshold time values are outlined below
+    (along with their respective default value):
+    \begin{enumerate}
+      \item \texttt{node-status-update-frequency}\footnote{\url{https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/\#node-status-update-frequency}}
+        \newline
+        The frequency at which the kubelet sends node status (heartbeat message)
+        to the Controller.
+        \newline
+        The default value is \texttt{10} seconds (\texttt{10s}).
+
+      \item \texttt{node-monitor-grace-period}\footnote{\url{https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager/\#node-monitor-grace-period}}
+        \newline
+        Amount of time after which an operating node is set to be unresponsive, indicating
+        that it is unhealthy. Must be \texttt{N} times greater than the \texttt{node-status-update-frequency}
+        of the node's \texttt{kubelet}, where \texttt{N} is the number of retries.
+        \newline
+        The default value is \texttt{40} seconds (\texttt{40s}).
+
+      \item \texttt{pod-eviction-timeout}\footnote{\url{https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager/\#pod-eviction-timeout}}
+        \newline
+        The duration after which the pods scheduled on the unresponsive node
+        begin to be removed.
+        \newline
+        The default value is \texttt{300} seconds (\texttt{5m}).
+    \end{enumerate}
+    It should be noted that the latter threshold values can be tailored to
+    cluster-specific use-case scenarios, yielding approximately three configurations:
+    \texttt{Fast Update/Fast Reaction}, \texttt{Medium Update/Average Reaction} and
+    \texttt{Low Update/Slow reaction}\cite{k8s_reliability}.
+    \newline
+    Because the reception of the most recent Heartbeat message is not always
+    known, this attribute can be \texttt{NULL} (\texttt{NULLABLE}). Furthermore,
+    the value is \texttt{NULL} when the \texttt{status} is \texttt{INACTIVE}.
 
   \item \texttt{last\_transition}
     \newline
+    Date and time of the most recent status transition.
+    \newline
+    This attribute indicates the last time the \texttt{status} attribute has
+    been changed. It is very helpful for users and administrators to understand how
+    long the node has been in the current status. The attribute is of type
+    \texttt{timestamptz}.
+    \newline
+    The value cannot be \texttt{NULL} because the status attribute cannot be \texttt{NULL}
+    (and thus it is known when the most recent transition occurs) and also
+    because the Server is in charge of updating this attribute. Therefore, the
+    Server is the only component with both low-level knowledge (GraphQL API requests
+    sent by the node itself) and high-level knowledge (Kubernetes Heartbeats).
+    \newline
+    For example, if the node's status attribute is set to \texttt{ACTIVE\_READY}
+    and the difference between the current timestamp and the value of the last transition
+    attribute is \texttt{48} hours, which implies that the node has been participating
+    in cluster operations for two consecutive days. The same logic can be
+    applied to determine how long the node is powered off (\texttt{INACTIVE}
+    status) and thus unused.
 
   \item \texttt{updated\_at}
     \newline
@@ -3538,15 +3680,105 @@ The \texttt{status} entity attributes are as follows:
   \includegraphics[width=\linewidth]{images/implementation/erm_node_pool.png}
 \end{wrapfigure}
 
+The node pool entity represents a collection of nodes with similar hardware characteristics.
+\newline
+This entity is critical for autoscaling, and the Cluster Autoscaler component makes
+extensive use of the available registered node groups, their respective
+information, and the corresponding nodes. Indeed, the Cluster Autoscaler relies on
+both high-level knowledge obtained from the Kubernetes API to continuously monitor
+the nodes and all scheduled workloads across the cluster, and low-level
+knowledge obtained from this entity (via the GraphQL API) to determine whether
+there are node pools with inactive nodes that can be booted up (upscaling) or
+nodes that can be turned off (downscaling) if some nodes are underutilized.
+\newline
+The current implementation combines nodes based on their respective number of CPU
+cores and memory (RAM) amount, which is also reflected in the \texttt{name} attribute.
+It should be noted that in future implementations, the GPU model may also be used.
+Because the number of CPU cores is relatively small, dealing with comparisons is
+relatively simple. However, for two primary causes, the latter is far from true
+for memory quantity. Firstly, the memory quantity unit is in byte (\texttt{B}),
+the data type is \texttt{bigint}, and therefore comparisons are performed on
+extremely large integers. Secondly, even if two nodes are from the same
+manufacturer and have the same hardware components, it is not always guaranteed that
+the memory quantity in bytes is identical. The latter has happened in reCluster,
+where the four Worker nodes are the same model from the same manufacturer and equipped
+with the same hardware, but their memory quantities in bytes vary slightly. One potential
+explanation is that some memory cells are faulty (this is more likely with older
+hardware, on which reCluster is designed), and the memory controller hides them from
+the Operating System, causing the total to be slightly different. To address the
+latter issues, the memory amount is first converted to GigaBytes (\texttt{GiB}) and
+then rounded to the closest half, yielding \texttt{0.5} or a multiple of it. It
+is now simple to organize the nodes in groups. It should be noted that the \texttt{512
+MiB} (\texttt{0.5 GiB}) value is not random, but rather reflects the minimal
+hardware requirements of the Kubernetes Orchestrator (K3s). As an example,
+consider the following four nodes: the first has a \texttt{4} core CPU and
+\texttt{4 GiB} of memory, the second has an \texttt{8} core CPU and \texttt{7.5 GiB}
+of memory, the third has a \texttt{4} core CPU and \texttt{4 GiB} of memory, and
+the fourth has an \texttt{8} core CPU and \texttt{8 GiB} of memory. The first and
+third nodes are assigned to the same node pool, whereas the second and fourth
+nodes are assigned to separate node pools.
+\newline
+The System has two logical node pools: one for Controller nodes and one for
+Worker nodes. Worker node pools function as previously explained, and they're
+employed for autoscaling by default. While all Controller nodes are merged into a
+single node pool called \texttt{controllers}, no hardware components are examined,
+and auto-scaling is disabled. The latter is done because, by design, the cluster
+cannot auto-scale Controller nodes, leaving hardware comparisons meaningless. If
+a controller node needs to be converted to a Worker node, it must first be
+deleted by the Kubernetes cluster, then removed by the Server/Database (via a
+single GraphQL API call made by an administrator), and finally re-registered in
+the cluster as a Worker node.
+\newline
+The node must be assigned to a node pool during the registration process. If the
+node pool does not exist, it is created automatically; otherwise, the node is assigned
+to the appropriate node pool with the same amount of CPU cores and transformed memory
+quantity.
+\newline
+The node pool entity has the attributes \texttt{min\_nodes} and \texttt{auto\_scale},
+which can be modified by an administrator via a GraphQL API node pool update request
+to change the associated node pool's autoscaling behavior.
+\newline
+As previously stated, a node is assigned to a single and unique node pool, but a
+node pool can be assigned to zero or multiple nodes.
+\newline
+The \texttt{node\_pool} entity attributes are as follows:
+
 \begin{itemize}
   \item \texttt{id}
     \newline
     Uniquely identify (\texttt{PK}) a node pool record.
     \newline
     The attribute is of type \texttt{UUID}.
+    \newline
+    A node must be assigned to a single and unique node pool, and a node pool can
+    have zero or more nodes assigned to it. As a result, the relation is one(\texttt{1})
+    to many(\texttt{*}).
 
   \item \texttt{name}
     \newline
+    Node pool's name.
+    \newline
+    A string of characters that uniquely (UNIQUE) identifies a node pool record.
+    \newline
+    The \texttt{name} and \texttt{id} attributes are conceptually
+    interchangeable because they both uniquely identify the same node pool
+    record. Furthermore, identical to the user entity's \texttt{username} attribute,
+    the \texttt{name} attribute is mostly used for users and administrators to easily
+    and quickly identify a node pool record without having to remember a 128-bit
+    alphanumerical string (\texttt{UUID}).
+    \newline
+    When the Server needs to create an additional node pool, it automatically
+    assigns a value to the \texttt{name} attribute based on the node type, the
+    number of CPU cores, and the transformed memory quantity value. If the node
+    pool is dedicated only to Controller nodes, the name is set to \texttt{controllers}
+    without any further information (this can be changed in the Server configuration).
+    However, the name of a node pool dedicated to Worker node(s) is a combination
+    of the two hardware values separated by a dot (\texttt{.}). It should be noted
+    that the latter can be easily modified in the Server implementation with different
+    values/logic.
+    \newline
+    For example, \texttt{cpu8.memory7.5} is the name of a Worker nodes pool that
+    combines nodes with \texttt{8} CPU cores and \texttt{7.5 GiB} of memory.
 
   \item \texttt{min\_nodes}
     \newline
