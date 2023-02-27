@@ -793,7 +793,7 @@ are involved, both of the latter actions need human interaction.
 \begin{wrapfigure}
   {r}{.5\textwidth}
   \centering
-  \includegraphics[width=.5\textwidth]{images/implementation/airgap.png}
+  \includegraphics[width=.5\textwidth]{images/implementation/airgap.pdf}
   \caption{An
   Air-Gap
   Environment
@@ -2089,28 +2089,28 @@ data that the server requires and the installation script (see section \ref{sec:
 collects from a node. Additionally, the latter is necessary for comprehending
 the raw data provided and processed by the GraphQL API (see section \ref{subsec:implementation_server_graphql}).
 
-\pagebreak
+\clearpage
+\newpage
 
 
-% TODO Center vertically
-\begin{figure}[htbp]
+\begin{figure}[p]
   \centering
-  \includegraphics[width=\linewidth]{images/implementation/erm.png}
+  \includegraphics[width=\textwidth]{images/implementation/erm.pdf}
   \caption{Database Entity Relationship Model (ERM)}
   \label{fig:erm}
 \end{figure}
 
-\pagebreak
+\clearpage
+\newpage
 
 
 \subsubsection{User}
 \label{subsubsec:implementation_server_database_user}
 
-\begin{wrapfigure}
-  {l}{.5\textwidth}
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{images/implementation/erm_user.png}
-\end{wrapfigure}
+  \includegraphics[width=.75\textwidth]{images/implementation/erm_user.pdf}
+\end{figure}
 
 The user entity represents all of the cluster's registered users. \\ %
 A user can logically be a real person, such as an administrator, or an automation
@@ -2269,11 +2269,10 @@ The \texttt{user} entity attributes are as follows:
 \subsubsection{Node}
 \label{subsubsec:implementation_server_database_node}
 
-\begin{wrapfigure}
-  {l}{.5\textwidth}
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{images/implementation/erm_node.png}
-\end{wrapfigure}
+  \includegraphics[width=.75\textwidth]{images/implementation/erm_node.pdf}
+\end{figure}
 
 The node entity represents all of the cluster's physical nodes, both active and inactive.
 It holds critical information about a node, and from this entity, other
@@ -2597,21 +2596,15 @@ The \texttt{node} entity attributes are as follows:
     The attribute is of type \texttt{timestamptz}.
 \end{itemize}
 
-% TODO Check
-\pagebreak
-
-
 \subsubsection{Cpu}
 \label{subsubsec:implementation_server_database_cpu}
 
-\begin{wrapfigure}
-  {l}{.5\textwidth}
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{images/implementation/erm_cpu.png}
-\end{wrapfigure}
+  \includegraphics[width=.75\textwidth]{images/implementation/erm_cpu.pdf}
+\end{figure}
 
-The cpu entity contains information about the CPU\footnote{\url{https://wikipedia.org/wiki/CPU}}
-(Central Processing Unit).
+The cpu entity contains information about the CPU (Central Processing Unit).
 \newline
 The entity includes the most important information about a particular CPU model obtained
 from the Linux Kernel data available at the virtual path \texttt{/proc/cpuinfo}\footnote{\url{https://www.kernel.org/doc/html/latest/filesystems/proc.html\#kernel-data}}.
@@ -2910,18 +2903,13 @@ The \texttt{cpu} entity attributes are as follows:
     The attribute is of the \texttt{timestamptz} type.
 \end{itemize}
 
-% TODO Check
-\pagebreak
-
-
 \subsubsection{Storage}
 \label{subsubsec:implementation_server_database_storage}
 
-\begin{wrapfigure}
-  {l}{.5\textwidth}
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{images/implementation/erm_storage.png}
-\end{wrapfigure}
+  \includegraphics[width=.75\textwidth]{images/implementation/erm_storage.pdf}
+\end{figure}
 
 The storage entity represents the persistence storage(s) accessible on the
 associated node.
@@ -3016,11 +3004,10 @@ entity attributes are as follows:
 \subsubsection{Interface}
 \label{subsubsec:implementation_server_database_interface}
 
-\begin{wrapfigure}
-  {l}{.5\textwidth}
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{images/implementation/erm_interface.png}
-\end{wrapfigure}
+  \includegraphics[width=.75\textwidth]{images/implementation/erm_interface.pdf}
+\end{figure}
 
 The interface entity depicts the network interface(s) accessible within the
 cluster's Internal Network that are associated with the node.
@@ -3225,11 +3212,10 @@ The \texttt{interface} entity attributes are as follows:
 \subsubsection{Status}
 \label{subsubsec:implementation_server_database_status}
 
-\begin{wrapfigure}
-  {l}{.5\textwidth}
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{images/implementation/erm_status.png}
-\end{wrapfigure}
+  \includegraphics[width=.75\textwidth]{images/implementation/erm_status.pdf}
+\end{figure}
 
 The status entity, as the name implies, represents the node's current status, as
 updated with the most recently available information.
@@ -3515,7 +3501,7 @@ The \texttt{status} entity attributes are as follows:
     \begin{minipage}{\linewidth}
       \centering
       \includegraphics
-      [width=.75\textwidth]{images/implementation/status_machine.png}
+      [width=.75\textwidth]{images/implementation/status_machine.pdf}
       \label{fig:status_machine} \captionof{figure}{Statuses and their transitions}
     \end{minipage}
 
@@ -3674,11 +3660,10 @@ The \texttt{status} entity attributes are as follows:
 \subsubsection{Node Pool}
 \label{subsubsec:implementation_server_database_node_pool}
 
-\begin{wrapfigure}
-  {l}{.5\textwidth}
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{images/implementation/erm_node_pool.png}
-\end{wrapfigure}
+  \includegraphics[width=.75\textwidth]{images/implementation/erm_node_pool.pdf}
+\end{figure}
 
 The node pool entity represents a collection of nodes with similar hardware characteristics.
 \newline
@@ -3863,13 +3848,111 @@ The \texttt{node\_pool} entity attributes are as follows:
 \end{itemize}
 
 \subsection{GraphQL API}
-\label{subsec:implementation_server_graphql}
+\label{subsec:implementation_server_graphql_api}
 
-\subsubsection{Schema}
-\label{subsubsec:implementation_server_graphql_schema}
+\begin{wrapfigure}
+  {r}{.25\textwidth} %
+  \centering
+  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/logos/graphql.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://graphql.org/brand}} }
+  \caption{GraphQL logo}
+\end{wrapfigure}
 
-\subsubsection{JSON Web Token}
-\label{subsubsec:implementation_server_graphql_json_web_token}
+\subsubsection{Queries}
+\label{subsubsec:implementation_server_graphql_api_queries}
+
+\begin{itemize}
+  \item \lstinline[language=graphql, morekeywords={[2]{Cpu}}, morekeywords={[4]{id}},
+    morekeywords={[5]{cpu}}]{cpu(id: ID!): Cpu}
+    \newline
+
+  \item \lstinline[language=graphql, morekeywords={[2]{Cpu, OrderByCpuInput, NonNegativeInt, WhereCpuInput}},
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{cpus}}]{cpus(cursor: ID, orderBy: OrderByCpuInput, skip: NonNegativeInt! = 0, take: Int! = 8, where: WhereCpuInput): [Cpu!]!}
+    \newline
+
+  \item \lstinline[language=graphql, morekeywords={[2]{MAC, Interface}}, morekeywords={[4]{address, id}},
+    morekeywords={[5]{interface}}]{interface(address: MAC, id: ID): Interface}
+    \newline
+
+  \item \lstinline[language=graphql, morekeywords={[2]{Interface, OrderByInterfaceInput, NonNegativeInt, WhereInterfaceInput}},
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{interfaces}}]{interfaces(cursor: ID, orderBy: OrderByInterfaceInput, skip: NonNegativeInt! = 0, take: Int! = 8, where: WhereInterfaceInput): [Interface!]!}
+    \newline
+
+  \item \lstinline[language=graphql, morekeywords={[2]{Node, IP}}, morekeywords={[4]{address, id, name}},
+    morekeywords={[5]{node}}]{node(address: IP, id: ID, name: String): Node}
+    \newline
+
+  \item \lstinline[language=graphql, morekeywords={[2]{Node, OrderByNodeInput, NonNegativeInt, WhereNodeInput}},
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{nodes}}]{nodes(cursor: ID, orderBy: OrderByNodeInput, skip: NonNegativeInt! = 0, take: Int! = 8, where: WhereNodeInput): [Node!]!}
+    \newline
+
+  \item \lstinline[language=graphql, morekeywords={[2]{NodePool}}, morekeywords={[4]{id, name}},
+    morekeywords={[5]{nodePool}}]{nodePool(id: ID, name: String): NodePool}
+    \newline
+
+  \item \lstinline[language=graphql, morekeywords={[2]{NodePool, OrderByNodePoolInput, NonNegativeInt, WhereNodePoolInput}},
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{nodePools}}]{nodePools(cursor: ID, orderBy: OrderByNodePoolInput, skip: NonNegativeInt! = 0, take: Int! = 8, where: WhereNodePoolInput)): [NodePool!]!}
+    \newline
+
+  \item \lstinline[language=graphql, morekeywords={[2]{Status}}, morekeywords={[4]{id}},
+    morekeywords={[5]{status}}]{status(id: ID!): Status}
+    \newline
+
+  \item \lstinline[language=graphql, morekeywords={[2]{Status, OrderByStatusInput, NonNegativeInt, WhereStatusInput}},
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{statuses}}]{statuses(cursor: ID, orderBy: OrderByStatusInput, skip: NonNegativeInt! = 0, take: Int! = 8, where: WhereStatusInput): [Status!]!}
+    \newline
+
+  \item \lstinline[language=graphql, morekeywords={[2]{Storage}}, morekeywords={[4]{id}},
+    morekeywords={[5]{storage}}]{storage(id: ID!): Storage}
+    \newline
+
+  \item \lstinline[language=graphql, morekeywords={[2]{Storage, OrderByStorageInput, NonNegativeInt, WhereStorageInput}},
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{storages}}]{storages(cursor: ID, orderBy: OrderByStorageInput, skip: NonNegativeInt! = 0, take: Int! = 8, where: WhereStorageInput): [Storage!]!}
+    \newline
+
+  \item \lstinline[language=graphql, morekeywords={[2]{User, NonEmptyString}}, morekeywords={[4]{id, username}},
+    morekeywords={[5]{user}}]{user(id: ID, username: NonEmptyString): User}
+    \newline
+
+  \item \lstinline[language=graphql, morekeywords={[2]{User, OrderByUserInput, NonNegativeInt, WhereUserInput}},
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{users}}]{users(cursor: ID, orderBy: OrderByUserInput, skip: NonNegativeInt! = 0, take: Int! = 8, where: WhereUserInput): [User!]!}
+    \newline
+\end{itemize}
+
+\subsubsection{Mutations}
+\label{subsubsec:implementation_server_graphql_api_mutations}
+
+\begin{itemize}
+  \item \lstinline[language=graphql, morekeywords={[2]{CreateNodeInput, JWT}}, morekeywords={[4]{data}},
+    morekeywords={[5]{createNode}}]{createNode(data: CreateNodeInput!): JWT!}
+    \newline
+
+  \item \lstinline[language=graphql, morekeywords={[2]{CreateUserInput, User}}, morekeywords={[4]{data}},
+    morekeywords={[5]{createUser}}]{createUser(data: CreateUserInput!): User!}
+    \newline
+
+  \item \lstinline[language=graphql, morekeywords={[2]{NonEmptyString, JWT}}, morekeywords={[4]{password, username}},
+    morekeywords={[5]{signIn}}]{signIn(username: NonEmptyString!, password: NonEmptyString!): JWT!}
+    \newline
+
+  \item \lstinline[language=graphql, deletekeywords={type}, morekeywords={[2]{Node, @auth}},
+    morekeywords={[3]{USER, ADMIN}}, morekeywords={[4]{id, type, roles}},
+    morekeywords={[5]{unassignNode}}]{unassignNode(id: ID!): Node! @auth(type: USER, roles: [ADMIN])}
+    \newline
+
+  \item \lstinline[language=graphql, deletekeywords={type}, morekeywords={[2]{NodePool, UpdateNodePoolInput, @auth}},
+    morekeywords={[3]{USER, ADMIN}}, morekeywords={[4]{id, data, type, roles}},
+    morekeywords={[5]{updateNodePool}}]{updateNodePool(id: ID!, data: UpdateNodePoolInput!): NodePool! @auth(type: USER, roles: [ADMIN])}
+    \newline
+
+  \item \lstinline[language=graphql, deletekeywords={type}, morekeywords={[2]{Status, UpdateStatusInput, @auth}},
+    morekeywords={[3]{NODE}}, morekeywords={[4]{data, type}}, morekeywords={[5]{updateStatus}}]{updateStatus(data: UpdateStatusInput!): Status! @auth(type: NODE)}
+    \newline
+
+  \item \lstinline[language=graphql, deletekeywords={type}, morekeywords={[2]{User, UpdateUserInput, @auth}},
+    morekeywords={[3]{USER}}, morekeywords={[4]{data, type}}, morekeywords={[5]{updateUser}}]{updateUser(data: UpdateUserInput!): User! @auth(type: USER)}
+    \newline
+\end{itemize}
 
 \subsection{Upscaling}
 \label{subsec:implementation_server_upscaling}

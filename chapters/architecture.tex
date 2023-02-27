@@ -34,7 +34,7 @@ how they are interconnected, as well as a potential connection to an external ne
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=.9\textwidth]{images/architecture/architecture.png}
+  \includegraphics[width=.9\textwidth]{images/architecture/architecture.pdf}
   \caption{Architecture overview}
   \label{fig:architecture}
 \end{figure}
@@ -79,7 +79,7 @@ that follow.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{images/architecture/worker.png}
+  \includegraphics[width=\linewidth]{images/architecture/worker.pdf}
 \end{wrapfigure}
 
 A worker node is designed to handle only deployable units of computation and services
@@ -109,7 +109,7 @@ the conclusion remains the same since it has the lowest power consumption.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{images/architecture/controller.png}
+  \includegraphics[width=\linewidth]{images/architecture/controller.pdf}
 \end{wrapfigure}
 
 A controller node is an essential component of the cluster, acting as a coordinator
@@ -179,7 +179,7 @@ their number and hardware requirements must be carefully balanced.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{images/architecture/server.png}
+  \includegraphics[width=\linewidth]{images/architecture/server.pdf}
 \end{wrapfigure}
 
 A server handles all cluster nodes, user authentication and authorization, and much
@@ -236,7 +236,7 @@ the server component is implemented.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{images/architecture/database.png}
+  \includegraphics[width=\linewidth]{images/architecture/database.pdf}
 \end{wrapfigure}
 
 The database component is strictly related to the server component. Its primary
@@ -295,7 +295,7 @@ reducing disk utilization. The cached data is stored in the main volatile memory
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{images/architecture/registry.png}
+  \includegraphics[width=\linewidth]{images/architecture/registry.pdf}
 \end{wrapfigure}
 
 % TODO Air-Gap reference
@@ -375,7 +375,7 @@ a registry request.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{images/architecture/cluster_autoscaler.png}
+  \includegraphics[width=\linewidth]{images/architecture/cluster_autoscaler.pdf}
 \end{wrapfigure}
 
 % TODO K8s reference
@@ -453,7 +453,7 @@ outlined below:
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{images/architecture/load_balancer.png}
+  \includegraphics[width=\linewidth]{images/architecture/load_balancer.pdf}
 \end{wrapfigure}
 
 % K8s reference
@@ -508,7 +508,7 @@ in reality, it is deployed directly on each active node.
 \begin{figure}[htbp]
   \centering
   \includegraphics
-  [width=.7\textwidth]{images/architecture/load_balancer_example.png}
+  [width=.7\textwidth]{images/architecture/load_balancer_example.pdf}
   \caption{Internal Load Balancer schema example}
   \label{fig:load_balancer}
 \end{figure}
@@ -566,7 +566,7 @@ network in relation to the cluster.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{images/architecture/external_network.png}
+  \includegraphics[width=\linewidth]{images/architecture/external_network.pdf}
 \end{wrapfigure}
 
 The external network is any network that does not directly connect to the
@@ -609,7 +609,7 @@ such a broad and complicated topic.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{images/architecture/internal_network.png}
+  \includegraphics[width=\linewidth]{images/architecture/internal_network.pdf}
 \end{wrapfigure}
 
 The Internal Network uses one or more layer 2 network switches to connect each physical
@@ -676,7 +676,7 @@ with the hostname \texttt{controller.recluster.local}.
 \begin{wrapfigure}
   {l}{.2\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{images/architecture/k8s_network.png}
+  \includegraphics[width=\linewidth]{images/architecture/k8s_network.pdf}
 \end{wrapfigure}
 
 \textit{"Kubernetes is all about sharing machines between applications"}\cite{k8s_cluster_networking}
@@ -690,52 +690,41 @@ newer technology. As a result, this section only contains fundamental and essent
 information regarding Kubernetes networking that is considered at its core and will
 not change in future releases.
 
-\begin{wrapfigure}
-  {r}{.5\textwidth}
-  \centering
-  \includegraphics[width=\linewidth]{images/architecture/overlay_network.png}
-  \caption{Comparison
-  between
-  the
-  Physical
-  Network
-  and
-  the
-  virtual
-  K8s
-  Overlay
-  Network}
-  \label{fig:overlay_network}
-\end{wrapfigure}
-
-The Kubernetes orchestrator networking is represented by K8s Network. It is a virtual
-network, as opposed to the Internal and External networks, in the sense that there
-are no physical connections between the various K8s components, only logical
-ones. The communication between the various K8s components is coordinated and distributed
-over all active nodes. Unless properly configured via a particular K8s Service, in
-the cluster architecture represented by the Load Balancer component, by default
-the various deployed containers in the K8s environment are not allowed to
-communicate outside the K8s network. \\ %
-In contrast to the previous two network layers, K8s Network does not map to a single
-layer of the ISO/OSI communication model. Instead, it covers numerous ISO/OSI layers,
-starting from the Data Link Layer (Layer 2) up to the Application Layer (Layer 7),
-which is the highest. \\ %
-K8s Network is regarded as an overlay network. An overlay network is a network
-that is established on top of a physical network that already exists. Because the
+The Kubernetes orchestrator networking is represented by K8s Network. It is a
+virtual network, as opposed to the Internal and External networks, in the sense
+that there are no physical connections between the various K8s components, only logical
+ones. The communication between the various K8s components is coordinated and
+distributed over all active nodes. Unless properly configured via a particular K8s
+Service, in the cluster architecture represented by the Load Balancer component,
+by default the various deployed containers in the K8s environment are not allowed
+to communicate outside the K8s network. \\ %
+In contrast to the previous two network layers, K8s Network does not map to a
+single layer of the ISO/OSI communication model. Instead, it covers numerous ISO/OSI
+layers, starting from the Data Link Layer (Layer 2) up to the Application Layer (Layer
+7), which is the highest. \\ %
+K8s Network is regarded as an overlay network. An overlay network is a network that
+is established on top of a physical network that already exists. Because the
 overlay creates the virtual network through encapsulation, it relies on the so-called
-underlay network for fundamental networking functions such as routing and
-forwarding. Most overlay networks are created in the ISO/OSI communication model's
-Application Layer (Layer 7) on top of the TCP/IP networking suite. Overlay
-technologies can also be utilized to overcome some of the underlay constraints
-while also providing additional routing and forwarding capabilities without
-modifying the physical networking infrastructure. An overlay network's nodes,
-represented as K8s instances, are linked together by logical connections that can
-span numerous physical links. A connection between two overlay nodes may require
-multiple hops in the underlying network. In the underlying network, a link
-between two overlay nodes may require multiple hops. Figure \ref{fig:overlay_network}
-compares the physical network to the virtual K8s overlay network that is created
-on top of it. Take note of the overall network simplicity and the lack of
-connection hops between each K8s instance. \\ %
+underlay network for fundamental networking functions such as routing and forwarding.
+Most overlay networks are created in the ISO/OSI communication model's
+Application Layer (Layer 7) on top of the TCP/IP networking suite. Overlay technologies
+can also be utilized to overcome some of the underlay constraints while also providing
+additional routing and forwarding capabilities without modifying the physical networking
+infrastructure. An overlay network's nodes, represented as K8s instances, are
+linked together by logical connections that can span numerous physical links. A connection
+between two overlay nodes may require multiple hops in the underlying network.
+In the underlying network, a link between two overlay nodes may require multiple
+hops. Figure \ref{fig:overlay_network} compares the physical network to the
+virtual K8s overlay network that is created on top of it. Take note of the overall
+network simplicity and the lack of connection hops between each K8s instance.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=.65\textwidth]{images/architecture/overlay_network.pdf}
+  \caption{Comparison between the Physical Network and the virtual K8s Overlay Network}
+  \label{fig:overlay_network}
+\end{figure}
+
 The Kubernetes networking stack, and, more generally, the Kubernetes ecosystem,
 is built following a set of standards and specifications. This is critical for two
 main reasons. It imposes an overall rigorous structure and design that must

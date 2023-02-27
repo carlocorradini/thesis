@@ -503,7 +503,7 @@ authorization. The sections of the \texttt{GraphQL} schema where the auth direct
 is used, as well as the enums that compose the different roles and permissions
 mappings are listed below:
 
-\begin{lstlisting}[language=graphql, morekeywords={[2]{@auth, Role, Permission}}, morekeywords={[3]{ADMIN, SIMPLE, VIEW, EDIT}}, morekeywords={[4]{roles, permissions, unprotected, protected, secret, arg}}, xleftmargin=\parindent, caption=\texttt{GraphQL} schema with auth directive and mappings]
+\begin{lstlisting}[language=graphql, escapeinside={(*@}{@*)}, morekeywords={[2]{@auth, Role, Permission}}, morekeywords={[3]{ADMIN, SIMPLE, VIEW, EDIT}}, morekeywords={[4]{arg}}, morekeywords={[5]{roles, permissions, unprotected, protected, secret}}, xleftmargin=\parindent, caption=\texttt{GraphQL} schema with auth directive and mappings]
   enum Role {
     ADMIN
     SIMPLE
@@ -522,7 +522,7 @@ mappings are listed below:
   type Query {
     unprotected: String!
     protected(arg: Boolean): Int! @auth
-    secret: Float! @auth(roles: [ADMIN], permissions: [VIEW])
+    secret: Float! @auth((*@\texttt{\textcolor{graphqlBlue}{roles}}@*): [ADMIN], (*@\texttt{\textcolor{graphqlBlue}{permissions}}@*): [VIEW])
   }
 \end{lstlisting}
 
@@ -537,14 +537,14 @@ shown in section
 \ref{subsec:corollary_projects_graphql_auth_diretive_type_definition}. \\ %
 Three queries are supported:
 \begin{enumerate}
-  \item \lstinline[language=graphql, basicstyle=\ttfamily, morekeywords={[4]{unprotected}}]{unprotected: String!}
+  \item \lstinline[language=graphql, morekeywords={[5]{unprotected}}]{unprotected: String!}
     \newline
     \texttt{unprotected} does not accept any arguments and returns a non-nullable
-    string. Does not require any authentication or authorization. As a result, it
-    may be called by anyone.
+    string. Does not require any authentication or authorization. As a result,
+    it may be called by anyone.
 
-  \item \lstinline[language=graphql, basicstyle=\ttfamily, morekeywords={[2]{@auth}},
-    morekeywords={[4]{protected, arg}}]{protected(arg: Boolean): Int! @auth}
+  \item \lstinline[language=graphql, morekeywords={[2]{@auth}}, morekeywords={[4]{arg}},
+    morekeywords={[5]{protected, arg}}]{protected(arg: Boolean): Int! @auth}
     \newline
     \texttt{unprotected} accepts a boolean optional parameter named \texttt{arg}
     and returns a non-nullable integer number. Because no roles or permissions are
@@ -552,8 +552,8 @@ Three queries are supported:
     authorization. As a consequence, everyone who has been authenticated is
     allowed to call this query.
 
-  \item \lstinline[language=graphql, basicstyle=\ttfamily, morekeywords={[2]{@auth}},
-    morekeywords={[3]{ADMIN, VIEW}}, morekeywords={[4]{roles, permissions, secret}}]{secret: Float! @auth(roles: [ADMIN], permissions: [VIEW])}
+  \item \lstinline[language=graphql, morekeywords={[2]{@auth}}, morekeywords={[3]{ADMIN, VIEW}},
+    morekeywords={[4]{roles, permissions}}, morekeywords={[5]{secret}}]{secret: Float! @auth(roles: [ADMIN], permissions: [VIEW])}
     \newline
     The most secure of the three, \texttt{secret}, does not take any parameters
     and returns a non-nullable float integer. The caller must have an admin role

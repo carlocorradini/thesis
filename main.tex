@@ -91,6 +91,7 @@
 \definecolor{graphqlOrange}{RGB}{209,154,102}
 \definecolor{graphqlGray}{RGB}{160,161,167}
 \definecolor{graphqlBlue}{RGB}{64,120,242}
+\definecolor{graphqlRed}{RGB}{228,86,73}
 % Code
 \usepackage{listings}
 \usepackage{lstautogobble}
@@ -206,11 +207,12 @@ commentstyle=\color{typescriptGray}\upshape %
 { %
 morekeywords={directive, on, enum, type}, %
 keywordstyle=\color{graphqlPurple}, %
-morekeywords=[2]{String, Int, Float, Boolean, Query, Mutation, Subscription}, %
+morekeywords=[2]{ID, String, Int, Float, Boolean, Query, Mutation, Subscription}, %
 keywordstyle=[2]\color{graphqlOrange}, %
 morekeywords=[3]{FIELD, FIELD_DEFINITION, OBJECT}, %
 keywordstyle=[3]\color{graphqlGreen}, %
 keywordstyle=[4]\color{graphqlBlue}, %
+keywordstyle=[5]\color{graphqlRed}, %
 morecomment=[l]{\#}, %
 morecomment=[s]{"""}{"""}, %
 commentstyle=\color{graphqlGray}\upshape %
