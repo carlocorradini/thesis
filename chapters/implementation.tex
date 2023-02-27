@@ -3782,9 +3782,68 @@ The \texttt{node\_pool} entity attributes are as follows:
 
   \item \texttt{min\_nodes}
     \newline
+    Minimum number of active (\texttt{ACTIVE\_READY} status) nodes in the node pool.
+    \newline
+    The attribute specifies a minimal number (inclusive) of active nodes with
+    the \texttt{ACTIVE\_READY} status in the node pool.
+    \newline
+    The Cluster Autoscaler uses this information to determine the minimal number
+    of nodes in the node pool that must always be available in the Kubernetes
+    cluster. Until the number of active nodes in the node pool equals the value of
+    the \texttt{min\_nodes} attribute, the Cluster Autoscaler is allowed to downscale
+    the nodes in the node pool.
+    \newline
+    The architecture is particularly focused on minimizing resource loss and
+    energy usage. Therefore, to enable the Cluster Autoscaler to completely
+    downscale all Worker nodes (or particular node pools), all node pools that are
+    dedicated to Worker nodes by default have the value of this attribute set to
+    \texttt{0}. Contrarily, the Cluster Autoscaler automatically disables
+    autoscaling procedures in the node pool reserved for controller nodes (\texttt{controllers}),
+    where the number of the \texttt{min\_nodes} attribute is set to the total number
+    of nodes assigned to the node pool. Since there are no active Worker nodes
+    when the cluster's overall workload is extremely low or nonexistent, with just
+    one or a very small number of Controller Nodes requiring minimal resources,
+    this enables the least amount of power consumption and resource loss.
+    \newline
+    Administrators can modify this attribute based on the cluster's requirements
+    and/or increase the cluster's minimal capacity in preparation for a high volume
+    of requests. However, whenever the attribute is changed, it is verified that
+    the new value is not less than \texttt{0} or greater than the total number of
+    nodes assigned to the node pool. The two latter checks prevent a node pool
+    from having the minimum number of nodes below \texttt{0} (impossible) and also
+    ensure that it does not exceed the node pool's maximum allowed capacity, as
+    any autoscaling capabilities or procedures are automatically disabled when a
+    value is greater than the number of nodes assigned to the node pool.
+    \newline
+    It should be noted that the additional knowledge of the number of active nodes
+    (\texttt{count}) and the maximum number of nodes (\texttt{max\_nodes}) available
+    in the node pool are calculable values that reflect a higher degree of knowledge
+    concerning the Database schema and are, as a result, calculated by the Server
+    and made available via internal services and the GraphQL API. The two values
+    are also used by the Cluster Autoscaler to determine the number of active
+    nodes currently present in the node pool as well as the highest number of
+    nodes that can be provided for upscaling.
 
   \item \texttt{auto\_scale}
     \newline
+    A Boolean flag that indicates whether or not the node pool can be employed
+    for autoscaling.
+    \newline
+    The attribute is of type \texttt{boolean}, where \texttt{true} indicates
+    that the node pool can be used for autoscaling and \texttt{false} indicates that
+    it cannot be handled for autoscaling and all nodes assigned to the node pool
+    must be ignored.
+    \newline
+    For all node pools that identify Worker nodes, the default value (\texttt{DEFAULT})
+    is \texttt{true}, so the Server omits the attribute whenever it needs to
+    create a new node pool for Worker nodes. The flag is set to \texttt{false}
+    by the Server during the initial creation of the node pool designated to
+    Controller nodes since any autoscaling procedures must ignore it.
+    \newline
+    When combined with the \texttt{min\_nodes} attribute, this attribute prevents
+    the node pool designated for Controller nodes from autoscaling. Additionally,
+    administrators have the same flexibility in changing the flag temporarily as
+    with the prior attribute to meet specific cluster requirements.
 
   \item \texttt{created\_at}
     \newline
