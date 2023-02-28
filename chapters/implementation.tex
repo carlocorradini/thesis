@@ -3850,6 +3850,14 @@ The \texttt{node\_pool} entity attributes are as follows:
 \subsection{GraphQL API}
 \label{subsec:implementation_server_graphql_api}
 
+This description shows the GraphQL API made available by the Server, which enables
+users and nodes to interact with both the high-level cluster, which represents
+the Kubernetes cluster and its overall workload, and the low-level cluster,
+which represents the bare-metal knowledge stored inside the Database. As previously
+mentioned, the API can provide more advanced capabilities and calculated data/attributes
+that are not present in the pure Database schema, such as the \texttt{count} and
+\texttt{max\_nodes} attributes of the Node Pool entity.
+
 \begin{wrapfigure}
   {r}{.25\textwidth} %
   \centering
@@ -3858,113 +3866,463 @@ The \texttt{node\_pool} entity attributes are as follows:
   \caption{GraphQL logo}
 \end{wrapfigure}
 
+GraphQL is a query language and server-side runtime for running queries using a
+type system specified in a schema. A GraphQL service is built by specifying types
+and fields on those types, then providing methods (resolvers) for each field on
+each type. Before any operation is made, it is first verified that it only
+pertains to the types and variables specified in the schema. Declarative data fetching
+with GraphQL allows clients to define precisely which data are needed,
+eliminating over- and under-fetching\footnote{\url{https://www.oreilly.com/library/view/hands-on-restful-web/9781838643577/becffd48-bca9-4c3a-9d89-0a490c5dce49.xhtml}}.
+Additionally, a GraphQL server only provides a single API endpoint rather than multiple
+endpoints that yield fixed data structures, as is the case with \texttt{REST}\footnote{\url{https://en.wikipedia.org/wiki/Representational_state_transfer}}
+(REpresentational State Transfer)\cite{graphql}. The GraphQL endpoint in the Server
+implementation is accessible at \texttt{/graphql}, but it can be modified to
+better suit the requirements of the cluster's organization. It requires considerable
+effort/time to understand how GraphQL operates and how its overall structure/architecture
+is composed of all the various types, fields, queries, mutations, etc. The
+latter, however, is outside the scope of this document, so it is strongly advised
+to visit the official website at \texttt{https://graphql.org} for a better
+comprehension of how GraphQL works. \\ %
+It is nearly unfeasible to provide a detailed explanation of the \textit{generated}
+GraphQL schema for the Server implementation because it consists of almost \texttt{2000}
+lines of code. Therefore, the explanations in this section (hence the titles of the
+two subsections) are limited to the queries and mutations that are exposed by
+the GraphQL API and the majority of them can be considered as an extension of
+the knowledge that is contained in the database schema that was previously
+discussed. Additionally, the word \textit{generated} at the beginning of this paragraph
+was not written at random but rather to highlight the fact that the GraphQL API is
+implemented using a code-first approach rather than a schema-first approach,
+establishing a single source of truth by defining the schema using classes and
+decorators. \\ %
+The majority of GraphQL queries and mutations provided by the Server
+implementation do not require any authentication or authorization, allowing anyone
+to utilize them. Far from it; the remaining queries and mutations are protected by
+a customized GraphQL Auth Directive (\texttt{@auth}) that prevents
+unauthenticated and/or unauthorized accesses. Since the GraphQL Auth Directive is
+a standard feature that can be used and shared by other GraphQL APIs and projects,
+it is not restricted to cluster implementation and enables protection for all
+possible GraphQL APIs. To make the GraphQL Auth Directive accessible to the public
+as a library that can be easily integrated with other projects, it was developed
+as a side project alongside the cluster implementation. Attachment \ref{sec:corollary_projects_graphql_auth_diretive}
+includes an in-depth overview correlated with examples of the GraphQL Auth Directive.
+Compared to the implementation of the latter directive, the directive used in the
+cluster implementation only differs by one small detail: \texttt{type}, an extra
+argument used to identify the type of the entity making the request (\texttt{USER}
+or \texttt{NODE}). Requests are rejected if the entity sending them does not match
+the one listed in the directive. The value \texttt{USER} is assigned by default if
+the \texttt{type} parameter is missing. \\ %
+A personal security token that is generated and provided by the Server for
+either a Node or a User is required from the entity performing the request to
+access a protected GraphQL query or mutation. When a Node registers to the cluster
+for the first time, it automatically obtains the token and is unable to obtain a
+new one ever again. A User is more flexible and can obtain a new token whenever it
+is successfully authenticated using the appropriate GraphQL mutation (\texttt{signIn}).
+The token implementation and management rely entirely on JSON Web Tokens\footnote{\url{https://jwt.io/introduction}}
+(JWT). JWT is an open standard, which specifies a compact and self-contained method
+for safely transferring data between parties as a JSON (JavaScript Object
+Notation) object. Because it is digitally signed with a secret (using the HMAC algorithm)
+or a public/private key pair (using RSA or ECDSA), this information can be verified
+and trusted\cite{rfc_7519}. The JWT token is digitally signed by \texttt{RS256}
+in the Server implementation, but this can be easily modified in the configuration
+settings with the appropriate public/private key pair files and corresponding encryption
+algorithm. The content of the token comprises 4 pieces of encoded information in
+addition to the JWT's data. The first of these is the \texttt{type}, which specifies
+the type of the entity (\texttt{USER} or \texttt{NODE}), the second is the
+\texttt{id}, which is used to uniquely identify the entity in queries and
+mutations implementation, and the final two are the \texttt{roles} and \texttt{permissions}
+of the entity, which are used in combination with the \texttt{type} to ensure protection.
+The token must be provided in the request's \texttt{Authorization} header using the
+\texttt{Bearer} authentication scheme\footnote{\url{https://www.rfc-editor.org/rfc/rfc6750}}:
+\texttt{Authorization: Bearer <TOKEN>}. An error response is generated if the
+entity attempts to access a protected API but the token is either absent, in an invalid
+format, or the verification procedure fails. \\ %
+It should be noted that in the implementation, all GraphQL queries/mutations that
+return a list (\texttt{[]}) support pagination, which includes both offset
+pagination and cursor-based pagination, via the arguments \texttt{cursor}, \texttt{skip}
+(default value set to \texttt{0}), and \texttt{take} (default value set to
+\texttt{8}). This allows the entities to divide the returned resources into manageable
+chunks improving the overall search experience and the overall Server performance.
+Additionally, the latter queries/mutations support advanced sorting, via the
+\texttt{orderBy} argument, and filtering, via the \texttt{where} argument. As previously
+stated, the GraphQL API is built on top of the database and its schema, so the API
+can be considered an extension of the database in terms of both the parameters that
+are accepted and the resources/objects that are returned.
+
 \subsubsection{Queries}
 \label{subsubsec:implementation_server_graphql_api_queries}
+
+GraphQL queries (\texttt{Query}\footnote{\url{http://spec.graphql.org/draft/\#sec-Query}})
+are used to query/fetch data without any server-side modification. \texttt{Query}
+fields can be executed in parallel by the GraphQL engine. \\ %
+A GraphQL \texttt{Query} is the logical equivalent of a \texttt{GET} request in \texttt{REST}.
+\\ %
+All GraphQL \texttt{Query}(s) supported by the Server implementation are listed
+below:
 
 \begin{itemize}
   \item \lstinline[language=graphql, morekeywords={[2]{Cpu}}, morekeywords={[4]{id}},
     morekeywords={[5]{cpu}}]{cpu(id: ID!): Cpu}
     \newline
+    \texttt{cpu} query returns the \texttt{Cpu}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/entities/Cpu.ts}}
+    object that matches the specified identifier (\texttt{id} argument).
+    \newline
+    Because of the \texttt{!} symbol, the \texttt{id} argument cannot be \texttt{null}
+    and is thus required. Whereas the returned \texttt{Cpu} object is nullable (there
+    is no \texttt{!} symbol) implying that the query returns \texttt{null} if no
+    CPU matches the provided identifier.
 
   \item \lstinline[language=graphql, morekeywords={[2]{Cpu, OrderByCpuInput, NonNegativeInt, WhereCpuInput}},
-    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{cpus}}]{cpus(cursor: ID, orderBy: OrderByCpuInput, skip: NonNegativeInt! = 0, take: Int! = 8, where: WhereCpuInput): [Cpu!]!}
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{cpus}}]{cpus(cursor: ID, orderBy: OrderByCpuInput, skip: NonNegativeInt! = 0, take: Int! = 8,}
     \newline
+    \hphantom{---------}\lstinline[language=graphql, morekeywords={[2]{Cpu, OrderByCpuInput, NonNegativeInt, WhereCpuInput}},
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{cpus}}]{where: WhereCpuInput): [Cpu!]!}
+    \newline
+    \texttt{cpus} query returns a non-nullable list (\texttt{[]!}) of non-nullable
+    \texttt{Cpu} objects.
+    \newline
+    The query allows for pagination (\texttt{cursor}, \texttt{skip}, and \texttt{take}
+    arguments), filtering (\texttt{where} argument of type \texttt{WhereCpuInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/where/WhereCpuInput.ts}}),
+    and sorting (\texttt{orderBy} argument of type \texttt{OrderByCpuInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/orderby/OrderByCpuInput.ts}}).
+    It is worth noting that the argument \texttt{skip} is of the type \texttt{NonNegativeInt},
+    indicating that it can accept values of \texttt{0} (inclusive) or greater
+    and that it is required (\texttt{!} symbol), but because it has a default
+    value of \texttt{0}, it can be omitted in the request. The \texttt{take}
+    argument is similar, but it can accept values less than, equal to, or greater
+    than \texttt{0} and has a default value of \texttt{8}. The latter arguments
+    and requirements are present in all queries that return a list, with the only
+    variation being the type of the associated \texttt{where} and \texttt{orderBy}
+    arguments.
 
   \item \lstinline[language=graphql, morekeywords={[2]{MAC, Interface}}, morekeywords={[4]{address, id}},
     morekeywords={[5]{interface}}]{interface(address: MAC, id: ID): Interface}
     \newline
+    \texttt{interface} query returns the \texttt{Interface}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/entities/Interface.ts}}
+    object that matches the specified identifier (\texttt{id} argument) or MAC address
+    (\texttt{mac} argument).
+    \newline
+    Because they both uniquely designate an \texttt{Interface} object, both arguments
+    are nullable. If the query is executed with both arguments set to \texttt{null},
+    an error is returned because the corresponding resolver function is unable
+    to uniquely identify the record.
 
   \item \lstinline[language=graphql, morekeywords={[2]{Interface, OrderByInterfaceInput, NonNegativeInt, WhereInterfaceInput}},
-    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{interfaces}}]{interfaces(cursor: ID, orderBy: OrderByInterfaceInput, skip: NonNegativeInt! = 0, take: Int! = 8, where: WhereInterfaceInput): [Interface!]!}
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{interfaces}}]{interfaces(cursor: ID, orderBy: OrderByInterfaceInput, skip: NonNegativeInt! = 0, take: Int! = 8,}
+    \hphantom{----------------}\lstinline[language=graphql, morekeywords={[2]{Interface, OrderByInterfaceInput, NonNegativeInt, WhereInterfaceInput}},
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{interfaces}}]{where: WhereInterfaceInput): [Interface!]!}
     \newline
+    \texttt{interfaces} query returns a non-nullable list of non-nullable \texttt{Interface}
+    objects.
+    \newline
+    The \texttt{where} argument is of type \texttt{WhereInterfaceInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/where/WhereInterfaceInput.ts}},
+    and the \texttt{orderBy} argument is of type \texttt{OrderByInterfaceInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/orderby/OrderByInterfaceInput.ts}}.
 
   \item \lstinline[language=graphql, morekeywords={[2]{Node, IP}}, morekeywords={[4]{address, id, name}},
-    morekeywords={[5]{node}}]{node(address: IP, id: ID, name: String): Node}
+    morekeywords={[5]{node}}]{node(id: ID, address: IP, name: String): Node}
     \newline
+    \texttt{node} query returns the \texttt{Node}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/entities/Node.ts}}
+    object that matches the specified identifier (\texttt{id} argument), IP
+    address (\texttt{ip} argument) or name (\texttt{name} argument).
 
   \item \lstinline[language=graphql, morekeywords={[2]{Node, OrderByNodeInput, NonNegativeInt, WhereNodeInput}},
-    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{nodes}}]{nodes(cursor: ID, orderBy: OrderByNodeInput, skip: NonNegativeInt! = 0, take: Int! = 8, where: WhereNodeInput): [Node!]!}
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{nodes}}]{nodes(cursor: ID, orderBy: OrderByNodeInput, skip: NonNegativeInt! = 0, take: Int! = 8,}
     \newline
+    \hphantom{-----------}\lstinline[language=graphql, morekeywords={[2]{Node, OrderByNodeInput, NonNegativeInt, WhereNodeInput}},
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{nodes}}]{where: WhereNodeInput): [Node!]!}
+    \newline
+    \texttt{nodes} query returns a non-nullable list of non-nullable \texttt{Node}
+    objects.
+    \newline
+    The \texttt{where} argument is of type \texttt{WhereNodeInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/where/WhereNodeInput.ts}},
+    and the \texttt{orderBy} argument is of type \texttt{OrderByNodeInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/orderby/OrderByNodeInput.ts}}.
 
   \item \lstinline[language=graphql, morekeywords={[2]{NodePool}}, morekeywords={[4]{id, name}},
     morekeywords={[5]{nodePool}}]{nodePool(id: ID, name: String): NodePool}
     \newline
+    \texttt{nodePool} query returns the \texttt{NodePool}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/entities/NodePool.ts}}
+    object that matches the specified identifier (\texttt{id} argument) or name (\texttt{name}
+    argument).
+    \newline
+    As mentioned in section \ref{subsubsec:implementation_server_database_node_pool},
+    the \texttt{Node Pool} object in the GraphQL API adds two additional attributes/fields
+    to the basic knowledge provided by the Database schema. The first field, \texttt{max\_nodes},
+    defines the total number of nodes that the node pool can handle. The field
+    has the same value as the number of nodes that are associated with the
+    corresponding node group. The second field, \texttt{count}, defines the
+    amount of nodes that are associated with the respective node pool, have the \texttt{node\_pool\_assigned}
+    attribute set to \texttt{true}, and are operational (active status). The latter
+    field is used to determine the amount of Kubernetes nodes of the corresponding
+    node pool that are operational and actively participating in the cluster.
+    Both of these attributes are critical for autoscaling purposes and are
+    extensively used by the Cluster Autoscaler component.
 
   \item \lstinline[language=graphql, morekeywords={[2]{NodePool, OrderByNodePoolInput, NonNegativeInt, WhereNodePoolInput}},
-    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{nodePools}}]{nodePools(cursor: ID, orderBy: OrderByNodePoolInput, skip: NonNegativeInt! = 0, take: Int! = 8, where: WhereNodePoolInput)): [NodePool!]!}
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{nodePools}}]{nodePools(cursor: ID, orderBy: OrderByNodePoolInput, skip: NonNegativeInt! = 0, take: Int! = 8,}
     \newline
+    \hphantom{----------------}\lstinline[language=graphql, morekeywords={[2]{NodePool, OrderByNodePoolInput, NonNegativeInt, WhereNodePoolInput}},
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{nodePools}}]{where: WhereNodePoolInput)): [NodePool!]!}
+    \newline
+    \texttt{nodePools} query returns a non-nullable list of non-nullable NodePool
+    objects.
+    \newline
+    The \texttt{where} argument is of type \texttt{WhereNodePoolInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/where/WhereNodePoolInput.ts}},
+    and the \texttt{orderBy} argument is of type \texttt{OrderByNodePoolInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/orderby/OrderByNodePoolInput.ts}}.
 
   \item \lstinline[language=graphql, morekeywords={[2]{Status}}, morekeywords={[4]{id}},
     morekeywords={[5]{status}}]{status(id: ID!): Status}
     \newline
+    \texttt{status} query returns the \texttt{Status}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/entities/Status.ts}}
+    object that matches the specified identifier (\texttt{id} argument).
 
   \item \lstinline[language=graphql, morekeywords={[2]{Status, OrderByStatusInput, NonNegativeInt, WhereStatusInput}},
-    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{statuses}}]{statuses(cursor: ID, orderBy: OrderByStatusInput, skip: NonNegativeInt! = 0, take: Int! = 8, where: WhereStatusInput): [Status!]!}
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{statuses}}]{statuses(cursor: ID, orderBy: OrderByStatusInput, skip: NonNegativeInt! = 0, take: Int! = 8,}
     \newline
+    \hphantom{---------------}\lstinline[language=graphql, morekeywords={[2]{Status, OrderByStatusInput, NonNegativeInt, WhereStatusInput}},
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{statuses}}]{where: WhereStatusInput): [Status!]!}
+    \newline
+    \texttt{statuses} query returns a non-nullable list of non-nullable \texttt{Status}
+    objects.
+    \newline
+    The \texttt{where} argument is of type \texttt{WhereStatusInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/where/WhereStatusInput.ts}},
+    and the \texttt{orderBy} argument is of type \texttt{OrderByStatusInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/orderby/OrderByStatusInput.ts}}.
 
   \item \lstinline[language=graphql, morekeywords={[2]{Storage}}, morekeywords={[4]{id}},
     morekeywords={[5]{storage}}]{storage(id: ID!): Storage}
     \newline
+    \texttt{storage} query returns the \texttt{Storage}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/entities/Storage.ts}}
+    object that matches the specified identifier (\texttt{id} argument).
 
   \item \lstinline[language=graphql, morekeywords={[2]{Storage, OrderByStorageInput, NonNegativeInt, WhereStorageInput}},
-    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{storages}}]{storages(cursor: ID, orderBy: OrderByStorageInput, skip: NonNegativeInt! = 0, take: Int! = 8, where: WhereStorageInput): [Storage!]!}
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{storages}}]{storages(cursor: ID, orderBy: OrderByStorageInput, skip: NonNegativeInt! = 0, take: Int! = 8,}
     \newline
+    \hphantom{---------------}\lstinline[language=graphql, morekeywords={[2]{Storage, OrderByStorageInput, NonNegativeInt, WhereStorageInput}},
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{storages}}]{where: WhereStorageInput): [Storage!]!}
+    \newline
+    \texttt{storages} query returns a non-nullable list of non-nullable \texttt{Storage}
+    objects.
+    \newline
+    The \texttt{where} argument is of type \texttt{WhereStorageInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/where/WhereStorageInput.ts}},
+    and the \texttt{orderBy} argument is of type \texttt{OrderByStorageInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/orderby/OrderByStorageInput.ts}}.
 
   \item \lstinline[language=graphql, morekeywords={[2]{User, NonEmptyString}}, morekeywords={[4]{id, username}},
     morekeywords={[5]{user}}]{user(id: ID, username: NonEmptyString): User}
     \newline
+    \texttt{user} query returns the \texttt{User}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/entities/User.ts}}
+    object that matches the specified identifier (\texttt{id} argument) or username
+    (\texttt{username} argument).
 
   \item \lstinline[language=graphql, morekeywords={[2]{User, OrderByUserInput, NonNegativeInt, WhereUserInput}},
-    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{users}}]{users(cursor: ID, orderBy: OrderByUserInput, skip: NonNegativeInt! = 0, take: Int! = 8, where: WhereUserInput): [User!]!}
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{users}}]{users(cursor: ID, orderBy: OrderByUserInput, skip: NonNegativeInt! = 0, take: Int! = 8,}
     \newline
+    \hphantom{-----------}\lstinline[language=graphql, morekeywords={[2]{User, OrderByUserInput, NonNegativeInt, WhereUserInput}},
+    morekeywords={[4]{cursor, orderBy, skip, take, where}}, morekeywords={[5]{users}}]{where: WhereUserInput): [User!]!}
+    \newline
+    \texttt{users} query returns a non-nullable list of non-nullable \texttt{User}
+    objects.
+    \newline
+    The \texttt{where} argument is of type \texttt{WhereUserInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/where/WhereUserInput.ts}},
+    and the \texttt{orderBy} argument is of type \texttt{OrderByUserInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/orderby/OrderByUserInput.ts}}.
 \end{itemize}
 
 \subsubsection{Mutations}
 \label{subsubsec:implementation_server_graphql_api_mutations}
 
+GraphQL mutations (\texttt{Mutation}\footnote{\url{http://spec.graphql.org/draft/\#sec-Mutation}})
+are used for operations that modify any server-side data. \texttt{Mutation} top-level
+fields are executed in serial by the GraphQL engine. \\ %
+A GraphQL \texttt{Mutation} is the logical equivalent of a \texttt{POST},
+\texttt{PUT}, \texttt{PATCH}, or \texttt{DELETE} request in \texttt{REST}. \\ %
+All GraphQL \texttt{Mutation}(s) supported by the Server implementation are
+listed below:
+
 \begin{itemize}
   \item \lstinline[language=graphql, morekeywords={[2]{CreateNodeInput, JWT}}, morekeywords={[4]{data}},
     morekeywords={[5]{createNode}}]{createNode(data: CreateNodeInput!): JWT!}
     \newline
+    \texttt{createNode} resolver registers a new \texttt{Node} object in the
+    Database using the data provided in the \texttt{data} input argument (of
+    type \texttt{CreateNodeInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/create/CreateNodeInput.ts}})
+    and returns a \texttt{JWT} security token if successful.
+    \newline
+    The associated Node will use the returned \texttt{JWT} token for any future operations
+    involving any of the protected GraphQL APIs.
+    \newline
+    It should be noted that if the registration fails for any reason, no \texttt{JWT}
+    token is returned and an error is generated.
+    \newline
+    Because neither the \texttt{data} argument nor the returned \texttt{JWT} token
+    can be \texttt{null}, a value must/is always supplied.
 
   \item \lstinline[language=graphql, morekeywords={[2]{CreateUserInput, User}}, morekeywords={[4]{data}},
     morekeywords={[5]{createUser}}]{createUser(data: CreateUserInput!): User!}
     \newline
+    \texttt{createUser} resolver registers a new \texttt{User} object in the
+    Database using the data provided in the \texttt{data} input argument (of
+    type \texttt{CreateUserInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/create/CreateUserInput.ts}})
+    and returns the created \texttt{User} object if successful.
+    \newline
+    The returned \texttt{User} object includes extra fields related to the given
+    data, such as the generated \texttt{id} and designated \texttt{roles}/\texttt{permissions}
+    fields.
+    \newline
+    The plain text \texttt{password} is hashed using the \texttt{bcrypt}
+    password-hashing function before being saved in the Database. Furthermore,
+    there is no \texttt{password} field mapped in the GraphQL schema that is assigned
+    to the \texttt{User} object, so it cannot be retrieved via any GraphQL queries
+    or mutations. The latter is done as a security precaution to prevent
+    sensitive information from leaking outside of the Server.
+    \newline
+    The difference between this mutation and the previous one is that no \texttt{JWT}
+    security token is returned because the user must use the specific mutation
+    \texttt{signIn} to successfully authenticate and acquire the \texttt{JWT}
+    security token.
+    \newline
+    Because neither the \texttt{data} argument nor the returned \texttt{User} object
+    can be \texttt{null}, a value must/is always supplied.
 
   \item \lstinline[language=graphql, morekeywords={[2]{NonEmptyString, JWT}}, morekeywords={[4]{password, username}},
     morekeywords={[5]{signIn}}]{signIn(username: NonEmptyString!, password: NonEmptyString!): JWT!}
     \newline
+    \texttt{signIn} resolver requires a user's \texttt{username} and \texttt{password}
+    to authenticate it. A \texttt{JWT} security token identifying the user entity
+    is returned if the authentication procedure succeeded.
+    \newline
+    The \texttt{username} argument is used to uniquely identify a \texttt{User}
+    record to acquire the associated \texttt{password} hashed using the \texttt{bcrypt}
+    password-hashing algorithm during the registration procedure. A \texttt{bcrypt}
+    function compares the provided plain text \texttt{password} argument with the
+    saved hashed \texttt{password} and returns \texttt{true} if the password matches
+    and \texttt{false} otherwise.
+    \newline
+    If the authenticated procedure fails due to an invalid \texttt{username} and/or
+    \texttt{password}, the mutation's error provides the generic message \texttt{"Username
+    or password is incorrect"} to prevent possible information leakage that an attacker
+    could leverage.
+    \newline
+    It should be noted that the current implementation lacks an advanced token
+    system for withdrawing tokens or verifying the current available active
+    sessions. The latter may be employed in future implementations that depend on
+    a more advanced architecture.
 
   \item \lstinline[language=graphql, deletekeywords={type}, morekeywords={[2]{Node, @auth}},
     morekeywords={[3]{USER, ADMIN}}, morekeywords={[4]{id, type, roles}},
     morekeywords={[5]{unassignNode}}]{unassignNode(id: ID!): Node! @auth(type: USER, roles: [ADMIN])}
     \newline
+    \texttt{unassignNode} mutation unassign and deactivate the node identified by
+    the \texttt{id} attribute.
+    \newline
+    The mutation is widely used in downscaling procedures to downscale the cluster's
+    specific node, which is identified by the \texttt{id} argument. The
+    procedure drains the Kubernetes node first, then deletes it from Kubernetes,
+    and when the Server monitoring receives confirmation of the deletion, it remotely
+    turns off the node via \texttt{SSH}. Section \ref{subsec:implementation_server_downscaling}
+    explains the latter procedure in better detail.
+    \newline
+    An equivalent mutation for upscaling procedures does not exist because the
+    Cluster Autoscaler only has high-level knowledge of the cluster and thus
+    only knows about the current Kubernetes cluster and its corresponding active
+    nodes, rather than all available nodes and their respective low-level information
+    (i.e. identifiers, statuses and more).
+    \newline
+    The Auth directive (\texttt{@auth}) is used to protect the mutation from unauthenticated
+    and unauthorized access. It specifies that only an entity of type \texttt{USER}
+    with the \texttt{ADMIN} role is authorized to unassign and turn off a node (as
+    indicated by the directive arguments).
 
   \item \lstinline[language=graphql, deletekeywords={type}, morekeywords={[2]{NodePool, UpdateNodePoolInput, @auth}},
     morekeywords={[3]{USER, ADMIN}}, morekeywords={[4]{id, data, type, roles}},
     morekeywords={[5]{updateNodePool}}]{updateNodePool(id: ID!, data: UpdateNodePoolInput!): NodePool! @auth(type: USER, roles: [ADMIN])}
     \newline
+    \texttt{updateNodePool} mutation is used to update the node pool with the \texttt{data}
+    argument (of type \texttt{UpdateNodePoolInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/update/UpdateNodePoolInput.ts}})
+    identified by the \texttt{id} argument.
+    \newline
+    It should be noted that the \texttt{data} argument contains the \texttt{count}
+    field that is not available in the Database and is thus considered marker information.
+    The cluster is autoscaled whenever the \texttt{count} field is not \texttt{null}
+    and the difference between it and the current count is not zero. If the specified
+    \texttt{count} is less than the current \texttt{count}, the cluster must be
+    downscaled, and the difference indicates how many nodes in the corresponding
+    node pool must be downscaled (deleted from Kubernetes and powered off
+    remotely). The downscale procedure is the same as the one outlined in the
+    previous mutation, but the nodes that must be downscaled are selected with the
+    strict policy of minimizing total cluster power consumption. As a result, the
+    selected nodes are those that consume more energy than the others that are currently
+    operational in the Kubernetes cluster. If the specified \texttt{count} is greater
+    than the current \texttt{count}, the cluster must be upscaled, and the
+    difference indicates how many nodes in the corresponding node pool must be
+    upscaled (remotely powered on). The list of nodes that need to be upscaled is
+    generated by searching for nodes that are currently in the \texttt{INACTIVE}
+    status and have the appropriate interface with \texttt{Wake-on-Lan} support (\texttt{wol}
+    attribute array non-empty) to allow remote bootstrapping. Then, the energy-saving
+    policy is applied again, and the list is sorted in ascending order of power consumption:
+    nodes at the beginning of the list are more power-efficient, while nodes at the
+    end are less power-efficient. Starting from the beginning of the list, the Server
+    selects the same number of nodes as the difference between the two count values
+    (is always positive since it is an upscale procedure), and for each node, the
+    Server sends a Wake-on-Lan message on the associated interfaces' MAC address,
+    remotely bootstrapping it. Section
+    \ref{subsec:implementation_server_upscaling} explains the latter procedure
+    in better detail.
+    \newline
+    If the specified \texttt{count} field is less than zero or higher than the
+    total number of nodes associated with the corresponding node pool (\texttt{max\_nodes}),
+    an error is returned because the value provided is incorrect. Furthermore,
+    if the identified node pool has disabled the autoscaling feature by having
+    the \texttt{auto\_scale} flag attribute set to \texttt{false}, an error is returned
+    indicating that the operation is not allowed for the given node pool.
+    \newline
+    Identical to the previous one, this mutation is protected by the Auth directive
+    (\texttt{@auth}), which allows only a \texttt{USER} entity with the \texttt{ADMIN}
+    role to perform the action.
 
   \item \lstinline[language=graphql, deletekeywords={type}, morekeywords={[2]{Status, UpdateStatusInput, @auth}},
     morekeywords={[3]{NODE}}, morekeywords={[4]{data, type}}, morekeywords={[5]{updateStatus}}]{updateStatus(data: UpdateStatusInput!): Status! @auth(type: NODE)}
     \newline
+    \texttt{updateStatus} mutation updates the Status with the \texttt{data}
+    argument (of type \texttt{UpdateStatusInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/update/UpdateStatusInput.ts}})
+    of the corresponding Node identified in the \texttt{JWT} security token
+    provided. If the update procedure is successful, the updated \texttt{Node} object
+    is returned.
+    \newline
+    Because the mutation is protected by the Auth directive (\texttt{@auth}),
+    and a \texttt{JWT} token (of a \texttt{NODE} entity type) must always be
+    provided to perform the mutation, there is intrinsic knowledge of who is requesting
+    the update. The \texttt{JWT} token encodes the Node identifier (\texttt{id} field),
+    which is used to uniquely identify the status record that necessitates the update
+    with the provided \texttt{data} argument. As stated in section \ref{subsubsec:implementation_server_database_status},
+    the Status record identifier and the Node identifier are the same value
+    because the Status entity's \texttt{id} attribute is both a Primary Key (\texttt{PK})
+    and a Foreign Key (\texttt{PK}) that is uniquely related to the corresponding
+    Node identifier (\texttt{id} field). If the two IDs are different, a join
+    operation between the Node entity and the Status entity is required, necessitating
+    of more resources and increasing the total execution time of the mutation.
 
   \item \lstinline[language=graphql, deletekeywords={type}, morekeywords={[2]{User, UpdateUserInput, @auth}},
     morekeywords={[3]{USER}}, morekeywords={[4]{data, type}}, morekeywords={[5]{updateUser}}]{updateUser(data: UpdateUserInput!): User! @auth(type: USER)}
     \newline
+    \texttt{updateUser} mutation updates the User with the \texttt{data}
+    argument (of type \texttt{UpdateUserInput}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/graphql/inputs/update/UpdateUserInput.ts}})
+    of the corresponding User identified in the \texttt{JWT} security token
+    provided. If the update procedure is successful, the updated \texttt{User} object
+    is returned.
+    \newline
+    This mutation, like the previous one, relies on the identifier encoded in
+    the provided \texttt{JWT} token (of a \texttt{USER} entity type) to uniquely
+    identify the User record and update it with the \texttt{data} argument provided.
+    \newline
+    It should be noted that if the \texttt{password} field in the \texttt{data}
+    argument is not \texttt{null}, it must be verified that it matches the
+    minimal password criteria outlined in the section
+    \ref{subsubsec:implementation_server_database_user}. If the \texttt{password}
+    meets the minimal criteria, it is hashed using the \texttt{bcrypt} password-hashing
+    function and then saved in the Database.
 \end{itemize}
 
 \subsection{Upscaling}
 \label{subsec:implementation_server_upscaling}
 
-\subsubsection{Wake-on-LAN}
-\label{subsubsec:implementation_server_scale_up_wake_on_lan}
-
 \subsection{Downscaling}
 \label{subsec:implementation_server_downscaling}
-
-\subsubsection{SSH}
-\label{subsubsec:implementation_server_scale_up_ssh}
 
 \subsection{Monitoring}
 \label{subsec:implementation_server_monitoring}
