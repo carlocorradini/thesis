@@ -880,8 +880,8 @@ which are detailed below:
     (see section \ref{subsubsec:implementation_dependencies_k3s_enhancements}).
 
   \item The Prisma ORM (see section
-    \ref{subsubsec:implementation_server_database_prisma}) used in the server component
-    implementation officially supports it (see section
+    \ref{subsubsec:implementation_server_database_object_relational_mapping}) used
+    in the server component implementation officially supports it (see section
     \ref{sec:implementation_server}).
 
   \item The server implementation mostly employs simple SQL code, with no
@@ -1487,7 +1487,7 @@ on Layer 2 of the ISO/OSI model, it is fully compatible with the cluster's
 Internal Network Architecture (see section \ref{subsec:architecture_network_internal_network}).
 Both MetalLB and the Internal Network's Layer 2 capabilities meet the criteria for
 a fully functional Wake-on-LAN (WoL) feature (see section
-\ref{subsubsec:implementation_server_scale_up_wake_on_lan}).
+\ref{subsubsec:implementation_server_database_interface}).
 
 Figure \ref{fig:metallb} depicts an example schema of a MetalLB cluster with distinct
 Kubernetes namespaces, services, and pods, as well as network connections.
@@ -1887,9 +1887,9 @@ minimization, attempting to reduce overall cluster power consumption while also
 enhancing the resource utilization of active nodes. It is intended to be completely
 interoperable with a Kubernetes cluster composed of heterogeneous systems. It
 provides a rich, type-safe, and secure \texttt{GraphQL API} (see section
-\ref{subsec:implementation_server_graphql}) that can be utilized manually by administrators
-and basic users or automatically by scripts and other cluster components, such
-as the Cluster Autoscaler (see section \ref{subsec:implementation_autoscaling_cluster_autoscaler}).
+\ref{subsec:implementation_server_graphql_api}) that can be utilized manually by
+administrators and basic users or automatically by scripts and other cluster components,
+such as the Cluster Autoscaler (see section \ref{subsec:implementation_autoscaling_cluster_autoscaler}).
 Server, as the name implies, has a direct mapping to the cluster architecture's Server
 component. \\ %
 To query, monitor (see section \ref{subsec:implementation_server_monitoring}), and
@@ -2087,7 +2087,7 @@ is important. \\ %
 This part's information is crucial for gaining a better understanding of the
 data that the server requires and the installation script (see section \ref{sec:implementation_installer})
 collects from a node. Additionally, the latter is necessary for comprehending
-the raw data provided and processed by the GraphQL API (see section \ref{subsec:implementation_server_graphql}).
+the raw data provided and processed by the GraphQL API (see section \ref{subsec:implementation_server_graphql_api}).
 
 \clearpage
 \newpage
@@ -2283,7 +2283,7 @@ practice keeping the plain password in the node system and also because it is an
 entirely new kind of object that must handle the various operations differently.
 When the node record is created in the database for the first time, the auth token
 (in the user returned when it is successfully authenticated after providing the
-correct \texttt{username} and \texttt{password} attributes, see section \ref{subsec:implementation_server_graphql})
+correct \texttt{username} and \texttt{password} attributes, see section \ref{subsubsec:implementation_server_graphql_api_mutations})
 is returned only once and it cannot be obtained again. As a result, the auth
 token is securely stored only in the corresponding node, and if it is lost for any
 reason, indicating that the node is faulty or compromised, the only way to retrieve
