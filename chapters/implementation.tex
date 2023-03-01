@@ -4321,8 +4321,120 @@ listed below:
 \subsection{Upscaling}
 \label{subsec:implementation_server_upscaling}
 
+\begin{wrapfigure}
+  {l}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/implementation/upscaling.pdf}
+\end{wrapfigure}
+
+This section illustrates how the Server implementation performs the Upscaling procedure
+to enable \texttt{INACTIVE} nodes to be remotely bootstrapped employing \texttt{Wake-on-Lan}.
+\\ %
+\texttt{Wake-on-Lan} (\texttt{WoL}) is an Ethernet standard protocol used to power
+on a machine using a specifically crafted network message known as a Magic Packet\cite{wake_on_lan}.
+It should be noted that to be awakened, the system's NIC must support and enable
+\texttt{WoL}. The Magic Packet is a frame sent in broadcast (destination \texttt{MAC}
+address \texttt{FF:FF:FF:FF:FF:FF}) containing the NIC's \texttt{MAC} address of
+the target machine that needs to be awakened. When the Magic Packet is received
+by the corresponding NIC and \texttt{WoL} is supported and enabled, the system
+bootstraps as if it were turned on via the power button. Because the Magic Packet
+is broadcasted, every NIC in the cluster receives it, but it is simply ignored because
+the target \texttt{MAC} address does not match. \texttt{WoL} configuration and
+flags have already been thoroughly discussed in section
+\ref{subsubsec:implementation_server_database_interface}. \\ %
+When the \texttt{data} argument of the \texttt{updateNodePool} GraphQL mutation
+has the \texttt{count} field set to a value larger than the current one, the
+Upscaling process is executed. It should be noted that if the \texttt{count}'s
+value is less than the current \texttt{count}, the process is reversed and a
+Downscale procedure is performed. The difference between the \texttt{count}
+argument and the current \texttt{count} is the number of \texttt{INACTIVE} nodes
+in the associated node pool that must be bootstrapped. The Server implementation
+examines invalid or unfeasible values (i.e. the \texttt{count} is higher than
+the total number of nodes assigned to the associated node pool) and potential errors
+during the overall procedure. \\ %
+Because the Server only has a low-level knowledge of the cluster and does not continuously
+monitor the entire Kubernetes cluster, its overall workload, and resource consumption,
+it must be instructed to execute the action by another entity. The entity that initiates
+the Upscaling procedure is typically the Cluster Autoscaler, which, unlike the Server,
+has a high-level knowledge of the cluster and can thus use the previously
+missing information to determine when and for how many nodes to perform the
+Upscaling procedure. A human Administrator is the second entity that physically forces
+the cluster to be Upscaled. The latter is less common, but it can be the consequence
+of different motivations and or requirements, such as preparing the cluster for
+an upcoming high volume of traffic that cannot be sustained with the previous
+number of active nodes. \\ %
+The decision about which \texttt{INACTIVE} nodes should be bootstrapped adheres to
+the strict policy of power consumption reduction. The collection of \texttt{INACTIVE}
+nodes is ordered in ascending order of power consumption, first by the \texttt{max\_power\_consumption}
+attribute, then by the \texttt{min\_power\_consumption} attribute if the previous
+values are the same. If two nodes have both attributes equal, they are compared against
+their performance in descending order, with the most performant nodes appearing
+first. The final resulting list begins with all of the most power-efficient nodes
+and ends with the most energy-hungry nodes. Starting at the top of the list, the
+number of nodes that must be bootstrapped is determined by the difference between
+the count data argument and the current count. It should be noted that the
+Cluster Autoscaler's Automatic Upscaling request is typically not aggressive and
+only involves one node. As a result, only the first node at the top of the list
+is typically selected and involved in the bootstrapping process. \\ %
+The preceding information and strategies for cluster Upscaling are condensed in
+the following steps and visually depicted in Figure \ref{fig:upscaling}:
+\begin{enumerate}
+  \item A Cluster Autoscaler or Administrator entity submits a request to the GraphQL
+    mutation \texttt{updateNodePool} with the node pool's identifier (\texttt{id}
+    argument) and a \texttt{count} value higher than the current count. To allow
+    the entity to perform the action, a valid \texttt{JWT} token must be supplied
+    in the \texttt{Authorization} header.
+    \newline
+    As an example, the identified node pool is \texttt{460d17d5-96ff-4e56-815c-e3367c60ae0d},
+    the \texttt{count} value is \texttt{2}, and the current count is \texttt{1}.
+
+  \item The \texttt{count} value is compared to the current one to determine
+    whether the number of nodes in the corresponding node group should be
+    \texttt{Increased} (\texttt{Upscaled}) or \texttt{Decreased} (\texttt{Downscaled}).
+    The requested operation is to \texttt{Increment} the number of nodes in the
+    node pool because the \texttt{count} value is higher. Moreover, it is also calculated
+    the difference between the two values to determine the number of nodes to bootstrap.
+    \newline
+    Because the provided \texttt{count} is higher than the existing count, the
+    \texttt{Increase} operation is selected. The difference (\texttt{N}) number is
+    \texttt{1}.
+
+  \item The Database is queried to obtain the list of \texttt{INACTIVE} nodes in
+    the associated node pool that also supports \texttt{WoL}.
+
+  \item By comparing the \texttt{max\_power\_consumption} and/or \texttt{min\_power\_consumption}
+    attributes, the list is ordered in ascending order of power consumption. If the
+    latter two attributes for some nodes are identical, they are sorted by
+    performance score in descending order.
+
+  \item \texttt{N} nodes are selected starting at the top of the list, where the
+    most power-efficient nodes are located. A Magic Packet in broadcast is sent
+    for each of these \texttt{N} nodes, targeting the \texttt{MAC} address of the
+    associated node's NIC. After that, the state of each node is updated to \texttt{BOOTING}.
+    \newline
+    The single most power-efficient node is selected (\texttt{NODE 1}) and the
+    Magic Packet targeting its NIC \texttt{MAC} address is sent. The status is
+    then updated to \texttt{BOOTING}.
+
+  \item The requested \texttt{N} nodes are successfully bootstrapped, and following
+    the initialization procedure, they join the Kubernetes cluster.
+\end{enumerate}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{images/implementation/upscaling_schema.pdf}
+  \caption{Upscaling scheme phases}
+  \label{fig:upscaling}
+\end{figure}
+
 \subsection{Downscaling}
 \label{subsec:implementation_server_downscaling}
+
+\begin{wrapfigure}
+  {l}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/implementation/downscaling.pdf}
+\end{wrapfigure}
 
 \subsection{Monitoring}
 \label{subsec:implementation_server_monitoring}
