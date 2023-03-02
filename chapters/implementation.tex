@@ -4617,8 +4617,91 @@ in the following steps and visually depicted in Figure \ref{fig:downscaling}:
 \subsection{Monitoring}
 \label{subsec:implementation_server_monitoring}
 
-% TODO Node Informer!
-% TODO https://aly.arriqaaq.com/kubernetes-informers
+The Server component must continuously monitor the currently active nodes to
+grasp their \texttt{status} and determine whether a node has been successfully \texttt{Added},
+\texttt{Updated}, or \texttt{Deleted}. \\ %
+Implementing a monitoring system from scratch that is based on periodic updates
+via Heartbeat messages and is also reliable, scalable, performant, and simple to
+use is a challenging task. \\ %
+Because the cluster is built around Kubernetes, a monitoring system with
+periodic Heartbeat messages is already in place, satisfying all of the preceding
+requirements. As a result, the Server implementation takes advantage of the latter,
+thanks to the use of a Kubernetes \texttt{Informer}\footnote{\url{https://github.com/kubernetes-client/javascript/blob/master/src/informer.ts}}.
+\\ %
+A Kubernetes \texttt{Informer} employs the Kubernetes API to \texttt{List} and \texttt{Watch}
+a specific resource or a group of resources. To prevent performance degradation and
+potentially useless requests (the resource has not been changed since the last
+request), the \texttt{Informer} does not constantly query (polling) the Kubernetes
+API. Instead, the \texttt{Informer} queries the resource(s) and stores the result
+in a local/internal cache, and an event (\texttt{Create}, \texttt{Update}, or \texttt{Delete})
+is only triggered/generated when the cached resource(s) differs from the one
+available through the Kubernetes API. The latter outlined Kubernetes \texttt{Informer}
+is only an oversimplification of how it works and how it is internally
+implemented, but it is critical to understand that it provides a powerful, yet
+simple-to-use and configure, mechanism for monitoring cluster nodes. \\ %
+The Kubernetes \texttt{Informer} can be considered as a subscription mechanism
+in which the Server component subscribes to the Node resource and whenever the
+resource changes, an event callback (\texttt{Add}, \texttt{Update}, or \texttt{Delete})
+is triggered. \\ %
+The monitoring system is implemented by the Server through a specialized class
+called \texttt{NodeInformer}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/k8s/NodeInformer.ts}},
+which encapsulates the Kubernetes Informer and is subscribed to all possible
+events concerning the Node resource. When the Kubernetes \texttt{Informer}
+triggers an event, the \texttt{NodeInformer} class's associated callback method
+is called. A callback function is only a frontend interface to a Kubernetes event,
+with the actual business logic delegated to one of the many Services based on
+the event that triggered the callback. The \texttt{NodeInformer} class, and thus
+the Kubernetes \texttt{Informer}, are only instantiated once when the Server bootstraps
+and terminated when the Server itself terminates. \\ %
+Figure \ref{fig:informer} depicts the monitoring scheme and the interaction of the
+previously mentioned components.
+
+% TODO Check
+\pagebreak
+
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=.75\textwidth]{images/implementation/informer.pdf}
+  \caption{Monitoring scheme}
+  \label{fig:informer}
+\end{figure}
+
+The following list depicts the various NodeInformer callbacks and their purposes:
+\begin{itemize}
+  \item \texttt{onAdd(node)}
+    \newline
+    A new \texttt{node} resource has been added.
+    \newline
+    Update the associated \texttt{node} record with the acquired \texttt{IP} address
+    and \texttt{status}.
+
+  \item \texttt{onUpdate(node)}
+    \newline
+    A \texttt{node} resource has been updated.
+    \newline
+    Update the associated \texttt{node} record with the acquired \texttt{IP} address
+    and \texttt{status}.
+
+  \item \texttt{onDelete(node)}
+    \newline
+    A \texttt{node} resource has been deleted.
+    \newline
+    Terminate (\texttt{poweroff}) the associated \texttt{node}. The latter
+    procedure also updates its \texttt{status}.
+
+  \item \texttt{onConnect()}
+    \newline
+    \texttt{Informer} has successfully connected and is started monitoring the associated
+    resource (\texttt{Node}).
+
+  \item \texttt{onError(error)}
+    \newline
+    Informer has encountered an \texttt{error}.
+    \newline
+    After \texttt{3} seconds, it automatically restarts. The latter value is
+    configurable.
+\end{itemize}
 
 \subsection{Configuration}
 \label{subsec:implementation_server_configuration}
