@@ -4706,6 +4706,124 @@ The following list depicts the various NodeInformer callbacks and their purposes
 \subsection{Configuration}
 \label{subsec:implementation_server_configuration}
 
+The Server implementation is fully customizable, with two methods available. \\ %
+The first method is to use a \texttt{TypeScript} configuration file, named
+\texttt{config.ts}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/config/config.ts}},
+that contains all of the setting parameters and structures used by the Server. Because
+it is a pure \texttt{TypeScript} file, it can be imported and used directly by other
+\texttt{TypeScript} source files with no additional steps. \\ %
+The second method, which is more commonly used for application configuration,
+employs the use of environment variables\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/server/src/config/env.ts}}.
+Because polluting the environment with a multitude of variables is not a good practice,
+only the most significant and/or required configuration parameters are available.
+If an environment variable is provided, it overrides the default value assigned
+in the first method's \texttt{TypeScript} configuration file (\texttt{config.ts}).
+As a result, even though it only supports a subset of all possible configuration
+parameters, the second approach has a higher precedence than the first. \\ %
+It would take too much space to explain all of the available configuration parameters
+that the Server implementation can be customized with, and some are self-explanatory,
+such as the \texttt{name} parameter, which specifies the application name, while
+others are almost immutable and rarely change. As a result, the following table
+only describes all of the configuration parameters and thus the environment
+variables that can be customized using the second method.
+
+\begin{xltabular}
+  {\textwidth} { >{\ttfamily}l | c | X | >{\ttfamily}c }
+
+  \multicolumn{1}{ c |}{\large{\textbf{Name}}} &
+  \multicolumn{1}{ c |}{\large{\textbf{Required}}} &
+  \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
+  \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hhline{====}
+
+  NODE\_ENV & \textcolor{bulmaRed}{\faicon{times}} & \texttt{Node.js}
+  environment.
+  \newline
+  Different environments enable or disable certain Server components or features.
+  For example, in \texttt{production}, the GraphQL Studio Explorer\footnote{\url{https://www.apollographql.com/docs/graphos/explorer/explorer}}
+  is disabled, whereas it is enabled in all other environments.
+  \newline
+  The following environments are supported:
+  \begin{itemize}
+    \item \texttt{development}
+
+    \item \texttt{production}
+
+    \item \texttt{test}
+  \end{itemize}
+  & production \\ \hline
+
+  HOST & \textcolor{bulmaRed}{\faicon{times}} & Listening address(es). & 0.0.0.0
+  \\ \hline
+
+  PORT & \textcolor{bulmaRed}{\faicon{times}} & Listening port. & 80 \\ \hline
+
+  LOGGER\_LEVEL & \textcolor{bulmaRed}{\faicon{times}} & Logging level.
+  \newline
+  Attachment \ref{cha:logging} provides additional information regarding logging
+  and logging levels.
+  \newline
+  The following logging levels are supported (listed in descending order of
+  importance):
+  \begin{itemize}[noitemsep]
+    \item[\protect\icircled{\texttt{7}}] \texttt{silent}
+
+    \item[\protect\icircled{\texttt{6}}] \texttt{fatal}
+
+    \item[\protect\icircled{\texttt{5}}] \texttt{error}
+
+    \item[\protect\icircled{\texttt{4}}] \texttt{warn}
+
+    \item[\protect\icircled{\texttt{3}}] \texttt{info}
+
+    \item[\protect\icircled{\texttt{2}}] \texttt{debug}
+
+    \item[\protect\icircled{\texttt{1}}] \texttt{trace}
+  \end{itemize}
+  & info \\ \hline
+
+  DATABASE\_URL & \textcolor{bulmaGreen}{\faicon{check}} & Database URL.
+  \newline
+  The current implementation is dependent on \texttt{PostgreSQL} and therefore
+  the \texttt{URL} must be a valid \texttt{PostgreSQL} connection string\footnote{\url{https://www.postgresql.org/docs/current/libpq-connect.html\#LIBPQ-CONNSTRING}}.
+  & \\ \hline
+
+  SSH\_USERNAME & \textcolor{bulmaRed}{\faicon{times}} & \texttt{SSH} username. &
+  root \\ \hline
+
+  SSH\_PRIVATE\_KEY & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{SSH}
+  private key (identity file). & \\ \hline
+
+  SSH\_PASSPHRASE & \textcolor{bulmaRed}{\faicon{times}} & \texttt{SSH}
+  passphrase.
+  \newline
+  The passphrase used to encrypt the \texttt{SSH} private key's sensitive
+  section.
+  \newline
+  Because the default cluster implementation does not involve any passphrase, it
+  is not required. & \\ \hline
+
+  TOKEN\_PRIVATE\_KEY & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{JWT}
+  private key.
+  \newline
+  The private key used to sign the \texttt{JWT}. & \\ \hline
+
+  TOKEN\_PUBLIC\_KEY & \textcolor{bulmaGreen}{\faicon{check}} & \texttt{JWT}
+  public key.
+  \newline
+  The public key used to verify the \texttt{JWT}. & \\ \hline
+
+  TOKEN\_PASSPHRASE & \textcolor{bulmaRed}{\faicon{times}} & \texttt{JWT}
+  passphrase.
+  \newline
+  The passphrase used to encrypt the \texttt{JWT} private key's sensitive
+  section.
+  \newline
+  Because the default cluster implementation does not involve any passphrase, it
+  is not required. & \\ \hline
+
+  \caption{Server configuration environment variables}
+\end{xltabular}
+
 \section{Installer}
 \label{sec:implementation_installer}
 
