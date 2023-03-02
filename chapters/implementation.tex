@@ -4824,6 +4824,51 @@ variables that can be customized using the second method.
   \caption{Server configuration environment variables}
 \end{xltabular}
 
+\section{Autoscaling}
+\label{sec:implementation_autoscaling}
+
+The cluster must be able to automatically perform autoscaling procedures to
+independently and autonomously change the resource limits of pods, number of replicas
+(pods), and number of nodes, requiring no or minimal human/manual intervention.
+\\ %
+Kubernetes includes three Autoscaler components that perform automatically and autonomously
+the previous autoscaling procedures: \texttt{Vertical Pod Autoscaler} (see
+section \ref{subsec:implementation_autoscaling_vertical_pod_autoscaler}) modifies
+the resource limits of the pods, \texttt{Horizontal Pod Autoscaler} (see section
+\ref{subsec:implementation_autoscaling_horizontal_pod_autoscaler}) modifies the number
+of replicas (pods), and \texttt{Cluster Autoscaler} (see section
+\ref{subsec:implementation_autoscaling_cluster_autoscaler}) modifies the number of
+nodes in the cluster. \\ %
+
+Because autoscaling (\texttt{Vertical}, \texttt{Horizontal}, and \texttt{Cluster})
+is not the primary emphasis of the document, this section is not dedicated to
+explaining it in depth and how it is implemented. Rather, it is intended to
+provide a high-level overview of the three autoscaling mechanisms and their
+Kubernetes implementations. The only exception is the \texttt{Cluster Autoscaler},
+because it necessitates a custom implementation built on top of the existing one
+to be compatible with the specific cluster environment (cloud provider).
+
+\subsection{Vertical Pod Autoscaler}
+\label{subsec:implementation_autoscaling_vertical_pod_autoscaler}
+
+\subsection{Horizontal Pod Autoscaler}
+\label{subsec:implementation_autoscaling_horizontal_pod_autoscaler}
+
+\subsection{Cluster Autoscaler}
+\label{subsec:implementation_autoscaling_cluster_autoscaler}
+
+\subsubsection{Cloud Provider}
+\label{subsubsec:implementation_autoscaling_cluster_autoscaler_cloud_provider}
+
+\subsubsection{Upscaling}
+\label{subsubsec:implementation_autoscaling_cluster_autoscaler_upscaling}
+
+\subsubsection{Downscaling}
+\label{subsubsec:implementation_autoscaling_cluster_autoscaler_downscaling}
+
+\subsubsection{Configuration}
+\label{subsubsec:implementation_autoscaling_cluster_autoscaler_configuration}
+
 \section{Installer}
 \label{sec:implementation_installer}
 
@@ -5219,29 +5264,15 @@ collector:
   # ...
 \end{lstlisting}
 
-\subsection{Node Facts}
-\label{subsec:implementation_installer_node_facts}
-
-\subsection{Node Information}
-\label{subsec:implementation_installer_node_information}
-
-\subsection{Node Benchmarks}
+\subsection{Benchmarks}
 \label{subsec:implementation_installer_node_benchmarks}
 
-\subsubsection{Sysbench}
-\label{subsubsec:implementation_installer_node_benchmarks_sysbench}
+% TODO sysbench
 
-\subsection{Node Power Consumption}
+\subsection{Power Consumption}
 \label{subsec:implementation_installer_node_power_consumption}
 
-\subsubsection{CloudFree Smart Plug}
-\label{subsubsec:implementation_installer_node_power_consumption_cloudfree_smart_plug}
-
-\subsection{Node Registration}
-\label{subsec:implementation_installer_node_registration}
-
-\subsubsection{K8s Node Label And Name}
-\label{subsubsec:implementation_installer_node_registration_k8s_node_label_and_name}
+% CloudFree Smart Plug
 
 \subsection{Cluster Initialization}
 \label{subsec:implementation_installer_cluster_initialization}
@@ -5262,47 +5293,3 @@ collector:
 
 \subsubsection{K8s}
 \label{subsubsec:implementation_installer_cluster_initialization_k8s}
-
-\subsection{Services}
-\label{subsec:implementation_installer_services}
-
-\subsubsection{Start}
-\label{subsubsec:implementation_installer_services_start}
-
-\subsubsection{Stop}
-\label{subsubsec:implementation_installer_services_stop}
-
-\subsubsection{Boot}
-\label{subsubsec:implementation_installer_services_boot}
-
-\subsubsection{Shutdown}
-\label{subsubsec:implementation_installer_services_shutdown}
-
-\section{Autoscaling}
-\label{sec:implementation_autoscaling}
-
-\subsection{Autoscaler}
-\label{subsec:implementation_autoscaling_autoscaler}
-
-\subsection{Vertical Pod Autoscaler}
-\label{subsec:implementation_autoscaling_vertical_pod_autoscaler}
-
-\subsection{Horizontal Pod Autoscaler}
-\label{subsec:implementation_autoscaling_horizontal_pod_autoscaler}
-
-\subsection{Cluster Autoscaler}
-\label{subsec:implementation_autoscaling_cluster_autoscaler}
-
-\subsubsection{Cloud Provider}
-\label{subsubsec:implementation_autoscaling_cluster_autoscaler_cloud_provider}
-
-\subsubsection{Configuration}
-\label{subsubsec:implementation_autoscaling_cluster_autoscaler_configuration}
-
-% TODO Cloud Configuration
-
-\subsubsection{Upscaling}
-\label{subsubsec:implementation_autoscaling_cluster_autoscaler_upscaling}
-
-\subsubsection{Downscaling}
-\label{subsubsec:implementation_autoscaling_cluster_autoscaler_downscaling}
