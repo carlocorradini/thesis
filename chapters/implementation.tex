@@ -4381,9 +4381,9 @@ the following steps and visually depicted in Figure \ref{fig:upscaling}:
 \begin{enumerate}
   \item A Cluster Autoscaler or Administrator entity submits a request to the GraphQL
     mutation \texttt{updateNodePool} with the node pool's identifier (\texttt{id}
-    argument) and a \texttt{count} value higher than the current count. To allow
-    the entity to perform the action, a valid \texttt{JWT} token must be supplied
-    in the \texttt{Authorization} header.
+    argument) and a \texttt{count} value higher than the current \texttt{count}.
+    To allow the entity to perform the action, a valid \texttt{JWT} token must
+    be supplied in the \texttt{Authorization} header.
     \newline
     As an example, the identified node pool is \texttt{460d17d5-96ff-4e56-815c-e3367c60ae0d},
     the \texttt{count} value is \texttt{2}, and the current count is \texttt{1}.
@@ -4410,7 +4410,7 @@ the following steps and visually depicted in Figure \ref{fig:upscaling}:
   \item \texttt{N} nodes are selected starting at the top of the list, where the
     most power-efficient nodes are located. A Magic Packet in broadcast is sent
     for each of these \texttt{N} nodes, targeting the \texttt{MAC} address of the
-    associated node's NIC. After that, the state of each node is updated to \texttt{BOOTING}.
+    associated node's NIC. After that, the status of each node is updated to \texttt{BOOTING}.
     \newline
     The single most power-efficient node is selected (\texttt{NODE 1}) and the
     Magic Packet targeting its NIC \texttt{MAC} address is sent. The status is
@@ -4423,7 +4423,7 @@ the following steps and visually depicted in Figure \ref{fig:upscaling}:
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{images/implementation/upscaling_schema.pdf}
-  \caption{Upscaling scheme phases}
+  \caption{Upscaling scheme}
   \label{fig:upscaling}
 \end{figure}
 
@@ -4435,6 +4435,184 @@ the following steps and visually depicted in Figure \ref{fig:upscaling}:
   \centering
   \includegraphics[width=\linewidth]{images/implementation/downscaling.pdf}
 \end{wrapfigure}
+
+This section illustrates how the Server implementation performs the Downscaling procedure
+to enable \texttt{ACTIVE} nodes to be remotely powered off employing \texttt{SSH}.
+\\ %
+\texttt{SSH} (Secure Shell) is a protocol for secure remote login from one
+machine to another. \texttt{SSH} is used in the cluster implementation to
+remotely issue the \texttt{poweroff}\footnote{\url{https://linux.die.net/man/8/poweroff}}
+command to the corresponding node that needs to be Downscaled. The \texttt{SSH} remote
+connection is immediately closed (automatic disconnection) by the Server as soon
+as the command is successfully issued to prevent potential errors because the Downscaled
+node begins the shutdown procedure, which includes killing all processes, including
+the \texttt{SSH} Server process itself. Every node in the cluster has an \texttt{SSH}
+Server that accepts remote connections. The \texttt{SSH} Server process is
+continuously monitored by the corresponding Init System deployed on the node, and
+if it fails for any reason, it is resumed automatically. To issue the \texttt{poweroff}
+command, the Server implementation involves an \texttt{SSH} Client that
+establishes a secure and remote connection with the associated \texttt{SSH} Server
+by specifying the node's \texttt{IP} address. Both the \texttt{SSH} Server on
+the nodes and the \texttt{SSH} Client on the Server component must be properly configured
+with correct parameters, certificates, and keys, or the request for a connection
+from Client to Server will be promptly denied, resulting in the failure of the Downscaling
+procedure. During the installation procedure, the installer script configures the
+\texttt{SSH} Server, replacing any previous configuration with the one provided.
+The \texttt{SSH} Client configuration, on the other hand, is part of the Server and
+is thus performed with the same approach (see section
+\ref{subsec:implementation_server_configuration}). The current cluster
+implementation configures \texttt{SSH} in accordance with the best practices outlined
+in the article "\texttt{Secure Secure Shell}"\footnote{\url{https://stribika.github.io/2015/01/04/secure-secure-shell.html}}:
+Only the \texttt{Ed25519}\footnote{\url{https://ed25519.cr.yp.to/ed25519-20110926.pdf}}
+high-speed, high-security digital signature scheme is allowed, and only the most
+secure \texttt{Cipher}s and \texttt{MAC}s are enabled. Because the latter are only
+configuration files, the organization can easily change and customize them to
+reflect different requirements. Having all cluster nodes pre-configured with \texttt{SSH}
+allows extra and diverse capabilities: Administrators can use an \texttt{SSH}
+Client to remotely connect to a node and perform various operations such as
+interactive and/or automated file transfers, whereas the use of automation tools
+such as Ansible\footnote{\url{https://www.ansible.com}} or Terraform\footnote{\url{https://www.terraform.io}}
+allow performing operations in parallel and in the same programmatic way,
+enabling another solution of configuring/managing the cluster via an
+Infrastructure as a Code. Finally, if the cluster is deployed in an Air-Gap
+environment and/or relying on \texttt{SSH} for remotely issuing the \texttt{poweroff}
+command is deemed unnecessary or too verbose for an organization, other non-protected
+and unsecure login protocols, such as \texttt{telnet} or \texttt{rlogin}, exist and
+can be used to achieve the same result. The cluster implementation currently
+only supports \texttt{SSH}, but extending support for other alternatives and/or
+unsecure protocols should be relatively simple. \\ %
+Two GraphQL mutations support the Downscaling procedure:
+\begin{enumerate}
+  \item \texttt{updateNodePool}
+    \newline
+    The first mutation is very similar to the process outlined for Upscaling. The
+    Downscaling procedure is triggered when the \texttt{count} field in the
+    \texttt{data} argument is set to a value smaller than the current one. The
+    number of \texttt{ACTIVE} nodes in the associated node pool that must be terminated
+    is the difference between the current \texttt{count} and the \texttt{count} argument.
+    The collection of current \texttt{ACTIVE} nodes is arranged in the same way as
+    the Upscaling procedure, using the same attributes and the same priority
+    order. The sorting order, however, is inverted, so the \texttt{max\_power\_consumption}
+    and \texttt{min\_power\_consumption} attributes are ordered in descending
+    order while the \texttt{performance} is ordered in ascending order. The
+    final list starts with the most energy-hungry (least power-efficient) nodes
+    and ends with the most power-efficient (least energy-hungry) nodes. The number
+    of nodes that must be terminated, starting at the top of the list, is equivalent
+    to the previously stated difference between the current \texttt{count} and
+    the \texttt{count} field.
+    \newline
+    Before completely terminating a node, it must be drained (automatically
+    performed by the Cluster Autoscaler before calling the GraphQL mutation) and
+    deleted from the Kubernetes cluster (status \texttt{ACTIVE\_DELETING}), resulting
+    in all of its deployments being safely migrated without outages and the node
+    being completely removed by the Kubernetes cluster, stopping the K8s Agent
+    and its monitoring. The latter action is asynchronous, and once completed, the
+    Server retrieves the \texttt{IP} address of the associated node, initiates an
+    \texttt{SSH} remote connection to the \texttt{SSH} Server, and issues the
+    \texttt{poweroff} command, effectively terminating the node. When the latter
+    is finished, the node's status is updated to \texttt{INACTIVE}. The node's
+    \texttt{ACTIVE} status lasts only a few seconds, from when the Server is
+    notified of the Kubernetes removal to when the command is properly issued
+    via \texttt{SSH}.
+    \newline
+    It should be noted that the Server is notified of the node's successful
+    removal from Kubernetes by utilizing the same monitoring system discussed in
+    section \ref{subsec:implementation_server_monitoring}, which is also used to
+    keep the node's status updated. As a result, the implementation meets two requirements
+    with a single efficient solution.
+
+  \item \texttt{unassignNode}
+    \newline
+    The second mutation is much simpler than the first because it does not
+    require the entire section of Increase/Decrease, filtering, and sorting
+    because the node to be terminated is already provided as an argument (\texttt{id}).
+    \newline
+    The complete termination procedure, which includes draining and deleting the
+    node from Kubernetes and then remotely terminating via \texttt{SSH}, is the same
+    as previously described.
+\end{enumerate}
+The important distinction between the two mutations is that \texttt{updateNodePool}
+is generic in that it is most concerned about how many and which nodes need to
+be terminated, whereas \texttt{unassignNode} is specific in that it allows to
+specifically identify which node needs to be terminated. Because most Downscale operations
+are performed on a single and known a priori node, the mutation \texttt{unassignNode}
+is the obvious and preferred option. The latter is especially noticeable in the
+Cluster Autoscaler, which knows which nodes are underutilized and for how long thanks
+to continuous monitoring. If one of the latter nodes exceeds a predefined time
+threshold, the Cluster Autoscaler makes a request to the \texttt{unassignNode}
+mutation, specifying the identifier of the underutilized node. As previously
+mentioned, when the Cluster Autoscaler sends the Downscaling request, the Drain
+operation is much quicker because it has almost already been performed by the
+Cluster Autoscaler itself and/or the residual number of deployments are
+extremely low. \\ %
+The preceding information and strategies for cluster Downscaling are condensed
+in the following steps and visually depicted in Figure \ref{fig:downscaling}:
+\begin{enumerate}
+  \item A Cluster Autoscaler or Administrator entity submits a request to one of
+    the two GraphQL mutations with a valid \texttt{JWT} token supplied in the
+    \texttt{Authorization} header:
+    \begin{itemize}
+      \item \texttt{updateNodePool}
+        \begin{enumerate}
+          \item The request includes the node pool's identifier (\texttt{id} argument)
+            and a \texttt{count} value lower than the current \texttt{count}.
+            \newline
+            As an example, the identified node pool is \texttt{460d17d5-96ff-4e56-815c-e3367c60ae0d},
+            the \texttt{count} value is \texttt{1}, and the current count is \texttt{2}.
+
+          \item The Database is queried to obtain the list of \texttt{ACTIVE\_READY}
+            nodes in the associated node pool.
+
+          \item By comparing the \texttt{max\_power\_consumption} and/or \texttt{min\_power\_consumption}
+            attributes, the list is ordered in descending order of power
+            consumption. If the latter two attributes for some nodes are identical,
+            they are sorted by performance score in ascending order.
+
+          \item \texttt{N} nodes are selected starting at the top of the list, where
+            the less power-efficient nodes are located.
+
+          \item For each selected node: Continue to parent step \texttt{2}.
+        \end{enumerate}
+
+      \item \texttt{unassignNode}
+        \begin{enumerate}
+          \item The request includes the node identifier (\texttt{id} argument).
+            \newline
+            As an example, the identified node is \texttt{e64fd01e-03c4-435b-9b02-32dfed936507}.
+
+          \item The database is queried to obtain information about the corresponding
+            node.
+
+          \item Continue to parent step \texttt{2}.
+        \end{enumerate}
+    \end{itemize}
+
+  \item The corresponding Kubernetes node is drained and deleted.
+    \newline
+    The node's status is updated to \texttt{ACTIVE\_DELETING}.
+
+  \item The previous operation is completed and the Server is notified that the node
+    was successfully deleted from Kubernetes.
+    \newline
+    The node's status is updated to \texttt{ACTIVE}.
+
+  \item The Server retrieves the corresponding node's \texttt{IP} address, establishes
+    an \texttt{SSH} remote connection to the \texttt{SSH} Server, and issues the
+    \texttt{poweroff} command.
+    \newline
+    The node's status is updated to \texttt{INACTIVE}.
+
+  \item The node has been successfully terminated, and the Kubernetes cluster
+    now has one fewer node.
+\end{enumerate}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics
+  [width=\textwidth]{images/implementation/downscaling_schema.pdf}
+  \caption{Downscaling scheme}
+  \label{fig:downscaling}
+\end{figure}
 
 \subsection{Monitoring}
 \label{subsec:implementation_server_monitoring}
