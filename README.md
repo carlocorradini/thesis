@@ -37,7 +37,7 @@ Master Thesis.
 
 ### Build
 
-> **Note**: Compiled PDF [`corradini_carlo_computer_science_2022_2023.pdf`](./corradini_carlo_computer_science_2022_2023.pdf)
+> **Note**: Compiled PDF [`corradini_carlo_computer_science_2021_2022.pdf`](./corradini_carlo_computer_science_2021_2022.pdf)
 
 ```sh
 npm run build
