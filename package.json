@@ -23,11 +23,11 @@
     "check:format": "npx prettier --check .",
     "check:markdown": "npx markdownlint \"**/*.md\"",
     "check:spell": "npx cspell lint --config cspell.json --no-progress --show-context \"**\"",
-    "clean": "npx shx rm -rf ./build ./corradini_carlo_computer_science_2022_2023.pdf",
+    "clean": "npx shx rm -rf ./build ./corradini_carlo_computer_science_2021_2022.pdf",
     "fix": "npx npm-run-all --npm-path npm fix:*",
     "fix:format": "npx prettier --write .",
     "fix:markdown": "npx markdownlint --fix \"**/*.md\"",
-    "postbuild": "npx shx cp ./build/main.pdf ./corradini_carlo_computer_science_2022_2023.pdf",
+    "postbuild": "npx shx cp ./build/main.pdf ./corradini_carlo_computer_science_2021_2022.pdf",
     "prebuild": "npm run clean"
   },
   "devDependencies": {
