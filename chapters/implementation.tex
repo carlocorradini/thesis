@@ -2517,7 +2517,7 @@ The \texttt{node} entity attributes are as follows:
     \newline
     The unit is in \texttt{Watt} rather than a lower one because the device used
     to measure the power consumption of the different nodes has a minimum sensitivity
-    of \texttt{Watt} (see section \ref{subsubsec:implementation_installer_node_power_consumption_cloudfree_smart_plug}).
+    of \texttt{Watt} (see section \ref{subsec:implementation_installer_node_power_consumption}).
     Furthermore, because the read values are always integers (i.e., no decimal point/float),
     the attribute's type can be securely set to \texttt{integer}. To represent that
     the device can read units well below the \texttt{Watt}, the type can be set to
@@ -2842,7 +2842,7 @@ The \texttt{cpu} entity attributes are as follows:
     It should be noted that the evaluation, as well as the final score for this attribute
     and \texttt{multi\_thread\_score} attribute, are carried out using the sysbench\footnote{\url{https://github.com/akopytov/sysbench}}
     application (see section
-    \ref{subsubsec:implementation_installer_node_benchmarks_sysbench})
+    \ref{subsec:implementation_installer_node_benchmarks})
 
   \item \texttt{multi\_thread\_score}
     \newline
@@ -2934,8 +2934,8 @@ have three or more storage devices, Longhorn (see section
 them to create a distributed block storage system.
 \newline
 Even though \texttt{Sysbench} (see section
-\ref{subsubsec:implementation_installer_node_benchmarks_sysbench}) supports it,
-the application currently does not support a scoring system for a storage device
+\ref{subsec:implementation_installer_node_benchmarks}) supports it, the
+application currently does not support a scoring system for a storage device
 that can help determine its performance under various conditions. The \texttt{storage}
 entity attributes are as follows:
 
@@ -4827,35 +4827,107 @@ variables that can be customized using the second method.
 \section{Autoscaling}
 \label{sec:implementation_autoscaling}
 
-The cluster must be able to automatically perform autoscaling procedures to
-independently and autonomously change the resource limits of pods, number of replicas
-(pods), and number of nodes, requiring no or minimal human/manual intervention.
-\\ %
-Kubernetes includes three Autoscaler components that perform automatically and autonomously
-the previous autoscaling procedures: \texttt{Vertical Pod Autoscaler} (see
-section \ref{subsec:implementation_autoscaling_vertical_pod_autoscaler}) modifies
-the resource limits of the pods, \texttt{Horizontal Pod Autoscaler} (see section
-\ref{subsec:implementation_autoscaling_horizontal_pod_autoscaler}) modifies the number
-of replicas (pods), and \texttt{Cluster Autoscaler} (see section
-\ref{subsec:implementation_autoscaling_cluster_autoscaler}) modifies the number of
-nodes in the cluster. \\ %
+Autoscaling dynamically increases (upscale) or decreases (downscale) the number
+of cluster resources (limits, replicas, and nodes) that are allocated. \\ %
+
+The cluster must be able to automatically perform autoscaling procedures to independently
+and autonomously change the resource limits of pods, number of replicas (pods), and
+number of nodes, requiring no or minimal human/manual intervention. \\ %
+Kubernetes includes three Autoscaler components that perform automatically and
+autonomously the previous autoscaling procedures: \texttt{Vertical Pod Autoscaler}
+(see section \ref{subsec:implementation_autoscaling_vertical_pod_autoscaler})
+modifies the resource limits of the pods, \texttt{Horizontal Pod Autoscaler} (see
+section \ref{subsec:implementation_autoscaling_horizontal_pod_autoscaler})
+modifies the number of replicas (pods), and \texttt{Cluster Autoscaler} (see section
+\ref{subsec:implementation_autoscaling_cluster_autoscaler}) modifies the number
+of nodes in the cluster. \\ %
 
 Because autoscaling (\texttt{Vertical}, \texttt{Horizontal}, and \texttt{Cluster})
-is not the primary emphasis of the document, this section is not dedicated to
-explaining it in depth and how it is implemented. Rather, it is intended to
-provide a high-level overview of the three autoscaling mechanisms and their
-Kubernetes implementations. The only exception is the \texttt{Cluster Autoscaler},
-because it necessitates a custom implementation built on top of the existing one
-to be compatible with the specific cluster environment (cloud provider).
+is not the primary emphasis of the document, this section is not dedicated to explaining
+it in depth and how it is implemented. Rather, it is intended to provide a high-level
+overview of the three autoscaling mechanisms and their Kubernetes implementations.
+The only exception is the \texttt{Cluster Autoscaler}, because it necessitates a
+custom implementation built on top of the existing one to be compatible with the
+specific cluster environment (cloud provider).
 
 \subsection{Vertical Pod Autoscaler}
 \label{subsec:implementation_autoscaling_vertical_pod_autoscaler}
 
+\begin{wrapfigure}
+  {l}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{
+    images/implementation/vertical_pod_autoscaler.pdf
+  }
+\end{wrapfigure}
+
+Vertical Pod Autoscaler\footnote{\url{https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler}}
+(VPA) adjusts a Pod's resource attributes (requests and limits) automatically. \\ %
+
+Pods are executed with unbounded resource constraints by default and can thus utilize
+as much as the amount of available resources on the Node. To address this and
+other potential issues, a global policy can be defined via a Limit Range\footnote{\url{https://kubernetes.io/docs/concepts/policy/limit-range}},
+which allows particular types of objects (such as \texttt{Pod} or \texttt{PersistentVolumeClaims})
+to be limited in the quantity of allocable resources. The latter only partially solves
+the problem because it does not allow for a finer-grained resource definition for
+each possible scheduled object deployment/instance, because some Pods may
+require fewer resources, resulting in resource waste, while others may require/need
+more resources, resulting in performance degradation and/or service outages. \\ %
+Kubernetes enables the fine-grained definition of the amount of resources that a
+Pod necessitates, commonly \texttt{CPU} and \texttt{Memory}. There are two kinds
+of resource definitions available: \texttt{request} and \texttt{limit}\footnote{\url{https://kubernetes.io/docs/concepts/configuration/manage-resources-containers}}.
+\\ %
+The resources \texttt{request} is the bare minimum of resources that the Pod necessitates.
+The \texttt{kube-scheduler}\footnote{\url{https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler}}
+component, which monitors for newly created Pods with no Node designated, uses this
+information to determine which Node is the best choice for the Pod to be scheduled
+on. When a Pod is deployed to a Node, the \texttt{kubelet}\footnote{\url{https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet}}
+component reserves the Node's desired resources \texttt{request} exclusively for
+the Pod. \\ %
+The resources \texttt{limit} is the highest amount of resources that the Pod can
+use. The \texttt{kubelet} component enforces these constraints on a Pod, preventing
+it from utilizing more than what has been defined. These limits can be applied
+either \texttt{reactively} (when a violation is detected) or by \texttt{enforcement}
+(prevents the container from ever exceeding the limits). \\ %
+If the Node where the Pod is deployed has sufficient free resources, the Pod may
+use more resources than the defined \texttt{request} amount while not exceeding
+the defined \texttt{limit}. \\ %
+Manually defining a Pod's resources \texttt{request} and resources \texttt{limit}
+is a challenging task because it can result in resource waste if the values are set
+too high, as well as potential service outages and/or performance degradation if
+the values are set too low. The latter issues are the same as when the \texttt{Limit
+Range} approach is used. \\ %
+Vertical Pod Autoscaler (VPA) relieves users from the burden of manually, accurately,
+and consistently updating the resources \texttt{limit} and \texttt{request} of a
+Pod. The VPA automatically sets the values of resources \texttt{request} and
+resources \texttt{limit} based on Pod utilization over time, providing for an
+improved scheduling mechanism that ensures the proper resource amount is
+available for each Pod scheduled on a Node. Moreover, the VPA can maintain the
+same resource ratio between \texttt{request} and \texttt{limit} that the user
+initially defined. As a result, the VPA downscales Pods that over-request
+resources and upscales Pods that under-request resources.
+
 \subsection{Horizontal Pod Autoscaler}
 \label{subsec:implementation_autoscaling_horizontal_pod_autoscaler}
 
+\begin{wrapfigure}
+  {l}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{
+    images/implementation/horizontal_pod_autoscaler.pdf
+  }
+\end{wrapfigure}
+
 \subsection{Cluster Autoscaler}
 \label{subsec:implementation_autoscaling_cluster_autoscaler}
+
+\begin{wrapfigure}
+  {l}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{
+    images/implementation/cluster_autoscaler.pdf
+  }
+\end{wrapfigure}
 
 \subsubsection{Cloud Provider}
 \label{subsubsec:implementation_autoscaling_cluster_autoscaler_cloud_provider}
