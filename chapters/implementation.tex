@@ -4918,6 +4918,40 @@ resources and upscales Pods that under-request resources.
   }
 \end{wrapfigure}
 
+Horizontal Pod Autoscaler\footnote{\url{https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale}}
+(HPA) adjusts the number of Pods (replicas) automatically. \\ %
+
+Manually defining the number of Pods for a deployment is a difficult task that,
+like in the VPA, if not properly configured can result in resource waste and/or service
+disruptions. \\ %
+The previously described resource \texttt{request} and \texttt{limit} must be specified
+when defining the Pod configuration. They are employed to establish the single
+resource or average resource utilization measurements of all Pods and whether an
+upscale (add replicas) or downscale (remove replicas) action is required. \\ %
+The HPA configuration must target a specific application deployment and must
+include a minimal number of replicas and a maximum number of replicas. The minimal
+number of replicas is used to determine a lower bound (inclusive) level below which
+the HPA terminates any downscale operation. The maximum number of replicas is
+used to determine an upper bound (inclusive) level that cannot be exceeded, and the
+HPA stops any upscale operation. The final required parameter for the HPA is to
+specify a collection of metrics that indicate when to perform any autoscaling
+operation based on what resource types and their corresponding values to monitor.
+The \texttt{CPU} and \texttt{Memory} resources, as well as their average value, are
+the most common metric types. As an example, suppose the HPA is set to monitor the
+CPU metric with an average resource utilization of 50\%. The HPA adds or removes
+Pods until the deployment's average CPU utilization is near 50\%. If the average
+utilization is greater than 50\%, the HPA would then upscale by adding more Pods,
+whereas if the average utilization is less than 50\%, the HPA would then
+downscale by removing Pods. \\ %
+Although the resource attributes used are similar to those employed by the VPA, the
+HPA behavior, execution, and algorithm are significantly different because the VPA
+scales the resources of a Pod while the HPA scales the number of Pods. It should
+be noted that HPA cannot be used alongside VPA on the same resources, and horizontal
+scaling is only suitable for stateless applications. \\ %
+Horizontal Pod Autoscaler (HPA) relieves users from the burden of manually,
+accurately and consistently updating the number of Pods for a specific
+deployment by leveraging metrics monitoring and utilization.
+
 \subsection{Cluster Autoscaler}
 \label{subsec:implementation_autoscaling_cluster_autoscaler}
 
