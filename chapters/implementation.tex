@@ -4963,8 +4963,76 @@ deployment by leveraging metrics monitoring and utilization.
   }
 \end{wrapfigure}
 
+Cluster Autoscaler\footnote{\url{https://github.com/carlocorradini/autoscaler/tree/master/cluster-autoscaler}}
+(CA) adjusts the number of Nodes automatically. \\ %
+
+Because the CA has already been extensively described in section \ref{subsec:architecture_components_cluster_autoscaler},
+this section is devoted to showing how it is intended to interface with the
+Server component (and, more broadly, with the cluster implementation) for
+upscaling (see section \ref{subsec:implementation_server_upscaling} and section \ref{subsubsec:implementation_autoscaling_cluster_autoscaler_upscaling})
+or downscaling (see section \ref{subsec:implementation_server_downscaling} and section
+\ref{subsubsec:implementation_autoscaling_cluster_autoscaler_downscaling})
+operations. Finally, are mentioned some of the most important configuration
+parameters that can be modified to adjust the CA and its general autoscaling
+responsiveness/behavior to better fit the use-case situation of the organization
+maintaining the cluster. \\ %
+Unlike the prior autoscalers, where only VPA or HPA could be used to monitor the
+same resources, CA can be used alongside both of them because it depends on
+different metric objects and has a different end goal. The combination of HPA and
+CA in the cluster is especially recommended. If the HPA attempts to schedule a
+number of Pods that exceed the current cluster capacity, the CA responds by increasing
+the total number of active nodes in the cluster, allowing un-schedulable/waiting
+Pods (Pods waiting to be assigned to a Node with enough free resources) to be
+scheduled on the newly booted node. If the HPA decreases the number of Pods,
+reducing the overall cluster workload, and a Node remains underutilized, the CA
+responds by migrating the Pods scheduled on the Node to another Node, decreasing
+the total number of active nodes in the cluster\cite{hpa_ca}.
+
 \subsubsection{Cloud Provider}
 \label{subsubsec:implementation_autoscaling_cluster_autoscaler_cloud_provider}
+
+The CA implementation differs from the previous two autoscalers in that it is not
+restricted to the Kubernetes cluster boundaries but also involves the external cluster
+managed by the so-called Cloud Provider. As a result, the CA must have a dedicated
+implementation built on top of the core CA implementation to support the specific
+Cloud Provider that manages the underlying cluster in order to automatically upscale
+(increase the number of nodes) and/or downscale the cluster (decrease the number
+of nodes). \\ %
+The distinction between the two boundaries has already been extensively discussed
+using the word knowledge. The CA has a high-level knowledge of the cluster (Kubernetes)
+and information about the active Nodes and Pods, so it can determine when to perform
+an autoscaling operation, but it lacks a low-level understanding of how to do so.
+As a result, it must rely on the Cloud Provider's Server implementation, which has
+complete low-level knowledge of how to bootstrap or terminate the Nodes in the cluster
+but lacks the high-level knowledge of when to do so. As a result, the CA and the
+Server cooperate to accomplish the common autoscaling objective by combining their
+knowledge. \\ %
+The official CA implementation is only compatible with big private and enterprise-oriented
+Cloud Providers like AWS, Azure, and GCP. As a result, a custom implementation of
+a Cloud Provider, known as \texttt{recluster}\footnote{\url{https://github.com/carlocorradini/autoscaler/tree/master/cluster-autoscaler/cloudprovider/recluster}},
+has been developed that is compatible with the architecture outlined in this
+document. Furthermore, the \texttt{recluster} implementation is smaller in size than
+the official CA distribution because the official one needs to be compatible with
+every Cloud Provider (hence more code), whereas the custom implementation is
+only compatible with the \texttt{recluster} architecture and excludes the other Cloud
+Providers (hence reducing the code). \\ %
+The Cloud Configuration (\texttt{cloud-config}) file is required by the CA to
+configure the custom Cloud Provider. The recluster Cloud Configuration is a \texttt{JSON}
+file that contains the two following attributes:
+\begin{enumerate}
+  \item \texttt{token}
+    \newline
+    \texttt{JWT} security token.
+    \newline
+    It is included in the Authorization header of every request to the Server's
+    GraphQL API.
+
+  \item \texttt{URL}
+    \newline
+    Server \texttt{URL}.
+    \newline
+    The complete Server \texttt{URL}, including potential routes such as \texttt{/graphql}.
+\end{enumerate}
 
 \subsubsection{Upscaling}
 \label{subsubsec:implementation_autoscaling_cluster_autoscaler_upscaling}
