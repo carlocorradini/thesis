@@ -1911,10 +1911,10 @@ a local copy of the certificate, which is available within the corresponding
 connection (client-controller and controller-client) and be confident that it is
 not intercepted\cite{k8s_api_access}. The overall cluster implementation is
 meant to operate with a certificate signed by a private CA by default, hence the
-Server requires a copy of the \texttt{kubeconfig} file (see section \ref{subsubsec:implementation_installer_cluster_initialization_kubeconfig}).
-If the Kubernetes Server and the Server are deployed on the same node, as is the
-case with reCluster, the latter is completely automated by the installation script
-(see section \ref{sec:implementation_installer}). \\ %
+Server requires a copy of the \texttt{kubeconfig} file. If the Kubernetes Server
+and the Server are deployed on the same node, as is the case with reCluster, the
+latter is completely automated by the installation script (see section
+\ref{sec:implementation_installer}). \\ %
 The server resource-waste reduction strategy is maintained automatically and in conjunction
 with the Cluster Autoscaler component implementation, without any human/physical
 interaction. As stated in chapter \ref{cha:architecture}, the Server and Cluster
@@ -2517,7 +2517,7 @@ The \texttt{node} entity attributes are as follows:
     \newline
     The unit is in \texttt{Watt} rather than a lower one because the device used
     to measure the power consumption of the different nodes has a minimum sensitivity
-    of \texttt{Watt} (see section \ref{subsec:implementation_installer_node_power_consumption}).
+    of \texttt{Watt} (see section \ref{subsec:implementation_installer_power_consumption}).
     Furthermore, because the read values are always integers (i.e., no decimal point/float),
     the attribute's type can be securely set to \texttt{integer}. To represent that
     the device can read units well below the \texttt{Watt}, the type can be set to
@@ -2841,8 +2841,7 @@ The \texttt{cpu} entity attributes are as follows:
     \newline
     It should be noted that the evaluation, as well as the final score for this attribute
     and \texttt{multi\_thread\_score} attribute, are carried out using the sysbench\footnote{\url{https://github.com/akopytov/sysbench}}
-    application (see section
-    \ref{subsec:implementation_installer_node_benchmarks})
+    application (see section \ref{subsec:implementation_installer_benchmarks})
 
   \item \texttt{multi\_thread\_score}
     \newline
@@ -2934,10 +2933,10 @@ have three or more storage devices, Longhorn (see section
 them to create a distributed block storage system.
 \newline
 Even though \texttt{Sysbench} (see section
-\ref{subsec:implementation_installer_node_benchmarks}) supports it, the
-application currently does not support a scoring system for a storage device
-that can help determine its performance under various conditions. The \texttt{storage}
-entity attributes are as follows:
+\ref{subsec:implementation_installer_benchmarks}) supports it, the application
+currently does not support a scoring system for a storage device that can help
+determine its performance under various conditions. The \texttt{storage} entity
+attributes are as follows:
 
 \begin{itemize}
   \item \texttt{id}
