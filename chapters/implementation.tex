@@ -5328,10 +5328,181 @@ The complete list of CA parameters supported is accessible at \url{https://githu
 \section{Installer}
 \label{sec:implementation_installer}
 
-\url{https://github.com/carlocorradini/reCluster/blob/main/install.sh}
+The installer is a POSIX script named \texttt{install.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/install.sh}}
+that contains approximately \texttt{3000} lines of code and is specifically designed
+to help administrators install the cluster implementation on a Node. It is
+highly configurable and can bootstrap a cluster from scratch if the \texttt{--init-cluster}
+parameter is specified. When the script is properly configured, all actions are performed
+automatically, exonerating the administrator of all responsibility. The overall installation
+procedure can take up to 10 minutes, depending on what components need to be
+installed and whether or not it is deployed in an Air-Gap environment. \\ %
+Many previously described concepts and components are found in this section and
+are merged to create a final and functional cluster implementation. It should be
+noted that the resulting cluster can be considered a unique entity in which each
+component collaborates with other components to keep the cluster healthy, stable
+and consistent. \\ %
+This section begins by briefly explaining the benchmark and power consumption
+procedures, followed by a high-level view of the script's steps, and concludes
+by listing all of the supported configuration parameters and the configuration
+files employed during the installation procedure.
+
+\subsection{Benchmarks}
+\label{subsec:implementation_installer_benchmarks}
+
+Specific benchmarks are required to evaluate all of the different hardware components
+of a Node. As stated in previous sections, the resulting data scores are then used
+to understand the overall performance of the Node as well as the individual performance
+of the hardware components that comprise it. \\ %
+The program selected to evaluate the system is \texttt{sysbench}\footnote{\url{https://github.com/akopytov/sysbench}},
+which allows benchmarking the CPU in single-thread and multi-thread, the memory
+in random/sequential read/write modes, and the different persistent storages in read/write
+modes. \\ %
+A benchmark has a fixed time duration, which can be specified using the \texttt{--bench-time}
+parameter. Moreover, the \texttt{sysbench} application takes a configurable
+amount of time to warm the system before executing a benchmarking operation. \\ %
+It should be noted that the final score number is specific to the \texttt{sysbench}
+application; thus, if the company desires to use a different application after having
+deployed the cluster, all benchmarks data must be retaken because the scores of
+the two applications may be incompatible.
+
+\subsection{Power Consumption}
+\label{subsec:implementation_installer_power_consumption}
+
+\begin{wrapfigure}
+  {r}{.25\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/implementation/plug.png}
+  \caption{CloudFree EU Smart Plug}
+  \label{fig:plug}
+\end{wrapfigure}
+
+To determine the power consumption of the Node and to attempt to evaluate the
+power consumption of each hardware component, an external device capable of detecting
+the system's current draw is required. Furthermore, the device must include a basic
+but powerful API that enables the script to query for the current power consumption
+to obtain meaningful data over a specified period. \\ %
+Figure \ref{fig:plug} depicts the device used in the cluster, which is a \texttt{CloudFree}\footnote{\url{https://cloudfree.shop}}
+EU Smart Plug. Even though numerous smart plug devices can perform the same
+tasks as the latter, the \texttt{CloudFree} device, as the name implies, does
+not require an internet connection to function and is thus cloud-free. Furthermore,
+it is pre-flashed with \texttt{Tasmota}\footnote{\url{https://tasmota.github.io}},
+an Open Source firmware for \texttt{ESP} devices. \\ %
+Because the overall cluster implementation is built on the \texttt{Tasmota}
+firmware, the installation script supports almost all devices that have been flashed
+with the \texttt{Tasmota} firmware in addition to the \texttt{CloudFree} devices.
+The latter is because the API endpoint and returned \texttt{JSON} schema for querying
+the current power consumption is the same for all \texttt{Tasmota} devices. \\ %
+The script has a dedicated common function for reading the power consumption
+over a specified period. Before starting the readings, there is a brief warming
+period. Following that, a request is sent to the device with a sleep period
+between each request. The latter is repeated for the duration of the total period
+of power consumption readings. Then, all of the readings are examined and the mean
+and Sample Standard Deviation are computed. An error is thrown if the Sample
+Standard Deviation value exceeds a defined tolerance.
+
+\subsection{Installation Procedure}
+\label{subsec:implementation_installer_installation_procedure}
+
+The installation procedure comprises the following steps, which are executed
+sequentially by the installation script. It should be noted that the name of each
+step corresponds to a specific function implemented in the script.
+
+\begin{enumerate}
+  \item \texttt{parse\_args}
+    \newline
+    Process the script's input arguments.
+    \newline
+    Section \ref{subsec:implementation_installer_configuration_parameters} lists
+    the supported parameters.
+
+  \item \texttt{verify\_system}
+    \newline
+    Verify that the current system meets all of the criteria for installing
+    \texttt{recluster}.
+    \newline
+    Example requirements include verifying that all necessary programs are
+    installed and the current Init System is supported.
+
+  \item \texttt{setup\_system}
+    \newline
+    Set up the system for the next steps.
+    \newline
+    To perform determine operations, the script needs a temporary directory, which
+    is created in this step.
+
+  \item \texttt{read\_system\_info}
+    \newline
+    Read all of the system hardware information.
+    \newline
+    All system information read is referred to as node facts (\texttt{NODE\_FACTS}).
+
+  \item \texttt{run\_benchmarks}
+    \newline
+    Run benchmark tests on each hardware component and update \texttt{NODE\_FACTS}
+    with the results.
+
+  \item \texttt{read\_power\_consumptions}
+    \newline
+    Read the overall power consumption of the system, both in idle and maximum load,
+    and try to calculate the power consumption of each hardware component.
+    \newline
+    The corresponding read values are appended to \texttt{NODE\_FACTS}.
+
+  \item \texttt{finalize\_node\_facts}
+    \newline
+    Adjust some values to finalize \texttt{NODE\_FACTS}.
+
+  \item \texttt{install\_k3s}
+    \newline
+    Install K3s.
+
+  \item \texttt{install\_node\_exporter}
+    \newline
+    Install Node Exporter.
+
+  \item \texttt{cluster\_init}
+    \newline
+    Install and activate the Database and Server components.
+    \newline
+    This procedure must be run only once when the cluster is initialized with the
+    argument \texttt{--init-cluster}.
+
+  \item \texttt{install\_recluster}
+    \newline
+    Install recluster on the node by registering the node via the Server
+    component.
+    \newline
+    After the installation process is completed successfully, the system is
+    configured with the Server's returned data and other specifications.
+
+  \item \texttt{start\_recluster}
+    \newline
+    Start the cluster-related Node components.
+
+  \item \texttt{configure\_k8s}
+    \newline
+    Set up the Kubernetes cluster.
+    \newline
+    It includes the installation of all Kubernetes components, such as the Load
+    Balancer, Registry, and Cluster Autoscaler. It is important to note that each
+    component is installed in a specific order because one component may require
+    another component.
+    \newline
+    This procedure must be run only once when the cluster is initialized with
+    the argument \texttt{--init-cluster}.
+\end{enumerate}
+
+After the installation procedure has been completed, \texttt{recluster} is up
+and running. \\ %
+It should be noted that the installation script also installs an uninstall
+script, named \texttt{recluster.uninstall.sh}, that is used to completely remove
+all installed software and files.
 
 \subsection{Configuration Parameters}
 \label{subsec:implementation_installer_configuration_parameters}
+
+All of the installation script's supported configuration parameters are listed
+in the table below:
 
 \begin{xltabular}
   {\textwidth} { >{\ttfamily}l | X | >{\ttfamily}c }
@@ -5340,44 +5511,55 @@ The complete list of CA parameters supported is accessible at \url{https://githu
   \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
   \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hhline{===}
 
-  admin-username & & admin \\ \hline
+  admin-username & Administrator username (\texttt{<USERNAME>}). & admin \\
+  \hline
 
-  admin-password & & Password\$0 \\ \hline
+  admin-password & Administrator password (\texttt{<PASSWORD>}). & Password\$0 \\
+  \hline
 
-  airgap & & false \\ \hline
+  airgap & Boolean flag that indicates whether the current is an Air-Gap
+  environment. & false \\ \hline
 
-  autoscaler-username & & autoscaler \\ \hline
+  autoscaler-username & Autoscaler username (\texttt{<USERNAME>}). & autoscaler
+  \\ \hline
 
-  autoscaler-password & & Password\$0 \\ \hline
+  autoscaler-password & Autoscaler password (\texttt{<PASSWORD>}). & Password\$0
+  \\ \hline
 
-  autoscaler-version & & latest \\ \hline
+  autoscaler-version & Autoscaler version (\texttt{<VERSION>}). & latest \\
+  \hline
 
-  bench-time & & 30 \\ \hline
+  bench-time & Benchmarking duration (\texttt{<TIME>}). & 30s \\ \hline
 
-  certs-dir & & configs/certs \\ \hline
+  certs-dir & Certificates directory (\texttt{<DIR>}). & configs/certs \\ \hline
 
-  config-file & & configs/recluster/config.yaml \\ \hline
+  config-file & \texttt{recluster} configuration file path (\texttt{<FILE>}). &
+  configs/recluster/config.yaml \\ \hline
 
-  disable-color & & false \\ \hline
+  disable-color & Disable any color from the output. & false \\ \hline
 
-  disable-spinner & & false \\ \hline
+  disable-spinner & Disable spinner animation. & false \\ \hline
 
   help & Display a help message and terminate (successfully). & \\ \hline
 
-  init-cluster & & false \\ \hline
+  init-cluster & Boolean flag that indicates whether to initialize the cluster.
+  & false \\ \hline
 
-  k3s-config-file & & configs/k3s/config.yaml \\ \hline
+  k3s-config-file & K3s configuration file path (\texttt{FILE}). & configs/k3s/config.yaml
+  \\ \hline
 
-  k3s-registry-config-file & & configs/k3s/registries.yaml \\ \hline
+  k3s-registry-config-file & K3s registry configuration file path (\texttt{FILE}).
+  & configs/k3s/registries.yaml \\ \hline
 
-  k3s-version & & latest \\ \hline
+  k3s-version & K3s version (\texttt{<VERSION>}). & latest \\ \hline
 
   log-level & Logging level (\texttt{<LEVEL>}).
   \newline
   Attachment \ref{cha:logging} provides additional information regarding logging
   and logging levels.
   \newline
-  The following logging levels are supported (listed in descending order of importance):
+  The following logging levels are supported (listed in descending order of
+  importance):
   \begin{itemize}[noitemsep]
     \item[\protect\icircled{\texttt{5}}] \texttt{fatal}
 
@@ -5391,40 +5573,50 @@ The complete list of CA parameters supported is accessible at \url{https://githu
   \end{itemize}
   & info \\ \hline
 
-  node-exporter-config-file & & configs/node\_exporter/config.yaml \\ \hline
+  node-exporter-config-file & Node Exporter configuration file path (\texttt{<FILE>}).
+  & configs/node\_exporter/config.yaml \\ \hline
 
-  node-exporter-version & & latest \\ \hline
+  node-exporter-version & Node Exporter version (\texttt{<VERSION>}). & latest
+  \\ \hline
 
-  pc-device-api & & http://pc.recluster.local/cm?cmnd=status\%2010 \\ \hline
+  pc-device-api & Power consumption device's API URL (\texttt{<URL>}). & http://UNKNOWN/cm?cmnd=status\%2010
+  \\ \hline
 
-  pc-interval & & 1 \\ \hline
+  pc-interval & Interval between the readings of power consumption (\texttt{<TIME>}).
+  & 1s \\ \hline
 
-  pc-time & & 30 \\ \hline
+  pc-time & Power consumption readings duration (\texttt{<TIME>}). & 30s \\ \hline
 
-  pc-warmup & & 10 \\ \hline
+  pc-warmup & Power consumption warmup (\texttt{<TIME>}). & 10s \\ \hline
 
-  server-env-file & & configs/recluster/server.env \\ \hline
+  server-env-file & Server environment file path (\texttt{<FILE>}). & configs/recluster/server.env
+  \\ \hline
 
-  spinner &
-  \begin{enumerate}
+  spinner & Spinner animation (\texttt{<SPINNER>}).
+  \newline
+  This is regarded as an Easter Egg\footnote{\url{https://wikipedia.org/wiki/Easter_egg}}.
+  \newline
+  The following spinners are supported:
+  \begin{enumerate}[noitemsep]
     \item \texttt{dots}
-      \newline
 
     \item \texttt{grayscale}
-      \newline
 
     \item \texttt{propeller}
-      \newline
   \end{enumerate}
   & \\ \hline
 
-  ssh-authorized-keys-file & & configs/ssh/authorized\_keys \\ \hline
+  ssh-authorized-keys-file & SSH authorized keys file path (\texttt{<FILE>}). & configs/ssh/authorized\_keys
+  \\ \hline
 
-  ssh-config-file & & configs/ssh/ssh\_config \\ \hline
+  ssh-config-file & SSH configuration file path (\texttt{<FILE>}). & configs/ssh/ssh\_config
+  \\ \hline
 
-  sshd-config-file & & configs/ssh/sshd\_config \\ \hline
+  sshd-config-file & SSH server configuration file path (\texttt{<FILE>}). & configs/ssh/sshd\_config
+  \\ \hline
 
-  user & & root \\ \hline
+  user & Current system user to install recluster files and programs (\texttt{<USER>}).
+  & root \\ \hline
 
   \caption{Installer script parameters}
 \end{xltabular}
@@ -5435,9 +5627,6 @@ The complete list of CA parameters supported is accessible at \url{https://githu
 % TODO # ... means skipped
 % TODO config script
 % TODO # replaced value from configs.sh
-
-\subsubsection{Certificates}
-\label{subsubsec:implementation_installer_configuration_files_certificates}
 
 \subsubsection{K3s}
 \label{subsubsec:implementation_installer_configuration_files_k3s}
@@ -5717,33 +5906,3 @@ collector:
   Subsystem sftp /usr/lib/ssh/sftp-server
   # ...
 \end{lstlisting}
-
-\subsection{Benchmarks}
-\label{subsec:implementation_installer_node_benchmarks}
-
-% TODO sysbench
-
-\subsection{Power Consumption}
-\label{subsec:implementation_installer_node_power_consumption}
-
-% CloudFree Smart Plug
-
-\subsection{Cluster Initialization}
-\label{subsec:implementation_installer_cluster_initialization}
-
-\subsubsection{Kubeconfig}
-\label{subsubsec:implementation_installer_cluster_initialization_kubeconfig}
-
-% https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig
-
-\subsubsection{Database}
-\label{subsubsec:implementation_installer_cluster_initialization_database}
-
-\subsubsection{Server}
-\label{subsubsec:implementation_installer_cluster_initialization_server}
-
-\subsubsection{Admin And Autoscaler Users}
-\label{subsubsec:implementation_installer_cluster_initialization_admin_and_autoscaler_users}
-
-\subsubsection{K8s}
-\label{subsubsec:implementation_installer_cluster_initialization_k8s}
