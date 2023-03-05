@@ -236,11 +236,11 @@ The accepted configuration parameters are listed in the table below.
   \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
   \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hhline{===}
 
-  --in-file <FILE> & Input script file (\texttt{<FILE>}).
+  in-file & Input script file (\texttt{<FILE>}).
   \newline
   If the file does not exist, an error is thrown. & \\ \hline
 
-  --out-file <FILE> & Output script file (\texttt{<FILE>}).
+  out-file & Output script file (\texttt{<FILE>}).
   \newline
   If a file with the same name and path already exists, an error is thrown. Unless
   the \texttt{--overwrite} argument is given, the latter is always true (see
@@ -251,13 +251,13 @@ The accepted configuration parameters are listed in the table below.
   \texttt{.inlined} string, and finally, if present, the extension (usually \texttt{.sh}).
   & <NAME>.inlined[EXTENSION] \\ \hline
 
-  --overwrite & Replace the input file.
+  overwrite & Replace the input file.
   \newline
   The inlined result replaces the original file content. This is the same as setting
   the output file's value as the original input file, except that the existence
   check is bypassed (see option above). & false \\ \hline
 
-  --log-level <LEVEL> & Logging level (\texttt{<LEVEL>}).
+  log-level & Logging level (\texttt{<LEVEL>}).
   \newline
   Attachment \ref{cha:logging} provides additional information regarding logging
   and logging levels.
@@ -277,10 +277,10 @@ The accepted configuration parameters are listed in the table below.
   \end{itemize}
   & info \\ \hline
 
-  --disable-color & Disable terminal colors (enabled by default). & false \\
+  disable-color & Disable terminal colors (enabled by default). & false \\
   \hline
 
-  --help & Display a help message and terminate (successfully). & \\
+  help & Display a help message and terminate (successfully). & \\
 
   \caption{Inline configuration parameters}
 \end{xltabular}

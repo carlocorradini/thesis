@@ -1823,7 +1823,7 @@ The accepted configuration parameters are listed in the table below.
   \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
   \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hhline{===}
 
-  --config-file <FILE> & Path to the dependencies configuration file (\texttt{<FILE>}).
+  config-file & Path to the dependencies configuration file (\texttt{<FILE>}).
   \newline
   Both relative and absolute paths are supported.
   \newline
@@ -1832,19 +1832,19 @@ The accepted configuration parameters are listed in the table below.
   \texttt{YAML} format and that the attributes structure is respected. &
   dependencies.config.yaml \\ \hline
 
-  --sync & Synchronize all dependencies specified in the configuration file.
+  sync & Synchronize all dependencies specified in the configuration file.
   \newline
   Dependencies are saved in the current working directory.
   \newline
   If a file is already present in the respective directory, it is not downloaded
   (skipped). & \\ \hline
 
-  --sync-force & The same as \texttt{--sync}, except that all dependencies are
+  sync-force & The same as \texttt{--sync}, except that all dependencies are
   downloaded even if they are already present locally.
   \newline
   The downloaded file replaces the local one (if exists). & \\ \hline
 
-  --log-level <LEVEL> & Logging level (\texttt{<LEVEL>}).
+  log-level & Logging level (\texttt{<LEVEL>}).
   \newline
   Attachment \ref{cha:logging} provides additional information regarding logging
   and logging levels.
@@ -1863,7 +1863,7 @@ The accepted configuration parameters are listed in the table below.
   \end{itemize}
   & info \\ \hline
 
-  --help & Display a help message and terminate (successfully). & \\ \hline
+  help & Display a help message and terminate (successfully). & \\ \hline
 
   \caption{Dependencies script parameters}
 \end{xltabular}
@@ -5037,11 +5037,293 @@ file that contains the two following attributes:
 \subsubsection{Upscaling}
 \label{subsubsec:implementation_autoscaling_cluster_autoscaler_upscaling}
 
+When the Cluster Autoscaler core needs to perform an upscaling operation, it
+employs the \texttt{increaseSize} function callback from the associated Cloud Provider
+implementation. \\ %
+
+The \texttt{increaseSize} function takes two parameters. The first parameter, \texttt{nodePool},
+is a pointer to the node pool on which the upscaling operation must be performed.
+The second parameter, \texttt{delta}, is a value that specifies the number of nodes
+that must be bootstrapped. The most common value of \texttt{delta} is \texttt{1}.
+\\ %
+Listing \ref{lst:increase_size} illustrates the pseudocode of the \texttt{recluster}
+Cloud Provider's upscaling function callback, and the following summary outlines
+its main steps:
+
+\begin{enumerate}[label=\protect\circled{\arabic{*}}]
+  \item Check that \texttt{delta} is strictly greater than zero; otherwise, an
+    error is thrown.
+    \newline
+    A \texttt{delta} value less than \texttt{0} indicates a downscaling operation
+    rather than an upscaling operation, while a \texttt{delta} value identical to
+    \texttt{0} indicates no scaling operation and thus both are invalid values.
+
+  \item Calculate the new \texttt{count} value (\texttt{newCount}).
+    \newline
+    The value is determined by adding the current \texttt{count} value of the node
+    pool to the \texttt{delta} value.
+
+  \item Check that \texttt{newCount} is not greater than the maximum number of
+    nodes allowed in the corresponding node pool (\texttt{max\_nodes});
+    otherwise, an error is thrown.
+    \newline
+    It is important to note that if the value is identical to the maximum, it is
+    accepted.
+
+  \item Send a GraphQL request to the mutation \texttt{updatedNodePool} with the
+    appropriate node pool identifier (\texttt{id} argument) and the updated count
+    value in the \texttt{data} argument. The variable \texttt{updatedNodePool}
+    holds the updated node pool.
+    \newline
+    Because it is an external request, it can fail, but this is omitted from the
+    pseudocode for clarity.
+
+  \item Compare the updated count value (\texttt{updatedNodePool.count}) to the
+    new count value (\texttt{newCount}) computed to ensure that the updated node
+    pool has been correctly updated. An error is thrown if the two values are
+    not identical.
+
+  \item Update the provided node pool's count (\texttt{nodePool.count}) value
+    with the updated node pool's count (\texttt{updatedNodePool.count}) value.
+\end{enumerate}
+
+\begin{lstlisting}[language=typescript, alsoletter={_}, escapeinside={(*@}{@*)}, xleftmargin=\parindent, morekeywords={[2]{nodePool, delta, newCount, count, updatedNodePool, GraphQL, max\_nodes, id}}, morekeywords={[3]{increaseSize, Error, updateNodePool}}, label={lst:increase_size}, caption=Pseudocode of \texttt{increaseSize} function callback]
+  function increaseSize(nodePool, delta) {
+    if (delta <= 0) throw new Error();                                                            (*@ \circled{\texttt{\tiny{1}}} @*)
+
+    const newCount = nodePool.count + delta;                                                      (*@ \circled{\texttt{\tiny{2}}} @*)
+
+    if (newCount > nodePool.max_nodes) throw new Error();                                         (*@ \circled{\texttt{\tiny{3}}} @*)
+
+    const updatedNodePool = GraphQL.updateNodePool(nodePool.id, { count: newCount });             (*@ \circled{\texttt{\tiny{4}}} @*)
+
+    if (updatedNodePool.count != newCount) throw new Error();                                     (*@ \circled{\texttt{\tiny{5}}} @*)
+
+    nodePool.count = updatedNodePool.count;                                                       (*@ \circled{\texttt{\tiny{6}}} @*)
+  }
+\end{lstlisting}
+
 \subsubsection{Downscaling}
 \label{subsubsec:implementation_autoscaling_cluster_autoscaler_downscaling}
 
+When the cluster autoscaler core needs to perform a downscaling operation, it
+can use one of the two function callbacks from the associated Cloud Provider
+implementation, \texttt{decreaseSize} and \texttt{deleteNodes}. \\ %
+As previously described in section \ref{subsec:implementation_server_downscaling},
+when performing a downscaling operation in the cluster, it can be very general (\texttt{updateNodePool})
+by specifying only the number of Nodes belonging to a node pool that need to be
+downscaled, or very specific (\texttt{unassignNode}) by specifying the exact
+Node identifier of the Node that needs to be downscaled. In this section, the
+more general approach implemented by the function \texttt{decreaseSize} is explained
+first, followed by the more specific approach implemented by the function
+\texttt{deleteNodes}. It should be noted that in \texttt{recluster}, probably
+due to its small size, the CA is very specific about which Node(s) should be
+downscaled, therefore it consistently employs the more specific callback function
+\texttt{deleteNodes}. \\ %
+
+The \texttt{decreaseSize} function takes two parameters and is very similar to
+the \texttt{increaseSize} function in that it does the exact opposite. The first
+parameter, \texttt{nodePool}, is a pointer to the node pool on which the downscaling
+operation must be performed. The second parameter, \texttt{delta}, is a value that
+specifies the number of nodes that must be terminated. The most common value of
+delta is \texttt{-1}. \\ %
+Listing \ref{lst:decrease_size} illustrates the pseudocode of the recluster
+Cloud Provider's downscaling function callback, and the following summary outlines
+its main steps:
+
+\begin{enumerate}[label=\protect\circled{\arabic{*}}]
+  \item Check that \texttt{delta} is strictly lower than zero; otherwise, an
+    error is thrown.
+    \newline
+    A \texttt{delta} value greater than \texttt{0} indicates an upscaling operation
+    rather than a downscaling operation, while a \texttt{delta} value identical to
+    \texttt{0} indicates no scaling operation and thus both are invalid values.
+
+  \item Calculate the new \texttt{count} value (\texttt{newCount}).
+    \newline
+    The value is determined by adding the current \texttt{count} value of the node
+    pool to the \texttt{delta} value.
+    \newline
+    Even though the operation is identical to that of the \texttt{increaseSize}
+    function, the resulting value is less than the current \texttt{count} value
+    because \texttt{delta} is a negative value and thus sum over a negative number
+    is a subtraction: $X + (-Y) = X - Y$.
+
+  \item Check that \texttt{newCount} is not lower than the minimum number of
+    nodes allowed in the corresponding node pool (\texttt{min\_nodes});
+    otherwise, an error is thrown.
+    \newline
+    It is important to note that if the value is identical to the minimum, it is
+    accepted.
+
+  \item Send a GraphQL request to the mutation \texttt{updatedNodePool} with the
+    appropriate node pool identifier (\texttt{id} argument) and the updated count
+    value in the \texttt{data} argument. The variable \texttt{updatedNodePool}
+    holds the updated node pool.
+    \newline
+    Because it is an external request, it can fail, but this is omitted from the
+    pseudocode for clarity.
+
+  \item Compare the updated count value (\texttt{updatedNodePool.count}) to the
+    new count value (\texttt{newCount}) computed to ensure that the updated node
+    pool has been correctly updated. An error is thrown if the two values are
+    not identical.
+
+  \item Update the provided node pool's count (\texttt{nodePool.count}) value
+    with the updated node pool's count (\texttt{updatedNodePool.count}) value.
+\end{enumerate}
+
+\begin{lstlisting}[language=typescript, alsoletter={_}, escapeinside={(*@}{@*)}, xleftmargin=\parindent, morekeywords={[2]{nodePool, delta, newCount, count, updatedNodePool, GraphQL, min\_nodes, id}}, morekeywords={[3]{decreaseSize, Error, updateNodePool}}, label={lst:decrease_size}, caption=Pseudocode of \texttt{decreaseSize} function callback]
+  function decreaseSize(nodePool, delta) {
+    if (delta >= 0) throw new Error();                                                            (*@ \circled{\texttt{\tiny{1}}} @*)
+
+    const newCount = nodePool.count + delta;                                                      (*@ \circled{\texttt{\tiny{2}}} @*)
+
+    if (newCount < nodePool.min_nodes) throw new Error();                                         (*@ \circled{\texttt{\tiny{3}}} @*)
+
+    const updatedNodePool = GraphQL.updateNodePool(nodePool.id, { count: newCount });             (*@ \circled{\texttt{\tiny{4}}} @*)
+
+    if (updatedNodePool.count != newCount) throw new Error();                                     (*@ \circled{\texttt{\tiny{5}}} @*)
+
+    nodePool.count = updatedNodePool.count;                                                       (*@ \circled{\texttt{\tiny{6}}} @*)
+  }
+\end{lstlisting}
+
+The \texttt{deleteNodes} function takes two parameters. The first parameter,
+\texttt{nodePool}, is a pointer to the node pool on which the downscaling
+operation must be performed. The second parameter, \texttt{nodes}, is an array
+of the (active) Nodes that need to be terminated. Because the array usually contains
+only one Node, it has a corresponding length of \texttt{1}. \\ %
+Listing \ref{lst:delete_nodes} illustrates the pseudocode of the recluster Cloud
+Provider's downscaling function callback, and the following summary outlines its
+main steps:
+
+\begin{enumerate}[label=\protect\circled{\arabic{*}}]
+  \item Check that the node's array \texttt{length} (number of Nodes) is
+    strictly greater than zero; otherwise, an error is thrown.
+    \newline
+    A \texttt{length} value lower than zero \texttt{0} indicates an unexpected value
+    because the length of an array must always be larger than or equal to \texttt{0},
+    whereas a length value equal to \texttt{0} indicates no scaling operation
+    and thus both are invalid values.
+
+  \item Calculate the new \texttt{count} value (\texttt{newCount}).
+    \newline
+    The value is determined by subtracting the current \texttt{count} value of the
+    node pool from the \texttt{length} of the nodes' array.
+
+  \item Check that \texttt{newCount} is not lower than the minimum number of
+    nodes allowed in the corresponding node pool (\texttt{min\_nodes});
+    otherwise, an error is thrown.
+    \newline
+    It is important to note that if the value is identical to the minimum, it is
+    accepted.
+
+  \item Iterate through the array's nodes.
+    \newline
+    The variable \texttt{i} represents the index of the array's ith node.
+
+  \item Send a GraphQL request to the mutation \texttt{unassignNode} with the
+    appropriate Node identifier (\texttt{id} argument). The variable \texttt{deletedNode}
+    holds the deleted/terminated node.
+    \newline
+    Because it is an external request, it can fail, but this is omitted from the
+    pseudocode for clarity.
+
+  \item Decrement the provided node pool's count (\texttt{nodePool.count}) value
+    by one (-1).
+    \newline
+    After repeating the same procedure for each Node, the node pool's count value
+    is identical to the new count (\texttt{newCount}) value.
+\end{enumerate}
+
+\begin{lstlisting}[language=typescript, alsoletter={_}, escapeinside={(*@}{@*)}, xleftmargin=\parindent, morekeywords={[2]{nodePool, nodes, node, newCount, count, deletedNode, GraphQL, min\_nodes, length, i}}, morekeywords={[3]{deleteNodes, Error, unassignNode}}, label={lst:delete_nodes}, caption=Pseudocode of \texttt{deleteNodes} function callback]
+  function deleteNodes(nodePool, nodes) {
+    if (nodes.length <= 0) throw new Error();                                                     (*@ \circled{\texttt{\tiny{1}}} @*)
+
+    const newCount = nodePool.count - nodes.length;                                               (*@ \circled{\texttt{\tiny{2}}} @*)
+
+    if (newCount < nodePool.min_nodes) throw new Error();                                         (*@ \circled{\texttt{\tiny{3}}} @*)
+
+    for (let i = 0; i < node.length; i = i + 1) {                                                 (*@ \circled{\texttt{\tiny{4}}} @*)
+      const deletedNode = GraphQL.unassignNode(nodes[i].id);                                      (*@ \circled{\texttt{\tiny{5}}} @*)
+
+      nodePool.count = nodePool.count - 1;                                                        (*@ \circled{\texttt{\tiny{6}}} @*)
+    }
+  }
+\end{lstlisting}
+
 \subsubsection{Configuration}
 \label{subsubsec:implementation_autoscaling_cluster_autoscaler_configuration}
+
+The most significant configuration parameters of the Cluster Autoscaler that can
+be adjusted to better meet the requirements of the organization in charge of the
+cluster are listed in table \ref{tbl:cluster_autoscaler}. These parameters can
+be modified to increase the CA's responsiveness, making it more aggressive for any
+autoscaling procedure, or to decrease the CA's responsiveness, making it less aggressive
+for any autoscaling procedure. \\ %
+The complete list of CA parameters supported is accessible at \url{https://github.com/carlocorradini/autoscaler/blob/master/cluster-autoscaler/FAQ.md\#what-are-the-parameters-to-ca}.
+
+\begin{xltabular}
+  {\textwidth} { >{\ttfamily}l | X | >{\ttfamily}c }
+
+  \multicolumn{1}{ c |}{\large{\textbf{Name}}} &
+  \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
+  \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hhline{===}
+
+  cloud-provider & Cloud Provider (\texttt{<NAME>}). & recluster \\ \hline
+
+  cloud-config & Path to the Cloud Configuration file (\texttt{<FILE>}). & \\ \hline
+
+  kubeconfig & Path to the \texttt{kubeconfig}\footnote{\url{https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig}}
+  file (\texttt{<FILE>}).
+  \newline
+  If the parameter is not provided, the CA attempts to acquire the \texttt{kubeconfig}
+  directly from the Kubernetes cluster where it was deployed. The latter implies
+  that the CA has been configured with the appropriate permissions (this is the case
+  in \texttt{recluster}). & \\ \hline
+
+  scale-down-delay-after-add & The time frame during which the CA is logically disabled
+  from executing a downscaling operation after having successfully executed an upscaling
+  operation (\texttt{<TIME>}). & 10m \\ \hline
+
+  scale-down-delay-after-delete & The time frame during which the CA is
+  logically disabled from executing a downscaling operation after having
+  successfully executed another downscaling operation (\texttt{<TIME>}).
+  \newline
+  The default value is the same as the value of the \texttt{scan-interval} parameter.
+  & scan-interval \\ \hline
+
+  scale-down-delay-after-failure & The time frame during which the CA is logically
+  disabled from executing a downscaling operation after having unsuccessfully executed
+  another downscaling operation (\texttt{<TIME>}). & 3m \\ \hline
+
+  scale-down-unneeded-time & The duration that a Node should be unneeded (underutilized)
+  before it is suitable for downscaling (\texttt{<TIME>}). & 10m \\ \hline
+
+  scale-down-unready-time & The duration that a Node should be unready (\texttt{ACTIVE\_NOT\_READY}
+  status and/or \texttt{UNKNOWN} status) before it is suitable for downscaling (\texttt{<TIME>}).
+  & 20m \\ \hline
+
+  scale-down-utilization-threshold & Node utilization level (\texttt{<LEVEL>}).
+  \newline
+  It is defined as the total of requested resources divided by the capacity, below
+  which a node is suitable for downscaling. & 0.5 \\ \hline
+
+  scan-interval & Time interval after which the cluster is evaluated for upscaling
+  or downscaling (\texttt{<TIME>}). & 10s \\ \hline
+
+  skip-nodes-with-system-pods & If \texttt{true}, never downscale Nodes with
+  Pods from the \texttt{kube-system}\footnote{\url{https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces}}
+  namespace (except for \texttt{DaemonSet} or mirror pods). & true \\ \hline
+
+  skip-nodes-with-local-storage & If \texttt{true}, never downscale Nodes with
+  Pods that have persistency storage of type local storage (\texttt{EmptyDir} or
+  \texttt{HostPath}). & true \\ \hline
+
+  \caption{Cluster Autoscaler parameters}
+  \label{tbl:cluster_autoscaler}
+\end{xltabular}
 
 \section{Installer}
 \label{sec:implementation_installer}
@@ -5058,39 +5340,39 @@ file that contains the two following attributes:
   \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
   \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hhline{===}
 
-  --admin-username <USERNAME> & & admin \\ \hline
+  admin-username & & admin \\ \hline
 
-  --admin-password <PASSWORD> & & Password\$0 \\ \hline
+  admin-password & & Password\$0 \\ \hline
 
-  --airgap & & false \\ \hline
+  airgap & & false \\ \hline
 
-  --autoscaler-username <USERNAME> & & autoscaler \\ \hline
+  autoscaler-username & & autoscaler \\ \hline
 
-  --autoscaler-password <PASSWORD> & & Password\$0 \\ \hline
+  autoscaler-password & & Password\$0 \\ \hline
 
-  --autoscaler-version <VERSION> & & latest \\ \hline
+  autoscaler-version & & latest \\ \hline
 
-  --bench-time <TIME> & & 30 \\ \hline
+  bench-time & & 30 \\ \hline
 
-  --certs-dir <DIR> & & configs/certs \\ \hline
+  certs-dir & & configs/certs \\ \hline
 
-  --config-file <FILE> & & configs/recluster/config.yaml \\ \hline
+  config-file & & configs/recluster/config.yaml \\ \hline
 
-  --disable-color & & false \\ \hline
+  disable-color & & false \\ \hline
 
-  --disable-spinner & & false \\ \hline
+  disable-spinner & & false \\ \hline
 
-  --help & Display a help message and terminate (successfully). & \\ \hline
+  help & Display a help message and terminate (successfully). & \\ \hline
 
-  --init-cluster & & false \\ \hline
+  init-cluster & & false \\ \hline
 
-  --k3s-config-file <FILE> & & configs/k3s/config.yaml \\ \hline
+  k3s-config-file & & configs/k3s/config.yaml \\ \hline
 
-  --k3s-registry-config-file <FILE> & & configs/k3s/registries.yaml \\ \hline
+  k3s-registry-config-file & & configs/k3s/registries.yaml \\ \hline
 
-  --k3s-version <VERSION> & & latest \\ \hline
+  k3s-version & & latest \\ \hline
 
-  --log-level <LEVEL> & Logging level (\texttt{<LEVEL>}).
+  log-level & Logging level (\texttt{<LEVEL>}).
   \newline
   Attachment \ref{cha:logging} provides additional information regarding logging
   and logging levels.
@@ -5109,23 +5391,21 @@ file that contains the two following attributes:
   \end{itemize}
   & info \\ \hline
 
-  --node-exporter-config-file <FILE> & & configs/node\_exporter/config.yaml \\
-  \hline
+  node-exporter-config-file & & configs/node\_exporter/config.yaml \\ \hline
 
-  --node-exporter-version <VERSION> & & latest \\ \hline
+  node-exporter-version & & latest \\ \hline
 
-  --pc-device-api <URL> & & http://pc.recluster.local/cm?cmnd=status\%2010 \\
-  \hline
+  pc-device-api & & http://pc.recluster.local/cm?cmnd=status\%2010 \\ \hline
 
-  --pc-interval <TIME> & & 1 \\ \hline
+  pc-interval & & 1 \\ \hline
 
-  --pc-time <TIME> & & 30 \\ \hline
+  pc-time & & 30 \\ \hline
 
-  --pc-warmup <TIME> & & 10 \\ \hline
+  pc-warmup & & 10 \\ \hline
 
-  --server-env-file <FILE> & & configs/recluster/server.env \\ \hline
+  server-env-file & & configs/recluster/server.env \\ \hline
 
-  --spinner &
+  spinner &
   \begin{enumerate}
     \item \texttt{dots}
       \newline
@@ -5138,13 +5418,13 @@ file that contains the two following attributes:
   \end{enumerate}
   & \\ \hline
 
-  --ssh-authorized-keys-file <FILE> & & configs/ssh/authorized\_keys \\ \hline
+  ssh-authorized-keys-file & & configs/ssh/authorized\_keys \\ \hline
 
-  --ssh-config-file <FILE> & & configs/ssh/ssh\_config \\ \hline
+  ssh-config-file & & configs/ssh/ssh\_config \\ \hline
 
-  --sshd-config-file <FILE> & & configs/ssh/sshd\_config \\ \hline
+  sshd-config-file & & configs/ssh/sshd\_config \\ \hline
 
-  --user <USER> & & root \\ \hline
+  user & & root \\ \hline
 
   \caption{Installer script parameters}
 \end{xltabular}

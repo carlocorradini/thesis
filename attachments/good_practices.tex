@@ -267,7 +267,7 @@ setup settings are provided in the table below.
   \multicolumn{1}{ c |}{\large{\textbf{Description}}} &
   \multicolumn{1}{ c }{\large{\textbf{Default Value}}} \\ \hhline{===}
 
-  --config-file <FILE> & Path to the bundle configuration file (\texttt{<FILE>}).
+  config-file & Path to the bundle configuration file (\texttt{<FILE>}).
   \newline
   Both relative and absolute paths are supported.
   \newline
@@ -276,26 +276,25 @@ setup settings are provided in the table below.
   \texttt{YAML} format and that the attributes structure is respected. & bundle.config.yaml
   \\ \hline
 
-  --out-file <FILE> & Name of the file path where the generated bundle archive file
-  should be saved.
+  out-file & Name of the file path where the generated bundle archive file should
+  be saved (\texttt{<FILE>}).
   \newline
   Absolute and relative paths are both supported.
   \newline
   By default, it is saved in the current working directory.
   \newline
-  The extension name should always be \texttt{.tar.gz} to distinguish a compressed
-  tar archive file. & bundle.tar.gz \\ \hline
+  The extension name should always be \texttt{.tar.gz} to distinguish a
+  compressed tar archive file. & bundle.tar.gz \\ \hline
 
-  --skip-run & Skip all commands in the metadata attribute \texttt{run}. & false
+  skip-run & Skip all commands in the metadata attribute \texttt{run}. & false
   \\ \hline
 
-  --log-level <LEVEL> & Logging level (\texttt{<LEVEL>}).
+  log-level & Logging level (\texttt{<LEVEL>}).
   \newline
   Attachment \ref{cha:logging} provides additional information regarding logging
   and logging levels.
   \newline
-  The following logging levels are supported (listed in descending order of
-  importance):
+  The following logging levels are supported (listed in descending order of importance):
   \begin{itemize}[noitemsep]
     \item[\protect\icircled{\texttt{5}}] \texttt{fatal}
 
@@ -309,7 +308,7 @@ setup settings are provided in the table below.
   \end{itemize}
   & info \\ \hline
 
-  --help & Display a help message and terminate (successfully). & \\ \hline
+  help & Display a help message and terminate (successfully). & \\ \hline
 
   \caption{Bundle script parameters}
 \end{xltabular}
