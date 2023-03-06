@@ -45,33 +45,31 @@ how they are interconnected, as well as a potential connection to an external ne
 \subsection{Node}
 \label{subsec:architecture_components_node}
 
-A node is a physical computer that runs the \texttt{Linux Kernel} and constantly
-executes software that is specific to the cluster's composition. Linux is a
-clone of the operating system Unix\footnote{\url{https://unix.org}}, written from
-scratch by Linus Torvalds\footnote{\url{https://wikipedia.org/wiki/Linus_Torvalds}}
-with help from a loosely-knit team of hackers across the world. It aims towards
-POSIX and Single UNIX Specification compliance\cite{linux}.\\ %
-Each node is physically connected to the other nodes via Ethernet and to the
-many operating services/components through a virtual network. Section \ref{sec:architecture_network}
-goes into further detail about cluster networking. \\ %
-A node can be in one of two states. The \texttt{active} state indicates that a node
-is turned on and is actively contributing to the cluster. The \texttt{inactive} state,
-on the other hand, shows that a node has been turned off and is no longer actively
-contributing to the cluster. This does not imply that the node is worthless and
-will never be utilized again, but simply that it is no longer required for the current
-cluster demand. A node state can be changed manually by switching the power
-button on or off, or automatically through the Cluster Autoscaler component,
-which monitors the current cluster state. More details about Cluster Autoscaler may
-be found in section \ref{subsec:architecture_components_cluster_autoscaler}. \\ %
-% TODO Maybe K8s reference section ?
-Two core services are continuously operating on each node. The first service is
-a Kubernetes-compliant distribution. Kubernetes, also known as K8s, is an open-source
-solution for automating containerized application deployment, scaling, and administration\cite{k8s}.
-The second service, Metrics Server, is a server that constantly monitors the node,
-exposing hardware and operating system metrics. \\ %
-Finally, each node is conceptually divided into two types depending on its role in
-the cluster: Worker nodes and Controller nodes. These are discussed in the sections
-that follow.
+A node is a physical computer that runs the \texttt{GNU/Linux}\footnote{\url{https://www.gnu.org}}\footnote{\url{https://kernel.org}}
+and constantly executes software that is specific to the cluster's composition.
+\\ %
+Each node is physically connected to the other nodes via Ethernet and to the many
+operating services/components through a virtual network. Section
+\ref{sec:architecture_network} goes into further detail about cluster networking.
+\\ %
+A node can be in one of two states. The \texttt{active} state indicates that a
+node is turned on and is actively contributing to the cluster. The \texttt{inactive}
+state, on the other hand, shows that a node has been turned off and is no longer
+actively contributing to the cluster. This does not imply that the node is worthless
+and will never be utilized again, but simply that it is no longer required for
+the current cluster demand. A node state can be changed manually by switching the
+power button on or off, or automatically through the Cluster Autoscaler
+component, which monitors the current cluster state. More details about Cluster
+Autoscaler may be found in section
+\ref{subsec:architecture_components_cluster_autoscaler}. \\ %
+Two core services are continuously operating on each node. The first service is a
+Kubernetes-compliant distribution. Kubernetes, also known as K8s, is an open-source
+solution for automating containerized application deployment, scaling, and
+administration\cite{k8s}. The second service, Metrics Server, is a server that
+constantly monitors the node, exposing hardware and operating system metrics. \\ %
+Finally, each node is conceptually divided into two types depending on its role
+in the cluster: Worker nodes and Controller nodes. These are discussed in the
+sections that follow.
 
 \subsubsection{Worker}
 \label{subsubsec:architecture_components_node_worker}
@@ -82,26 +80,26 @@ that follow.
   \includegraphics[width=\linewidth]{images/architecture/worker.pdf}
 \end{wrapfigure}
 
-A worker node is designed to handle only deployable units of computation and services
-that are not critical components of the cluster. It is not in charge of
-scheduling the work over several nodes; rather, it only accepts it from a
-cluster-available authenticated and authorized controller node. \\ %
-Even though a worker node executes the effectively scheduled workload in the
-cluster, it is not considered a critical component of it. At any given time, the
-total number of active workers might be zero. That is, there is no scheduled workload,
-and previously worker nodes have been shut down automatically to prevent
-precious resource waste that is no longer required. \\ %
-The majority of the cluster's accessible machines are worker nodes. This raises the
-overall amount of schedulable workload as well as heterogeneity. Heterogeneity
+A worker node is designed to handle only deployable units of computation and
+services that are not critical components of the cluster. It is not in charge of
+scheduling the work over several nodes; rather, it only accepts it from a cluster-available
+authenticated and authorized controller node. \\ %
+Even though a worker node executes the effectively scheduled workload in the cluster,
+it is not considered a critical component of it. At any given time, the total
+number of active workers might be zero. That is, there is no scheduled workload,
+and previously worker nodes have been shut down automatically to prevent precious
+resource waste that is no longer required. \\ %
+The majority of the cluster's accessible machines are worker nodes. This raises
+the overall amount of schedulable workload as well as heterogeneity. Heterogeneity
 is helpful because it may help schedule workloads to nodes with the bare minimum
-of requested resources, preventing waste. Assume that the total number of
-\texttt{active} nodes in the cluster is zero and that there are two \texttt{inactive}
-worker nodes. The first node has 4 GiB of memory and consumes 100W of power,
-whereas the second node has 8 GiB of memory and consumes 150W of power. A workload
-using around 3GiB of memory is then planned for the cluster. Because it
-decreases resource waste, notably memory waste, the first worker node will be
-chosen. It is important to note that if both nodes have an equal amount of memory,
-the conclusion remains the same since it has the lowest power consumption.
+of requested resources, preventing waste. Assume that the total number of \texttt{active}
+nodes in the cluster are zero and there are two \texttt{inactive} worker nodes.
+The first node has 4 GiB of memory and consumes 100W of power, whereas the second
+node has 8 GiB of memory and consumes 150W of power. A workload using around
+3GiB of memory is then planned for the cluster. Because it decreases resource waste,
+notably memory waste, the first worker node will be chosen. It is important to
+note that if both nodes have an equal amount of memory, the conclusion remains the
+same since it has the lowest power consumption.
 
 \subsubsection{Controller}
 \label{subsubsec:architecture_components_node_controller}
@@ -112,28 +110,28 @@ the conclusion remains the same since it has the lowest power consumption.
   \includegraphics[width=\linewidth]{images/architecture/controller.pdf}
 \end{wrapfigure}
 
-A controller node is an essential component of the cluster, acting as a coordinator
-between the active worker nodes and the overall workload in the cluster. It
-continually monitors the cluster's state in terms of available nodes, how and where
-the workload should be scheduled, and much more. A consistent and secure API must
-be provided for administration and end-users who wish to deploy custom services in
-the cluster. The API can be made available to an external network if it is
-available and appropriately configured, allowing remote control and improving overall
-usage. \\ %
-To ensure the integrity and management of a cluster, at least one controller
-node must be constantly available. It is strongly suggested to have multiple controller
-nodes that meet the high availability model to withstand potential system,
-component, or application failures. This is possible considering an odd number
-of controller nodes (i.e. three) that are always active. A quorum of controller
-nodes is required for a cluster to agree on cluster state updates. Quorum in a cluster
-with \texttt{n} controllers is \texttt{(n / 2) + 1}. Adding one node to any odd-sized
-controller group will always increase the number of nodes required for a quorum.
-Although adding a node to an odd-sized controller group appears to improve fault
-tolerance since there are more machines, it worsens it because the same number
-of nodes can crash without losing quorum but there are more nodes that can fail.
-If the cluster cannot withstand any more failures, adding a node before removing
-nodes is dangerous because if the new controller node fails to register, the cluster
-quorum would be permanently lost\cite{quorum}. The latter is not a strict necessity,
+A controller node is an essential component of the cluster, acting as a
+coordinator between the active worker nodes and the overall workload in the
+cluster. It continually monitors the cluster's state in terms of available nodes,
+how and where the workload should be scheduled, and much more. A consistent and
+secure API must be provided for administration and end-users who wish to deploy
+custom services in the cluster. The API can be made available to an external network
+if it is available and appropriately configured, allowing remote control and
+improving overall usage. \\ %
+To ensure the integrity and management of a cluster, at least one controller node
+must be constantly available. It is strongly suggested to have multiple
+controller nodes that meet the high availability model to withstand potential
+system, component, or application failures. This is possible considering an odd number
+of controller nodes (i.e. three) that are always active. A quorum of controller nodes
+is required for a cluster to agree on cluster state updates. Quorum\footnote{\url{https://etcd.io/docs/latest/faq/\#why-an-odd-number-of-cluster-members}}
+in a cluster with \texttt{n} controllers is \texttt{(n / 2) + 1}. Adding one node
+to any odd-sized controller group will always increase the number of nodes required
+for a quorum. Although adding a node to an odd-sized controller group appears to
+improve fault tolerance since there are more machines, it worsens it because the
+same number of nodes can crash without losing quorum but there are more nodes that
+can fail. If the cluster cannot withstand any more failures, adding a node before
+removing nodes is dangerous because if the new controller node fails to register,
+the cluster quorum would be permanently lost. The latter is not a strict necessity,
 but rather a preferable practice, even though it may slightly increase total resource
 waste. Consider this: if the only available controller node encounters a software
 or hardware failure and becomes unavailable, the entire cluster becomes
@@ -148,7 +146,8 @@ or disabled based on the management needs of the cluster. \\ %
 It should be noted that the total number of active or inactive nodes in the cluster
 is not limited. However, a large number of nodes increases the workload on controller
 nodes, which must maintain the cluster state updated and synchronized. As a result,
-as shown in table \ref{tbl:controller_node_requirements}\cite{k3s_large_clusters},
+as shown in table \ref{tbl:controller_node_requirements} (extracted from the official
+K3s documentation\footnote{\url{https://docs.k3s.io/installation/requirements\#large-clusters}}),
 their number and hardware requirements must be carefully balanced.
 
 \begin{xltabular}
@@ -182,53 +181,52 @@ their number and hardware requirements must be carefully balanced.
   \includegraphics[width=\linewidth]{images/architecture/server.pdf}
 \end{wrapfigure}
 
-A server handles all cluster nodes, user authentication and authorization, and much
-more. It does not directly monitor the workload in the same way as a controller
-node does, but it does serve as a low-level middleware controller. Every action
-is made because of human intervention (e.g., administrators) or another
-component of the cluster that has much higher-level knowledge of the current
-state and reacts appropriately. \\ %
-It is both an essential and a non-essential component of the cluster. It is essential
-in the sense that it is aware of all registered nodes, both active and inactive,
-and understands how to switch them on and off automatically. It reduces resource
-waste by automatically increasing or decreasing the number of nodes in the
-cluster when used in conjunction with the Cluster Autoscaler component (see section
-\ref{subsec:architecture_components_cluster_autoscaler}). Without prior information,
-there is no component in the cluster that can operate as an oracle about the
-nodes, leaving the Cluster Autoscaler worthless and increasing total resource waste.
-It is also deemed non-essential in the sense that, while decreasing resource waste
-is the overall architecture's goal, there is no requirement for a high
-availability model as in controller nodes. If a server instance crashes and does
-not restart, leaving no more servers in the cluster, the entire cluster continues
-to function normally. However, unless failures, human interaction, or server restarts,
-the number of active nodes remains constant, potentially increasing resource waste.
-\\ %
-A server instance does not have to run on a dedicated node. A node can hold
-numerous components at the same time, as previously mentioned. A node may be a
-server, a controller, and a worker all at the same time, drastically decreasing resource
+A server handles all cluster nodes, user authentication and authorization, and
+much more. It does not directly monitor the workload in the same way as a controller
+node does, but it does serve as a low-level middleware controller. Every action is
+made because of human intervention (e.g., administrators) or another component of
+the cluster that has much higher-level knowledge of the current state and reacts
+appropriately. \\ %
+It is both an essential and a non-essential component of the cluster. It is
+essential in the sense that it is aware of all registered nodes, both active and
+inactive, and understands how to switch them on and off automatically. It reduces
+resource waste by automatically increasing or decreasing the number of nodes in the
+cluster when used in conjunction with the Cluster Autoscaler component (see
+section \ref{subsec:architecture_components_cluster_autoscaler}). Without prior
+information, no component in the cluster can operate as an oracle about the nodes,
+leaving the Cluster Autoscaler worthless and increasing total resource waste. It
+is also deemed non-essential in the sense that, while decreasing resource waste
+is the overall architecture's goal, there is no requirement for a high availability
+model as in controller nodes. If a server instance crashes and does not restart,
+leaving no more servers in the cluster, the entire cluster continues to function
+normally. However, unless failures, human interaction, or server restarts, the number
+of active nodes remains constant, potentially increasing resource waste. \\ %
+A server instance does not have to run on a dedicated node. A node can hold numerous
+components at the same time, as previously mentioned. A node may be a server, a
+controller, and a worker all at the same time, drastically decreasing resource
 waste. It is crucial to note, however, that a server should not be executed on a
-worker node since, as previously explained, the total number of active workers
-might be zero, terminating the server instance and the capability of automatically
+worker node since, as previously explained, the total number of active workers might
+be zero, terminating the server instance and the capability of automatically
 adjusting the cluster size. \\ %
 The server provides an API to facilitate cluster administration. Furthermore, as
-previously said, it is in charge of user authentication and authorization. Unharmful
-queries (providing information about active nodes or listing non-sensible
-information about a user) should not require any authentication or only a minimal
-one. Queries that mutate the state of the cluster or display sensitive
-information (turning on or off a node or displaying sensitive user information)
-must be protected by a high-security mechanism. \\ %
-A heartbeat daemon must be implemented on the server to continuously check the
-condition of a node and detect any problems. A heartbeat is a periodic signal or
-message created by hardware or software that is sent between devices at regular intervals
-of seconds. If the endpoint does not receive a heartbeat for an extended period,
-often many heartbeat intervals, the machine that should have sent the heartbeat
-is assumed to have failed\cite{heartbeat}. The latter is commonly implemented by
-controller nodes since they must constantly monitor and acquire information
+previously said, it is in charge of user authentication and authorization.
+Unharmful queries (providing information about active nodes or listing non-sensible
+information about a user) should not require any authentication or only a
+minimal one. Queries that mutate the state of the cluster or display sensitive information
+(turning on or off a node or displaying sensitive user information) must be protected
+by a high-security mechanism. \\ %
+A heartbeat daemon must be implemented on the server to continuously check the condition
+of a node and detect any problems. A heartbeat\footnote{\url{https://wikipedia.org/wiki/Heartbeat_(computing)}}
+is a periodic signal or message created by hardware or software that is sent
+between devices at regular intervals. If the endpoint does not receive a heartbeat
+for an extended period, often many heartbeat intervals, the machine that should have
+sent the heartbeat is assumed to have failed. The latter is commonly implemented
+by controller nodes since they must constantly monitor and acquire information
 about active nodes for workload scheduling. As a result, a server can use the
 controller's API to eliminate duplication, increase consistency and availability,
 and simplify implementation. \\ %
 For more information, section \ref{sec:implementation_server} covers in detail how
-the server component is implemented.
+the Server component is implemented.
 
 \subsection{Database}
 \label{subsec:architecture_components_database}
@@ -250,29 +248,29 @@ changes them to ensure integrity. Like the server component, is seen as both nec
 and non-essential. A server is worthless without the database, resulting in the same
 outcome as previously explained. \\ %
 This component is seen as the union of numerous modules that form it rather than
-as a single entity. A database, in general, is a structured collection of
-information or data that is persistently stored in a computer system. A database
-management system (DBMS) is a software program that acts as an interface between
-the database and its end users or applications, allowing for the retrieval, updating,
-and administration of how information is structured and optimized. A DBMS also facilitates
-database supervision and control by providing several administrative operations such
-as performance monitoring, tuning, and backup and recovery\cite{database}. The latter
-indicates that each module and feature is dependent on the implementation. Only
-for the database itself, there are several distinct types, and for each type, there
-are numerous distributions with varying features and capabilities. To better
-follow the overall design criteria, the ultimate decision on which one to take must
-be carefully examined. \\ %
-Persistency and fault tolerance are strongly related, most importantly, in the data
-layer. Even if an error occurs, the only vital and critical component that must be
-preserved and not lost is all the stored data. Data persistency is the
-preservation of data after the program that produced it has been terminated. To do
-this, the data must be written to non-volatile storage, a type of memory that can
-maintain the information indefinitely even if the program is no longer functioning\cite{persistency}.
-Fault tolerance, which differs slightly from the previous definition, refers to a
-non-volatile storage system's capacity to recover from an error or faulty condition,
-most typically an irreversible hardware failure of some type, without losing any
-previously stored data. Disk fault tolerance is often achieved by disk
-management technologies such as mirroring\footnote{\url{https://wikipedia.org/wiki/Disk_mirroring}},
+as a single entity. A database\footnote{\url{https://www.oracle.com/database/what-is-database}},
+in general, is a structured collection of information or data that is
+persistently stored in a computer system. A database management system (DBMS) is
+a software program that acts as an interface between the database and its end users
+or applications, allowing for the retrieval, updating, and administration of how
+information is structured and optimized. A DBMS also facilitates database supervision
+and control by providing several administrative operations such as performance monitoring,
+tuning, and backup and recovery. The latter indicates that each module and
+feature is dependent on the implementation. Only for the database itself, there
+are several distinct types, and for each type, there are numerous distributions
+with varying features and capabilities. To better follow the overall design criteria,
+the ultimate decision on which one to take must be carefully examined. \\ %
+Persistency and fault tolerance are strongly related, most importantly, in the
+data layer. Even if an error occurs, the only vital and critical component that
+must be preserved and not lost is all the stored data. Data persistency\footnote{\url{https://www.mongodb.com/databases/data-persistence}}
+is the preservation of data after the program that produced it has been terminated.
+To do this, the data must be written to non-volatile storage, a type of memory
+that can maintain the information indefinitely even if the program is no longer
+functioning. Fault tolerance, which differs slightly from the previous
+definition, refers to a non-volatile storage system's capacity to recover from an
+error or faulty condition, most typically an irreversible hardware failure of
+some type, without losing any previously stored data. Disk fault tolerance is
+often achieved by disk management technologies such as mirroring\footnote{\url{https://wikipedia.org/wiki/Disk_mirroring}},
 data striping\footnote{\url{https://wikipedia.org/wiki/Data_striping}},
 duplexing\footnote{\url{https://www.pcmag.com/encyclopedia/term/disk-duplexing}},
 and Redundant Array of Independent (or Inexpensive) Disks (RAID)\footnote{\url{https://wikipedia.org/wiki/RAID}}\cite{disk_management_technologies}.
@@ -298,27 +296,25 @@ reducing disk utilization. The cached data is stored in the main volatile memory
   \includegraphics[width=\linewidth]{images/architecture/registry.pdf}
 \end{wrapfigure}
 
-% TODO Air-Gap reference
-% TODO Container reference
-
 The registry component is a private container registry that the K8s orchestrator
-uses in the cluster to download a specific image or collection of images. A container
-registry is a stateless, highly scalable server-side application that stores and
-distributes container-based application images\cite{docker_registry}. \\ %
+uses in the cluster to download a specific image or collection of images. A
+container registry is a stateless, highly scalable server-side application that stores
+and distributes container-based application images\cite{docker_registry}. \\ %
 A registry is regarded as a non-essential component because the whole system may
-function without it. If an internet connection is available and one of the
-numerous public container registries (such as Docker Hub\footnote{\url{https://hub.docker.com}})
-is accessible, the cluster downloads and runs the requested image from the external
-network. Having a private register in the cluster, on the other hand, may solve
-a plethora of potential difficulties. Some of them are as follows:
+function without it. If an internet connection is available and one of the numerous
+public container registries (such as Docker Hub\footnote{\url{https://hub.docker.com}})
+is accessible, the cluster downloads and runs the requested image from the
+external network. Having a private register in the cluster, on the other hand, may
+solve a plethora of potential difficulties. Some of them are as follows:
 
 \begin{itemize}
   \item The K8s orchestrator fails to download the requested images in an Air-Gapped
-    environment when there is no internet connection. As a result, the entire cluster
-    is nearly unusable. The only realistic approach is to make a local duplicate
-    of the remote images for each cluster node. This is hard to accomplish and prone
-    to errors. Furthermore, there is a waste of disk memory, but it also ignores
-    how and where the images are downloaded.
+    environment when there is no internet connection (see section
+    \ref{subsec:implementation_dependencies_air_gap_environment}). As a result, the
+    entire cluster is nearly unusable. The only realistic approach is to make a
+    local duplicate of the remote images for each cluster node. This is hard to accomplish
+    and prone to errors. Furthermore, there is a waste of disk memory, but it
+    also ignores how and where the images are downloaded.
 
   \item A local solution is required for an organization that wants complete control
     over its images and is unwilling to put them on an external service.
@@ -348,26 +344,26 @@ a plethora of potential difficulties. Some of them are as follows:
 \end{itemize}
 
 In practice, the registry is used to distribute the Cluster Autoscaler image (see
-\ref{subsec:architecture_components_cluster_autoscaler}) that is specifically built
-to function with reCluster. \\ %
-Even though it is supported out of the box, the component does not need to be
-instantiated on a specific physical node; rather, it is deployed directly in the
-K8s environment. The registry may be accessible from both inside and outside the
-K8s network, thanks to a correctly configured Load Balancer component (further information
-in section \ref{subsec:architecture_components_load_balancer}) that exposes the
-service to a non-K8s-related external network. Exposing the K8s service is critical
-for conveniently allowing the upload (push) and download (pull) of an image without
+\ref{subsec:architecture_components_cluster_autoscaler}) that is specifically
+built to function with reCluster. \\ %
+Even though it is supported out of the box, the component does not need to be instantiated
+on a specific physical node; rather, it is deployed directly in the K8s environment.
+The registry may be accessible from both inside and outside the K8s network, thanks
+to a correctly configured Load Balancer component (further information in
+section \ref{subsec:architecture_components_load_balancer}) that exposes the service
+to a non-K8s-related external network. Exposing the K8s service is critical for
+conveniently allowing the upload (push) and download (pull) of an image without
 the user requiring any extra settings. The approach must remain the same as when
-utilizing a publicly accessible registry, but with the cluster's registry address
-provided. Because the registry is externally accessible, it must be properly configured
-to improve overall security. HTTPS\footnote{\url{https://wikipedia.org/wiki/HTTPS}},
-which enables secure communication over a cryptographic channel, and
-authentication, which permits access only to a limited group of authenticated users,
-must be set up and/or implemented. \\ %
-The registry is deployed in the K8s environment, but the K8s orchestrator needs it
-to fetch the required images, leading to a circular dependence. To avoid the latter,
-the registry image should be made available on each node, eliminating the need for
-a registry request.
+utilizing a publicly accessible registry, but with the cluster's registry
+address provided. Because the registry is externally accessible, it must be
+properly configured to improve overall security. HTTPS, which enables secure
+communication over a cryptographic channel, and authentication, which permits
+access only to a limited group of authenticated users, must be set up and/or implemented.
+\\ %
+The registry is deployed in the K8s environment, but the K8s orchestrator needs
+it to fetch the required images, leading to a circular dependence. To avoid the
+latter, the registry image should be made available on each node, eliminating
+the need for a registry request.
 
 \subsection{Cluster Autoscaler}
 \label{subsec:architecture_components_cluster_autoscaler}
@@ -378,20 +374,18 @@ a registry request.
   \includegraphics[width=\linewidth]{images/architecture/cluster_autoscaler.pdf}
 \end{wrapfigure}
 
-% TODO K8s reference
-
 The Cluster Autoscaler component is a program that automatically adjusts the
 number of nodes in the cluster to guarantee that all deployed services have a
 location to execute and no nodes are underutilized\cite{cluster_autoscaler}. It
 is not in charge of node behavior and registration in the cluster; it only determines
 if a node should be turned on or off, but not how. As a result, for low-level
-control, it must rely on the server component. Nonetheless, the autoscaler is an
+control, it must rely on the Server component. Nonetheless, the autoscaler is an
 essential component of the cluster due to its automation, which eliminates the
 need for human interaction and dramatically lowers resource waste. \\ %
 The Cluster Autoscaler is deployed in the K8s environment rather than on a
 separate node. After the registry becomes available, the container image of the
-autoscaler is uploaded and made available to the whole cluster during the
-initialization phase. Because the registry is defined as a critical K8s service,
+Cluster Autoscaler is uploaded and made available to the whole cluster during
+the initialization phase. Because the registry is defined as a critical K8s service,
 it may be scheduled on any node, both workers and controllers. Since the cluster
 may scale to zero workers, this applies to every critical component in the K8s environment,
 preventing a service outage. Furthermore, the cluster autoscaler must be
@@ -424,10 +418,9 @@ outlined below:
     monitor the cluster's condition for a suitable node with enough free
     resources to host a waiting service. Waiting forever for a current active node
     to free up some resources affects the cluster's overall usability and quality
-    of service\footnote{\url{https://wikipedia.org/wiki/Quality_of_service}} (QoS).
-    The solution is to check if there is a suitable inactive node in the local
-    cache that can be turned on. If such a node is identified, a specific
-    request is issued to the server, and the queued deployments are automatically
+    of service (QoS). The solution is to check if there is a suitable inactive
+    node in the local cache that can be turned on. If such a node is identified,
+    a specific request is issued to the server, and the queued deployments are automatically
     scheduled to the newly bootstrapped node.
 
   \item Some nodes are constantly unneeded for an extended period. When a node's
@@ -440,7 +433,7 @@ outlined below:
     resources, raising its overall utilization. Following completion of the
     latter, the unneeded node has almost zero workloads (non-zero since there
     may be system deployments running that do not require a migration and may be
-    deleted) and can be switched off and removed. The autoscaler makes a
+    deleted) and can be switched off and removed. The Cluster Autoscaler makes a
     specific request to the server with the node identifier; the server removes the
     node from the K8s environment and subsequently shuts it off altogether. When
     a node is successfully shut down, its status changes from active to inactive,
@@ -456,11 +449,10 @@ outlined below:
   \includegraphics[width=\linewidth]{images/architecture/load_balancer.pdf}
 \end{wrapfigure}
 
-% K8s reference
 The load balancer component provides an externally accessible IP address to an
 internal K8s application. It may be seen as an abstract mechanism of exposing the
 application as a network service without requiring an unfamiliar service discovery
-mechanism\cite{load_balancer}. \\ %
+mechanism\cite{k8s}. \\ %
 An application can be composed of multiple replicas that are generated and
 destroyed to maintain the cluster in the desired state. The replicas can be spread
 over many active nodes, improving overall performance, availability, and fault
@@ -488,22 +480,22 @@ Google\footnote{\url{https://cloud.google.com}}, or Amazon\footnote{\url{https:/
 a load balancer is generally an external, sophisticated, and highly specialized
 component that is specifically designed to be compatible with the specific cloud
 provider. The general architecture in question, however, is far simpler and operates
-on bare-metal servers. A bare-metal server is a physical computer that is
-exclusively operated by one customer or tenant\cite{bare_metal_server}. As a
-result, an external load balancer may be substituted with an internal one that is
-deployed directly in the K8s environment. An internal load balancer minimizes
-overall resource usage while also improving maintainability. Furthermore, as
-with the registry and cluster autoscaler components, the internal load balancer is
+on bare-metal servers. A bare-metal server\footnote{\url{https://wikipedia.org/wiki/Bare-metal_server}}
+is a physical computer that is exclusively operated by one customer or tenant. As
+a result, an external load balancer may be substituted with an internal one that
+is deployed directly in the K8s environment. An internal load balancer minimizes
+overall resource usage while also improving maintainability. Furthermore, as with
+the registry and Cluster Autoscaler components, the internal load balancer is
 kept automatically operational and in good working condition at all times by the
 K8s orchestrator.
 
 \subsubsection{Example Schema}
 \label{subsubsec:architecture_components_load_balancer_schema}
 
-Figure \ref{fig:load_balancer} depicts an example schema of an Internal Load
-Balancer in a cluster architecture. It is worth noting that the Internal Load Balancer
-component is presented externally to the nodes to simplify the overall overview but
-in reality, it is deployed directly on each active node.
+Figure \ref{fig:load_balancer} depicts an example schema of an Internal Load Balancer
+in a cluster architecture. It is worth noting that the Internal Load Balancer
+component is presented externally to the nodes to simplify the overall overview
+but in reality, it is deployed directly on each active node.
 
 \begin{figure}[htbp]
   \centering
@@ -513,51 +505,44 @@ in reality, it is deployed directly on each active node.
   \label{fig:load_balancer}
 \end{figure}
 
-There are three active nodes and one Internal Load Balancer in the cluster. The
-nodes' roles have not been specified, however as stated in section
-\ref{subsec:architecture_components_node}, each node can be regarded as both a Controller
-and a Worker. Three applications, \texttt{A}, \texttt{B}, and \texttt{C}, have been
-deployed in the K8s environment, with three replicas available for each. Concerning
-the other replicas, each replica is scheduled on a distinct node. \\ %
-The organization in charge of the cluster wishes to expose each application by
-assigning each one a unique externally accessible IP address from the Internal
-Network (i.e., a private IPv4 address\footnote{\url{https://wikipedia.org/wiki/Private_network}}).
-It should be noted that the process of mapping/routing an IP address from the Internal
-Network to an IP address from the External Network is not mentioned. The Load
-Balancer creates a matching internal service for each application that knows
-where all the replicas are installed and how to efficiently distribute traffic
-among them. Assume that application \texttt{A} is assigned the IP address
-\texttt{10.0.0.97} and that the Load Balancer receives an external request from a
-client on the Internal Network. The Load Balancer examines the target address
-and finds a match; the request is then routed to internal service \texttt{A}. Service
-\texttt{A} then redirects the request to one of the active nodes where a replica
-of application \texttt{A} is deployed. Finally, the replica handles the request,
-and a response is created and sent back to the client.
+There are three active nodes and one Internal Load Balancer in the cluster. The nodes'
+roles have not been specified, however as stated in section \ref{subsec:architecture_components_node},
+each node can be regarded as both a Controller and a Worker. Three applications,
+\texttt{A}, \texttt{B}, and \texttt{C}, have been deployed in the K8s
+environment, with three replicas available for each. Concerning the other
+replicas, each replica is scheduled on a distinct node. \\ %
+The organization in charge of the cluster wishes to expose each application by assigning
+each one a unique externally accessible IP address from the Internal Network (i.e.,
+a private IPv4 address). It should be noted that the process of mapping/routing
+an IP address from the Internal Network to an IP address from the External
+Network is not mentioned. The Load Balancer creates a matching internal service for
+each application that knows where all the replicas are installed and how to efficiently
+distribute traffic among them. Assume that application \texttt{A} is assigned the
+IP address \texttt{10.0.0.97} and that the Load Balancer receives an external
+request from a client on the Internal Network. The Load Balancer examines the target
+address and finds a match; the request is then routed to internal service
+\texttt{A}. Service \texttt{A} then redirects the request to one of the active nodes
+where a replica of application \texttt{A} is deployed. Finally, the replica
+handles the request, and a response is created and sent back to the client.
 
 \section{Network}
 \label{sec:architecture_network}
 
-The cluster is composed of several network layers, each of which may interact
-with components of the same layer but by default, not with components of a different
+The cluster is composed of several network layers, each of which may interact with
+components of the same layer but by default, not with components of a different
 layer. Each network layer is heterogeneous: various software/hardware components
-and applications correlate to different network layers. The cluster can support
-communications across layers, but this must be done transparently and accurately
-to avoid significantly increasing the cluster's complexity and resource waste while
+and applications correlate to different network layers. The cluster can support communications
+across layers, but this must be done transparently and accurately to avoid
+significantly increasing the cluster's complexity and resource waste while
 lowering its overall security. Both software and hardware components that reside
-between the two communicating levels enable inter-layer communication. The most fundamental
-requirement for the latter to work is that there be no potential conflicts between
-the two communicating layers. \\ %
-Some network layers of the cluster can be directly compared with ISO/OSI layers,
-depending on the requirements and capabilities. The International Organization for
-Standardization\footnote{\url{https://www.iso.org}} (ISO) developed the Open Systems
-Interconnection (OSI) model, which allows various communication systems to
-communicate using standard protocols. The OSI model may be thought of as a universal
-computer networking language. It is built on the idea of separating a
-communication system into seven abstract layers, each one stacked on top of the previous\cite{osi}.
-\\ %
+between the two communicating levels enable inter-layer communication. The most
+fundamental requirement for the latter to work is that there be no potential
+conflicts between the two communicating layers. \\ %
+Some network layers of the cluster can be directly compared with \texttt{ISO/OSI}
+model's layers, depending on the requirements and capabilities. \\ %
 There are three distinct network layers in the cluster architecture seen in
-figure \ref{fig:architecture}. They are covered in the subsections that follow,
-beginning with the most external network and progressing to the most internal
+figure \ref{fig:architecture}. They are covered in the sections that follow,
+starting with the most external network and progressing to the most internal
 network in relation to the cluster.
 
 \subsection{External Network}
@@ -571,37 +556,28 @@ network in relation to the cluster.
 
 The external network is any network that does not directly connect to the
 cluster. It denotes any network that is incompatible with the Internal Network (see
-the section below) and requires a router or other similar components to communicate
-with the latter. A router connects two or more packet-switched networks or
-subnetworks. It performs two key functions: managing traffic across these
-networks by forwarding data packets to their intended IP addresses and allowing
-numerous devices to use the same Internet connection\cite{router}. To put it
-simply, the External Network is any existing network in the world that is not the
-Internal Network, ergo the Internet: the network of networks\footnote{\url{https://wikipedia.org/wiki/Internet}}.
-\\ %
-In terms of the ISO/OSI communication model, the external network is analogous
-to Layer 3, the Network Layer. The Network Layer is in charge of facilitating
-data transfer across two networks. On the sender's device, the Network Layer
-divides segments from the Transport Layer (Layer 4) into smaller pieces called
-packets, which are then reassembled on the receiving device. Routing is the
-process by which the Network Layer determines the optimum physical path for data
-to take to reach its destination. If the two communicating devices are on the same
-network, the Network Layer is not required\cite{osi}. \\ %
-If the deployed applications may be accessible by external clients and there is a
-requirement for external resources, such as public container images, that are not
-locally available in the cluster, connectivity to the external network is
-required. Furthermore, if the organization in charge of the overall architecture
-wishes to have remote control and monitoring of the cluster from anywhere in the
-world, the only current practical and supported solution is an internet connection.
-If the latter is not required, the external network can be omitted from the cluster
+the section \ref{subsec:architecture_network_internal_network}) and requires a Router
+or other similar components to communicate with the latter. To put it simply, the
+External Network is any existing network in the world that is not the Internal Network,
+ergo the Internet: the network of networks. \\ %
+The External Network is analogous to Layer 3 of the \texttt{ISO/OSI}
+communication model, defined as the Network Layer, which is in charge of
+facilitating data transfer between two networks. \\ %
+If the deployed applications may be accessible by external clients and there is
+a requirement for external resources, such as public container images, that are
+not locally available in the cluster, connectivity to the external network is required.
+Furthermore, if the organization in charge of the overall architecture wishes to
+have remote control and monitoring of the cluster from anywhere in the world,
+the only current practical and supported solution is an internet connection. If the
+latter is not required, the external network can be omitted from the cluster
 design, resulting in an Air-Gap environment without internet access. As a result,
-all required resources and components are already available locally, and access to
-the cluster is restricted to the internal network. \\ %
-Finally, an External Network is inherently insecure. As a result, high-security
-protocols, methods, and procedures must be created and effectively set to avoid
-any possible disservices. Although cluster security should be implemented, it is
-not currently the primary focus, and only some basic procedures are used as it is
-such a broad and complicated topic.
+all required resources and components are already available locally, and access
+to the cluster is restricted to the internal network. \\ %
+Finally, an External Network is inherently insecure. As a result, high-security protocols,
+methods, and procedures must be created and effectively set to avoid any possible
+disservices. Although cluster security should be implemented, it is not currently
+the primary focus, and only some basic procedures are used as it is such a broad
+and complicated topic.
 
 \subsection{Internal Network}
 \label{subsec:architecture_network_internal_network}
@@ -612,63 +588,48 @@ such a broad and complicated topic.
   \includegraphics[width=\linewidth]{images/architecture/internal_network.pdf}
 \end{wrapfigure}
 
-The Internal Network uses one or more layer 2 network switches to connect each physical
-node in the cluster. Simply described, the Internal Network is primarily direct device-to-device
-communication with no interaction with external networks. Another switch, router,
-or computer might be considered a device. A layer 2 network switch connects devices
-on the same network and forwards data packets between them. A switch, unlike a router,
-only transmits data to the one device for which it is meant, rather than to networks
-of several devices\cite{switch}. Because the Internal Network is usually composed
-of two or more linked devices and is located in a limited geographic area, it is
-classified as a LAN (Local Area Network). For further information\cite{lan}. \\ %
-The Internal Network is equivalent to the ISO/OSI communication model's Layer 2,
-the Data Link Layer, due to the overall network design and use of only layer 2
-network switches. The Data Link Layer is very similar to the Network Layer (L3),
-except that it only allows data to be sent between two devices on the same
-network. The Data Link Layer breaks packets from the Network Layer into smaller pieces
-known as frames. The Data Link Layer, like the Network Layer, is responsible for
-flow control and error control in intra-network communication, whereas the Transport
-Layer is responsible for flow control and error control in intra-network communications\cite{osi}.
-\\ %
+The Internal Network uses one or more layer 2 network switches to connect each
+physical node in the cluster. Simply described, the Internal Network is
+primarily direct device-to-device communication with no interaction with
+external networks. Another switch, router, or computer might be considered a device.
+Because the Internal Network is usually composed of two or more linked devices
+and is located in a limited geographic area, it is classified as a LAN (Local
+Area Network). \\ %
+The Internal Network is analogous to Layer 2 of the \texttt{ISO/OSI}
+communication model, defined as the Data Link Layer, which allows data to be
+sent between two devices on the same network. \\ %
 Because of the network design at Layer 2, communication between internal devices
 in a LAN is based on MAC addresses rather than IP addresses, which are utilized
 at Layer 3. As a result, network switches forward data based on the destination MAC
 address. A MAC address (Media Access Control address) is a unique sequence of 12
 hexadecimal digits permanently stored in the Network Interface Controller (NIC)
 that typically encodes the manufacturer's registered identification number. A device
-can have multiple NICs, each with its own unique MAC address\cite{mac_address}.
-One key difference between IP addresses and MAC addresses is the former is
-assigned dynamically to each device and may change over time, whereas the latter
-are assigned permanently. This distinction is critical since the device's MAC
-address may be used to uniquely identify a device in the same network and
-automatically bootstrap it. The latter is known as Wake-on-LAN (WoL) and is employed
-by the server component in the cluster. Chapter \ref{cha:implementation}
-contains further information regarding automatic cluster upscaling. \\ %
-A router device is required if the Internal Network wants to communicate with
-other networks to access various resources or execute external operations. As a result,
-the router (Layer 3) is directly linked to a switch (Layer 2), which connects every
-node in the cluster. The latter link between the two layers is regarded as the
-boundary between the secure Internal Network and the insecure External Network. Furthermore,
-the total number of switch and/or router devices in the architecture is not
-predetermined and can be increased to improve overall cluster network
-performance and fault tolerance. If an external connection is not required, the
-whole design is reduced and made up of solely L2 network switches, eliminating the
-requirement for routers. Without them, a considerable amount of resource waste is
-reduced, not just in terms of pure hardware that can be reutilized as worker
-nodes, but also in terms of overall cluster power consumption, because a network
-switch is more power-efficient than a router\cite{switch_vs_router_power_consumption}.
-\\ %
-Finally, a local domain name may be used to conveniently identify nodes in the
-Internal Network with a hostname (i.e., \texttt{recluster.local}). \texttt{.local}
-is a special-use domain name reserved by the Internet Engineering Task Force (IETF)\footnote{\url{https://www.ietf.org}}
-so that it cannot be installed as a top-level domain in the Internet's Domain
-Name System (DNS)\footnote{\url{https://wikipedia.org/wiki/Domain_Name_System}}.
-As a result, it is similar to the other special domain names. However, \texttt{.local}
-is intended for usage in link-local networking, allowing DNS service to be established
-without the need for local deployments of standard DNS infrastructure on LANs\cite{local_domain_name}\cite{rfc_2606}.
-As a result, instead of an IP address or MAC address, a worker node may be
-recognized with the hostname \texttt{worker.recluster.local} and a controller node
-with the hostname \texttt{controller.recluster.local}.
+can have multiple NICs, each with its own unique MAC address. One key difference
+between IP addresses and MAC addresses is the former is assigned dynamically to each
+device and may change over time, whereas the latter are assigned permanently. This
+distinction is critical since the device's MAC address may be used to uniquely identify
+a device in the same network and automatically bootstrap it. The latter is known
+as Wake-on-LAN (WoL) and is employed by the server component in the cluster. Chapter
+\ref{cha:implementation} contains further information regarding automatic cluster
+upscaling. \\ %
+A router device is required if the Internal Network wants to communicate with other
+networks to access various resources or execute external operations. As a result,
+the router (Layer 3) is directly linked to a switch (Layer 2), which connects
+every node in the cluster. The latter link between the two layers is regarded as
+the boundary between the secure Internal Network and the insecure External Network.
+Furthermore, the total number of switch and/or router devices in the architecture
+is not predetermined and can be increased to improve overall cluster network performance
+and fault tolerance. If an external connection is not required, the whole design
+is reduced and made up of solely L2 network switches, eliminating the
+requirement for routers. Without them, a considerable amount of resource waste
+is reduced, not just in terms of pure hardware that can be reutilized as worker nodes,
+but also in terms of overall cluster power consumption, because a network switch
+is more power-efficient than a router\cite{switch_vs_router_power_consumption}. \\ %
+Finally, a local domain name may be used to conveniently identify nodes in the Internal
+Network with a hostname (i.e., \texttt{recluster.local})\cite{rfc_2606}. As a
+result, instead of an IP address or MAC address, a Worker node may be recognized
+with the hostname \texttt{worker.recluster.local} and a controller node with the
+hostname \texttt{controller.recluster.local}.
 
 \subsection{K8s Network}
 \label{subsec:architecture_network_k8s_network}
@@ -679,7 +640,7 @@ with the hostname \texttt{controller.recluster.local}.
   \includegraphics[width=\linewidth]{images/architecture/k8s_network.pdf}
 \end{wrapfigure}
 
-\textit{"Kubernetes is all about sharing machines between applications"}\cite{k8s_cluster_networking}
+\textit{"Kubernetes is all about sharing machines between applications"}\cite{k8s}
 \\ %
 
 Premise: the purpose of this section is not to demonstrate how Kubernetes networking
@@ -718,6 +679,7 @@ hops. Figure \ref{fig:overlay_network} compares the physical network to the
 virtual K8s overlay network that is created on top of it. Take note of the overall
 network simplicity and the lack of connection hops between each K8s instance.
 
+% TODO
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=.65\textwidth]{images/architecture/overlay_network.pdf}
@@ -742,8 +704,7 @@ rigorous security measures in the cluster. Therefore, the backend has been
 modified to need just direct Layer 2 communication between the nodes without any
 encryption. Moreover, the latter not only needed fewer dependencies but also
 improved overall performance because the extra procedures were no longer
-required.
-
+required. \\ %
 The following information is essential for understanding the basic principles of
 K8s networking. They were collected from the official Kubernetes website, which
 can be found at \url{https://kubernetes.io}. \\ %
@@ -752,7 +713,7 @@ attempt to use the same ports. Port coordination, also known as dynamic port
 allocation, is extremely difficult to do at scale and exposes cluster-level issues.
 Kubernetes, on the other hand, takes a different approach. \\ %
 Every Pod, which are the smallest deployable units of computing that can be created
-and managed in a cluster\cite{k8s_pod}, is assigned its cluster-wide IP address.
+and managed in a cluster\cite{k8s}, is assigned its cluster-wide IP address.
 This eliminates the need to explicitly construct connections between Pods and
 deal with container ports mapping to node ports. As a result, Kubernetes
 enforces the following basic criteria for any networking implementation:
@@ -761,14 +722,13 @@ enforces the following basic criteria for any networking implementation:
     of NAT (Network Address Translation). NAT is a means of transparently
     mapping an IP address space to another\cite{nat}.
 
-  \item Kubernetes agents (such as system daemons, kubelet, and so on) on a node
-    can communicate with all pods on that node.
+  \item Kubernetes agents (such as system daemons, \texttt{kubelet}, and so on)
+    on a node can communicate with all pods on that node.
 \end{itemize}
 Kubernetes IP addresses exist at the Pod scope; containers within a Pod share
 their network namespaces, including their IP address and MAC address. This
 implies that containers within a Pod may all contact each other's ports on
-\texttt{localhost}\footnote{\url{https://wikipedia.org/wiki/Localhost}};
-requiring port coordination. \\ %
+\texttt{localhost}; requiring port coordination. \\ %
 Four concerns are addressed by Kubernetes networking:
 \begin{enumerate}
   \item \textit{Highly-coupled container-to-container communications}
@@ -794,19 +754,17 @@ The container runtime on each node implements the Kubernetes network model.
 Container runtime software, such as containerd\footnote{\url{urlhttps://containerd.io}}
 or CRI-O\footnote{\url{https://cri-o.io}}, is responsible for operating the
 containers. Container runtimes handle their network and security capabilities via
-the Container Network Interface (CNI)\cite{k8s_cluster_networking}\cite{k8s_networking_model}.
-CNI is composed of a specification and libraries for designing plugins that
-configure network interfaces in Linux containers. CNI is only concerned with the
-network connectivity of containers and removing allocated resources when the container
-is destroyed\cite{cni}.
+the Container Network Interface (CNI)\cite{k8s}. CNI is composed of a specification
+and libraries for designing plugins that configure network interfaces in Linux containers.
+CNI is only concerned with the network connectivity of containers and removing
+allocated resources when the container is destroyed\cite{cni}.
 
 \section{Cluster}
 \label{sec:architecture_cluster}
 
 The architecture has a real-world implementation in the reCluster project\footnote{\url{https://github.com/carlocorradini/reCluster}}.
-It employs several hardware components decommissioned by the University of
-Trento\footnote{\url{https://www.unitn.it}} that were formerly utilized by
-students in the computer classroom.
+It employs several hardware components decommissioned by the University of Trento\footnote{\url{https://www.unitn.it}}
+that were formerly utilized by students in the computer classroom.
 
 \begin{figure}[htbp]
   \centering

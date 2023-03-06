@@ -9,7 +9,6 @@ the entire community. \\ %
 Shortly after the publication, I began receiving some feedback, contributions,
 and, most importantly, appreciation in the form of GitHub stars\footnote{\url{https://docs.github.com/en/get-started/exploring-projects-on-github/saving-repositories-with-stars}}.
 \\ %
-% TODO Reference Philosophy and MIT
 The three projects derived from the development of reCluster are briefly
 illustrated and explained in the sections that follow. As stated in the Philosophy
 section, everything is completely Open Source and available under the MIT
@@ -18,14 +17,14 @@ license.
 \section{Node Exporter Installer}
 \label{sec:corollary_projects_node_exporter_installer}
 
-% TODO Node exporter reference
-% TODO K3s reference
 Available at \url{https://github.com/carlocorradini/node\_exporter\_installer} \\ %
-Used while installing reCluster on a Node. \\ %
-Node exporter does not provide any installation script and the default procedure
-(see \url{https://github.com/prometheus/node_exporter#installation-and-usage})
+Used while installing reCluster on a Node (see section \ref{sec:implementation_installer}).
+\\ %
+Node exporter (see section \ref{subsec:implementation_dependencies_node_exporter})
+does not provide any installation script and the default procedure (see \url{https://github.com/prometheus/node_exporter#installation-and-usage})
 is far from user-friendly and easily configurable. \\ %
-Inspired by K3s \texttt{install.sh}\footnote{\url{https://github.com/k3s-io/k3s/blob/master/install.sh}}
+Inspired by K3s (see section \ref{subsec:implementation_dependencies_k3s})
+\texttt{install.sh}\footnote{\url{https://github.com/k3s-io/k3s/blob/master/install.sh}}
 script, Node exporter installer helps the user by automatically installing Node
 exporter on the machine. Condensed in a single \texttt{install.sh} POSIX script,
 it is easily configurable (see section
@@ -94,18 +93,15 @@ table below.
 \label{subsec:corollary_projects_node_exporter_installer_example}
 
 This section shows some examples of how to use Node exporter installer. In both,
-we use \texttt{curl} (a command-line tool for getting or sending data using URL
-syntax\cite{curl}) to download the script from
+we use \texttt{curl}\footnote{\url{https://curl.se}} to download the script from
 \url{https://raw.githubusercontent.com/carlocorradini/node_exporter_installer/main/install.sh}
-and pipe (redirect the output of a program to the input of another program) the
-result to \texttt{sh} (UNIX shell command-line interpreter\footnote{\url{https://wikipedia.org/wiki/Unix_shell}})
-for execution.
+and pipe the output to \texttt{sh} for execution.
 
 \subsubsection{Basic}
 \label{subsubsec:corollary_projects_node_exporter_installer_example_basic}
 
-Install Node exporter using the default configuration parameters for both
-installer and binary.
+Install Node exporter using the default configuration parameters for both installer
+and binary.
 
 \begin{lstlisting}[language=shell, morekeywords={[3]{--silent, --show-error, --fail, --location, -}}, xleftmargin=\parindent, caption=Basic installation with default configuration parameters]
   curl \
@@ -137,18 +133,19 @@ all default collectors, leaving only CPU and memory statistics enabled.
 \section{Inline}
 \label{sec:corollary_projects_inline}
 
-% TODO Bundle reference
 Available at \url{https://github.com/carlocorradini/inline} \\ %
-Used while generating the final release bundle for distribution. \\ %
-It is useful to be able to split a large script into many files to make it easier
-to work with while still being able to distribute it as a single script. This
-program reads an input file and produces an output file with all of the sources
-inlined. \\ %
-The source command, \texttt{.\ <FILE>} for POSIX shells or \texttt{source <FILE>}
-for non-POSIX shells (e.g. Bash\footnote{\url{https://www.gnu.org/software/bash}}),
-read, and executes commands from the file specified in the current shell
-environment. It is useful to load functions, variables, and configuration files into
-the current shell context\cite{source}. \\ %
+Used while generating the final release bundle for distribution (see section \ref{sec:good_practices_bundle}).
+\\ %
+It is useful to be able to split a large script into many files to make it
+easier to work with while still being able to distribute it as a single script. This
+program reads an input file and produces an output file with all of the sources inlined.
+\\ %
+The source command\footnote{\url{https://linuxize.com/post/bash-source-command}},
+\texttt{.\ <FILE>} for POSIX shells or \texttt{source <FILE>} for non-POSIX
+shells (e.g. Bash\footnote{\url{https://www.gnu.org/software/bash}}), read, and executes
+commands from the file specified in the current shell environment. It is useful
+to load functions, variables, and configuration files into the current shell
+context. \\ %
 Inline is a static tool that does not execute the input script. As a result, it
 cannot determine the value of a variable dynamically if it is used inside the
 source command path (i.e. \texttt{source "\$DIR/path/to/script/sh"}). To avoid
@@ -192,15 +189,12 @@ Many helpful features of Inline are described below.
 
   \item Shebang removal in sourced files.
     \newline
-    A shebang is the character sequence consisting of the characters number sign
-    and exclamation mark (\texttt{\#!}) at the beginning of a script. In a Unix-like
-    operating system, when a text file with a shebang is used as if it is an
-    executable, the program loader executes the specified interpreter program,
-    passing as an argument the path that was initially used when attempting to
-    run the script, so that the program can use the file as input data\cite{shebang}
+    A shebang\footnote{\url{https://wikipedia.org/wiki/Shebang_(Unix)}} is the
+    character sequence consisting of the hashtag symbol and exclamation mark (\texttt{\#!})
+    at the beginning of a script.
     \newline
-    The shell interpreter only allows one shebang per script. As a result, the
-    shebang is only allowed in the input script file, while it is automatically removed
+    The shell interpreter only allows one shebang per script. As a result, the shebang
+    is only allowed in the input script file, while it is automatically removed
     in all sourced script files.
 
   \item Avoid inlining a certain source file. If the inline skip comment
@@ -340,24 +334,22 @@ not override the original input file.
 \section{GraphQL Auth Directive}
 \label{sec:corollary_projects_graphql_auth_diretive}
 
-% TODO GraphQL reference
-% TODO Node.js reference
 Available at \url{https://github.com/carlocorradini/graphql-auth-directive} \\ %
-Used in the \texttt{GraphQL} API. \\ %
+Used in the \texttt{GraphQL} API (see section \ref{subsec:implementation_server_graphql_api}).
+\\ %
 A custom \texttt{GraphQL} directive that protects resources from unauthenticated
 and unauthorized access in high-security contexts. It is available in all major
 \texttt{Node.js} registries as \texttt{graphql-auth-directive}. \\ %
 A directive is an identifier preceded by a \texttt{@} character, optionally
 followed by a list of named arguments, which can appear after almost any form of
-syntax in the \texttt{GraphQL} query or schema languages\cite{graphql_directive}.
-\\ %
+syntax in the \texttt{GraphQL} query or schema languages\cite{graphql}. \\ %
 The \texttt{GraphQL} context holds all important information about the current
 request. A \texttt{GraphQL} context is an object that is shared by all resolvers
 in a given execution. It helps store data such as authentication information,
 the current user, database connections, data sources, and other information required
-to operate the business logic\cite{graphql_context}. It is important to note that
-the context does not have to follow a predefined structure; rather, it is highly
-flexible to the user's implementation.
+to operate the business logic\cite{graphql}. It is important to note that the context
+does not have to follow a predefined structure; rather, it is highly flexible to
+the user's implementation.
 
 \subsection{Configuration}
 \label{subsec:corollary_projects_graphql_auth_diretive_configuration}
@@ -414,7 +406,7 @@ as well as a transformer function that applies the auth logic to the executable
       \newline
       It is standard practice in \texttt{GraphQL} and in programming languages
       to map a set of values to an enum. An enumeration type is a special kind of
-      scalar that is restricted to a particular set of allowed values\cite{graphql_enum}.
+      scalar that is restricted to a particular set of allowed values\cite{graphql}.
       \newline
       This option restricts the allowed values of roles to a specific set rather
       than a general string.
@@ -460,13 +452,12 @@ as well as a transformer function that applies the auth logic to the executable
 \subsection{Type Definition}
 \label{subsec:corollary_projects_graphql_auth_diretive_type_definition}
 
-% TODO GraphQL reference
 GraphQL has its language for writing GraphQL Schemas: the GraphQL Schema
 Definition Language (SDL). SDL is incredibly powerful and expressive while being
 simple and intuitive to use. The syntax is well-defined and is included in the
 official GraphQL specification\footnote{\url{https://spec.graphql.org}}. Schema Definitions
 are also known as IDL (Interface Definition Language) or SDL (Schema Definition
-Language)\cite{graphql_sdl}. \\ %
+Language)\cite{graphql}. \\ %
 The Type Definition of the GraphQL auth directive generated with default
 settings is shown below:
 
@@ -487,20 +478,21 @@ settings is shown below:
 \end{lstlisting}
 
 The above definition must be available in every \texttt{GraphQL} schema that
-utilizes the directive, otherwise an error is thrown during the server bootstrap
-operation. \\ %
-As stated in section \ref{subsec:corollary_projects_graphql_auth_diretive_configuration},
-the definition is generated dynamically by a set of configuration options or
-their default value. The name (\texttt{@auth}), \texttt{roles} and \texttt{permissions}
-type (non-nullable \texttt{String} array), and default value (an empty array
-\texttt{[]}) are easily distinguishable.
+utilizes the directive, otherwise, an error is thrown during the server
+bootstrap operation. \\ %
+As stated in section
+\ref{subsec:corollary_projects_graphql_auth_diretive_configuration}, the definition
+is generated dynamically by a set of configuration options or their default value.
+The name (\texttt{@auth}), \texttt{roles} and \texttt{permissions} type (non-nullable
+\texttt{String} array), and default value (an empty array \texttt{[]}) are
+easily distinguishable.
 
 \subsection{Example}
 \label{subsec:corollary_projects_graphql_auth_diretive_example}
 
 Consider a \texttt{GraphQL} backend application that requires authentication and
-authorization. The sections of the \texttt{GraphQL} schema where the auth directive
-is used, as well as the enums that compose the different roles and permissions
+authorization. The sections of the \texttt{GraphQL} schema where the auth
+directive is used, as well as the enums that compose the different roles and permissions
 mappings are listed below:
 
 \begin{lstlisting}[language=graphql, escapeinside={(*@}{@*)}, morekeywords={[2]{@auth, Role, Permission}}, morekeywords={[3]{ADMIN, SIMPLE, VIEW, EDIT}}, morekeywords={[4]{arg}}, morekeywords={[5]{roles, permissions, unprotected, protected, secret}}, xleftmargin=\parindent, caption=\texttt{GraphQL} schema with auth directive and mappings]
@@ -526,15 +518,15 @@ mappings are listed below:
   }
 \end{lstlisting}
 
-The available roles are represented by the enum \texttt{Role}: \texttt{ADMIN}
-for administrators and \texttt{BASIC} for simple users. The supported
-permissions are represented by the enum \texttt{Permission}: \texttt{VIEW} to allow
-resource visualization and \texttt{EDIT} to allow resource modification. \\ %
+The available roles are represented by the enum \texttt{Role}: \texttt{ADMIN} for
+administrators and \texttt{BASIC} for simple users. The supported permissions are
+represented by the enum \texttt{Permission}: \texttt{VIEW} to allow resource
+visualization and \texttt{EDIT} to allow resource modification. \\ %
 The definition of \texttt{@auth} directive accepts as roles an array of \texttt{Role}
-whose default value is empty and as permissions an array of \texttt{Permission} whose
-default value is empty. Notice the difference from the default type definition
-shown in section
-\ref{subsec:corollary_projects_graphql_auth_diretive_type_definition}. \\ %
+whose default value is empty and as permissions an array of \texttt{Permission}
+whose default value is empty. Notice the difference from the default type definition
+shown in section \ref{subsec:corollary_projects_graphql_auth_diretive_type_definition}.
+\\ %
 Three queries are supported:
 \begin{enumerate}
   \item \lstinline[language=graphql, morekeywords={[5]{unprotected}}]{unprotected: String!}
