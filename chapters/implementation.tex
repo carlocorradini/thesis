@@ -5026,7 +5026,7 @@ file that contains the two following attributes:
     It is included in the Authorization header of every request to the Server's
     GraphQL API.
 
-  \item \texttt{URL}
+  \item \texttt{url}
     \newline
     Server \texttt{URL}.
     \newline
@@ -5623,14 +5623,49 @@ in the table below:
 \subsection{Configuration Files}
 \label{subsec:implementation_installer_configuration_files}
 
-% TODO # ... means skipped
-% TODO config script
-% TODO # replaced value from configs.sh
+This section highlights the most essential portions of the configuration and
+Kubernetes deployment files employed in the cluster implementation. Some portions
+have been removed, and the comment \texttt{...} indicates where this has occurred.
+\\ %
+
+The majority of the parameters and/or configuration attributes revert to what
+has been explained and illustrated in all of the previous chapters and sections,
+therefore it is strongly advised to revise the corresponding argument of the respective
+configuration/deployment file if it is unclear. \\ %
+The files may require identical properties, such as the Server URL or Registry
+URL, with other files. It has developed a utility POSIX script called \texttt{configs.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/scripts/configs.sh}}
+that reads a configuration file named \texttt{configs.config.yaml}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/scripts/configs.config.yaml}}
+that includes all of the most frequent and important configuration parameters. The
+script then substitutes an identification marker in the configuration/deployment
+files with the value read from the specified configuration file. This was done
+to prevent a high degree of duplication in the files as well as potential
+misconfiguration due to simple mistakes. The marker, represented by the color
+\fcolorbox{black}{yamlPurple}{\rule{0pt}{6pt}\rule{6pt}{0pt}}, begins with the symbols
+\fontencoding{T1}{\ttfamily{\color{yamlPurple}{\$\{\{}}} and ends with the symbols
+\fontencoding{T1}{\ttfamily{\color{yamlPurple}{\}\}}}}, and in the middle, there
+is a dot-separated string that identifies the corresponding parameter read from the
+script's configuration files. If there is no valid mapping between the
+identifier and the value, an error is thrown. The comment beneath the marker
+indicates the resulting line with the substitute value after the script has
+processed it. It should be noted that this document does not describe how the script
+has been implemented and configured. \\ %
+Lastly, keep in mind that these files represent the configurations of the
+recluster implementation and can thus be adjusted or updated to better match the
+needs and/or requirements of another cluster deployment's organization. As an example,
+the IP addresses of the Load Balancer component are based on the private network
+\texttt{10.0.0.0/24}, but this setup may not be appropriate for other
+installations (it may clash with other already deployed networks), and thus it must/can
+easily be modified.
 
 \subsubsection{K3s}
 \label{subsubsec:implementation_installer_configuration_files_k3s}
 
-\begin{lstlisting}[language=yaml, alsoletter={._}, escapeinside={(*@}{@*)}, morekeywords={[2]{mirrors, endpoint, configs, tls, ca_file, key_file}}, xleftmargin=\parindent, label={lst:k3s_registries_config}, caption=TODO]
+K3s registries configuration file (\texttt{registries.yaml}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/configs/k3s/registries.yaml}})
+is shown in Listing \ref{lst:k3s_registries_config}. Take note of the
+relationship between the registry \texttt{mirror} name used in the Kubernetes deployment
+files and the actual local IP address \texttt{endpoint}.
+
+\begin{lstlisting}[language=yaml, alsoletter={._}, escapeinside={(*@}{@*)}, morekeywords={[2]{mirrors, endpoint, configs, tls, ca_file, key_file}}, xleftmargin=\parindent, label={lst:k3s_registries_config}, caption=K3s registries configuration file]
   mirrors:
     ${{ k8s.registry.mirror.host }}(*@\ttfamily\textcolor{yamlBlue}{:}@*)${{ k8s.registry.mirror.port }}:
     # registry.recluster.local:5000:
@@ -5646,7 +5681,15 @@ in the table below:
         key_file: '/usr/local/share/ca-certificates/registry.key'
 \end{lstlisting}
 
-\begin{lstlisting}[language=yaml, alsoletter={.-}, morekeywords={[2]{token, cluster-init, cluster-domain, flannel-backend, disable, node-taint}}, xleftmargin=\parindent, label={lst:k3s_controller_config}, caption=TODO]
+K3s server configuration file (\texttt{config.controller.yaml}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/configs/k3s/config.controller.yaml}})
+is shown in Listing \ref{lst:k3s_controller_config}. Take note of the \texttt{token},
+cluster initialization flag, \texttt{server} URL, and node-taint \texttt{CriticalAddonsOnly=true:NoExecute}.
+The \texttt{server} parameter is only provided if the Node is not the first to be
+bootstrapped. If the \texttt{taint} is commented, it indicates that the Node is
+both a Server and an Agent, and thus can accept workload; otherwise, the Node cannot
+accept any workload.
+
+\begin{lstlisting}[language=yaml, alsoletter={.-}, morekeywords={[2]{token, cluster-init, cluster-domain, flannel-backend, disable, node-taint}}, xleftmargin=\parindent, label={lst:k3s_controller_config}, caption=K3s server configuration file]
   token: "${{ k3s.token }}"
   # token: "4646f99bc4cbae3d5eceed856b337c9d3284be0d4056a3909f780c0c385fbf93"
   cluster-init: true
@@ -5660,7 +5703,11 @@ in the table below:
     # - 'CriticalAddonsOnly=true:NoExecute'
 \end{lstlisting}
 
-\begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{token, server}}, xleftmargin=\parindent, label={lst:k3s_worker_config}, caption=TODO]
+K3s agent configuration file (\texttt{config.worker.yaml}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/configs/k3s/config.worker.yaml}})
+is shown in Listing \ref{lst:k3s_worker_config}. The parameters \texttt{token} and
+\texttt{server} are always required.
+
+\begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{token, server}}, xleftmargin=\parindent, label={lst:k3s_worker_config}, caption=K3s agent configuration file]
   token: "${{ k3s.token }}"
   # token: "4646f99bc4cbae3d5eceed856b337c9d3284be0d4056a3909f780c0c385fbf93"
   server: "https://${{ k3s.server.host }}:${{ k3s.server.port }}"
@@ -5670,7 +5717,13 @@ in the table below:
 \subsubsection{K8s}
 \label{subsubsec:implementation_installer_configuration_filesn_k8s}
 
-\begin{lstlisting}[language=yaml, alsoletter={.-1}, morekeywords={1}, morekeywords={[2]{apiVersion, kind, metadata, name, namespace, stringData, cloud-config, labels, app, spec, replicas, selector, matchLabels, template, serviceAccountName, tolerations, containers, image, command, volumeMounts, mountPath, readOnly, volumes, secret, secretName}}, xleftmargin=\parindent, label={lst:k8s_autoscaler_deployment}, caption=TODO]
+Cluster Autoscaler deployment file (\texttt{deployment.yaml}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/configs/k8s/autoscaler/ca/deployment.yaml}})
+is shown in Listing \ref{lst:k8s_autoscaler_deployment}. Take note of the Cloud
+Configuration, as well as the associated \texttt{url} and \texttt{token} attributes,
+in addition to the deployment definition, which specifies the Cluster Autoscaler
+container image from the respective local Registry and the command arguments.
+
+\begin{lstlisting}[language=yaml, alsoletter={.-1}, morekeywords={1}, morekeywords={[2]{apiVersion, kind, metadata, name, namespace, stringData, cloud-config, labels, app, spec, replicas, selector, matchLabels, template, serviceAccountName, tolerations, containers, image, command, volumeMounts, mountPath, readOnly, volumes, secret, secretName}}, xleftmargin=\parindent, label={lst:k8s_autoscaler_deployment}, caption=Cluster Autoscaler deployment file]
   # ...
 
   ---
@@ -5701,7 +5754,6 @@ in the table below:
       # ...
       spec:
         # ...
-        serviceAccountName: 'cluster-autoscaler'
         containers:
           - name: 'cluster-autoscaler'
             image: "${{ k8s.registry.mirror.host }}:${{ k8s.registry.mirror.port }}/recluster                       /cluster-autoscaler"
@@ -5723,7 +5775,14 @@ in the table below:
               secretName: 'cluster-autoscaler-secret'
 \end{lstlisting}
 
-\begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{apiVersion, kind, metadata, name, namespace, spec, addresses, ipAddressPools}}, xleftmargin=\parindent, label={lst:k8s_metallb_config}, caption=TODO]
+MetalLB configuration file (\texttt{config.yaml}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/configs/k8s/loadbalancer/config.yaml}})
+is shown in Listing \ref{lst:k8s_metallb_config}. Take note of the IP address
+pool and the fact that it is used in \texttt{Layer 2 Advertisement} mode.
+Moreover, because both extremes are inclusive, the example pool, which is set from
+\texttt{10.0.0.200} to \texttt{10.0.0.250}, has \texttt{51} available addresses and
+not \texttt{50}.
+
+\begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{apiVersion, kind, metadata, name, namespace, spec, addresses, ipAddressPools}}, xleftmargin=\parindent, label={lst:k8s_metallb_config}, caption=MetalLB configuration file]
   ---
   apiVersion: 'metallb.io/v1beta1'
   kind: 'IPAddressPool'
@@ -5746,7 +5805,18 @@ in the table below:
       - 'default'
 \end{lstlisting}
 
-\begin{lstlisting}[language=yaml, alsoletter={.015}, morekeywords={1, 5000}, morekeywords={[2]{apiVersion, kind, type, metadata, name, namespace, data, tls.crt, tls.key, accessModes, storageClassName, resources, requests, storage, spec, selector, app, ports, protocol, port, targetPort, loadBalancerIP, replicas, template, containers, image, containerPort, volumes, secret, secretName, persistentVolumeClaim, claimName}}, xleftmargin=\parindent, label={lst:k8s_registry_config}, caption=TODO]
+Docker Registry deployment file (\texttt{deployment.yaml}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/configs/k8s/registry/deployment.yaml}})
+is shown in Listing \ref{lst:k8s_registry_config}. Take note of the \texttt{TLS}
+parameters, persistent storage, deployment definition, and service configuration.
+The persistent storage is of the type \texttt{local-path} or \texttt{longhorn}
+and has a capacity of \texttt{32 GiB}. The Registry \texttt{image} and its associated
+\texttt{port} are specified in the deployment. Lastly, the Service configuration
+of type \texttt{LoadBalancer} with all associated parameters is specified to expose
+the Registry. In addition to the latter, take notice of the \texttt{loadBalancerIP}
+parameter, which specifies a fixed IP address for the Registry that is within the
+Load Balancer IP address pool.
+
+\begin{lstlisting}[language=yaml, alsoletter={.015}, morekeywords={1, 5000}, morekeywords={[2]{apiVersion, kind, type, metadata, name, namespace, data, tls.crt, tls.key, accessModes, storageClassName, resources, requests, storage, spec, selector, app, ports, protocol, port, targetPort, loadBalancerIP, replicas, template, containers, image, containerPort, volumes, secret, secretName, persistentVolumeClaim, claimName}}, xleftmargin=\parindent, label={lst:k8s_registry_config}, caption=Docker Registry deployment file]
   # ...
 
   ---
@@ -5827,9 +5897,16 @@ in the table below:
 \subsubsection{Node exporter}
 \label{subsubsec:implementation_installer_configuration_files_node_exporter}
 
-% TODO Write node exporter no config file but install.sh transform
+Node Exporter configuration file (\texttt{config.yaml}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/configs/node_exporter/config.yaml}})
+is shown in Listing \ref{lst:node_exporter_config}. Take note that all collectors
+are disabled, except for the \texttt{CPU} and \texttt{memory} collectors. \\ %
+The Node Exporter application does not allow a configuration file by default, and
+it can only be customized when it is executed via arguments. To simplify the
+process, the cluster implementation allows configuring Node Exporter with a file,
+and then all the parameters are transformed into arguments when it is installed
+via the installation script.
 
-\begin{lstlisting}[language=yaml, alsoletter={.-}, morekeywords={[2]{collector, disable-defaults, cpu, meminfo}}, xleftmargin=\parindent, label={lst:node_exporter_config}, caption=TODO]
+\begin{lstlisting}[language=yaml, alsoletter={.-}, morekeywords={[2]{collector, disable-defaults, cpu, meminfo}}, xleftmargin=\parindent, label={lst:node_exporter_config}, caption=Node Exporter configuration file]
 collector:
   disable-defaults: true
   cpu: true
@@ -5839,7 +5916,10 @@ collector:
 \subsubsection{reCluster}
 \label{subsubsec:implementation_installer_configuration_files_recluster}
 
-\begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{kind, recluster, server}}, xleftmargin=\parindent, label={lst:recluster_controller_config}, caption=TODO]
+reCluster Controller configuration file (\texttt{config.controller.yaml}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/configs/recluster/config.controller.yaml}})
+is shown in Listing \ref{lst:recluster_controller_config}.
+
+\begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{kind, recluster, server}}, xleftmargin=\parindent, label={lst:recluster_controller_config}, caption=reCluster Controller configuration file]
   kind: 'controller'
 
   recluster:
@@ -5847,7 +5927,13 @@ collector:
     # server: "10.0.0.10:8080"
 \end{lstlisting}
 
-\begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{kind, recluster, server}}, xleftmargin=\parindent, label={lst:recluster_worker_config}, caption=TODO]
+reCluster Worker configuration file (\texttt{config.worker.yaml}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/configs/recluster/config.worker.yaml}})
+is shown in Listing \ref{lst:recluster_worker_config}. \\ %
+The only distinction between the Controller and Worker configuration files is the
+\texttt{kind} parameter, which instructs the installation script which K3s and other
+potential component configuration file to read.
+
+\begin{lstlisting}[language=yaml, alsoletter={.}, morekeywords={[2]{kind, recluster, server}}, xleftmargin=\parindent, label={lst:recluster_worker_config}, caption=reCluster Worker configuration file]
   kind: 'worker'
 
   recluster:
@@ -5855,7 +5941,10 @@ collector:
     # server: "10.0.0.10:8080"
 \end{lstlisting}
 
-\begin{lstlisting}[language=shell, alsoletter={_}, morestring={*[b]"}, morekeywords={[4]{NODE_ENV, HOST, PORT, LOGGER_LEVEL, DATABASE_URL, SSH_USERNAME, SSH_PRIVATE_KEY, SSH_PASSPHRASE, TOKEN_PRIVATE_KEY, TOKEN_PUBLIC_KEY, TOKEN_PASSPHRASE}}, xleftmargin=\parindent, label={lst:recluster_server_config}, caption=TODO]
+Server environment configuration file (\texttt{server.env}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/configs/recluster/server.env}})
+is shown in Listing \ref{lst:recluster_server_config}.
+
+\begin{lstlisting}[language=shell, alsoletter={_}, morestring={*[b]"}, morekeywords={[4]{NODE_ENV, HOST, PORT, LOGGER_LEVEL, DATABASE_URL, SSH_USERNAME, SSH_PRIVATE_KEY, SSH_PASSPHRASE, TOKEN_PRIVATE_KEY, TOKEN_PUBLIC_KEY, TOKEN_PASSPHRASE}}, xleftmargin=\parindent, label={lst:recluster_server_config}, caption=Server environment configuration file]
   NODE_ENV='production'
   HOST='0.0.0.0'
   PORT=${{ recluster.server.port }}
@@ -5874,12 +5963,19 @@ collector:
 \subsubsection{SSH}
 \label{subsubsec:implementation_installer_configuration_files_ssh}
 
-\begin{lstlisting}[language=shell, xleftmargin=\parindent, label={lst:ssh_authorized_keys}, caption=TODO]
+SSH authorized keys configuration file (\texttt{authorized\_keys}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/configs/ssh/authorized_keys}})
+is shown in Listing \ref{lst:ssh_authorized_keys}.
+
+\begin{lstlisting}[language=shell, xleftmargin=\parindent, label={lst:ssh_authorized_keys}, caption=SSH authorized keys file]
   ${{ ssh.authorized_key }}
   # ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK4mrabO3qgmkmWKSP+WcBDEWGGqJUBoiQdK3yAbKry9
 \end{lstlisting}
 
-\begin{lstlisting}[language=shell, alsoletter={*.-@}, morekeywords={[4]{Host, AddKeysToAgent, IdentitiesOnly, PasswordAuthentication, ChallengeResponseAuthentication, PubkeyAuthentication, HostKeyAlgorithms, Ciphers, MACs, UseRoaming}}, keywordstyle={[5]\color{shellGreen}}, morekeywords={[5]{*, yes, no, ssh-ed25519-cert-v01@openssh.com, ssh-ed25519, chacha20-poly1305@openssh.com, aes256-gcm@openssh.com, aes128-gcm@openssh.com, aes256-ctr, aes192-ctr, aes128-ctr, hmac-sha2-512-etm@openssh.com, hmac-sha2-256-etm@openssh.com, umac-128-etm@openssh.com, hmac-sha2-512, hmac-sha2-256, umac-128@openssh.com}}, xleftmargin=\parindent, label={lst:ssh_config}, caption=TODO]
+SSH configuration file (\texttt{ssh\_config}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/configs/ssh/ssh_config}})
+is shown in Listing \ref{lst:ssh_config}. Take note of the \texttt{Ed25519}
+digital signature scheme, as well as the \texttt{Ciphers} and \texttt{MACs}.
+
+\begin{lstlisting}[language=shell, alsoletter={*.-@}, morekeywords={[4]{Host, AddKeysToAgent, IdentitiesOnly, PasswordAuthentication, ChallengeResponseAuthentication, PubkeyAuthentication, HostKeyAlgorithms, Ciphers, MACs, UseRoaming}}, keywordstyle={[5]\color{shellGreen}}, morekeywords={[5]{*, yes, no, ssh-ed25519-cert-v01@openssh.com, ssh-ed25519, chacha20-poly1305@openssh.com, aes256-gcm@openssh.com, aes128-gcm@openssh.com, aes256-ctr, aes192-ctr, aes128-ctr, hmac-sha2-512-etm@openssh.com, hmac-sha2-256-etm@openssh.com, umac-128-etm@openssh.com, hmac-sha2-512, hmac-sha2-256, umac-128@openssh.com}}, xleftmargin=\parindent, label={lst:ssh_config}, caption=SSH configuration file]
   Host *
     AddKeysToAgent yes
     IdentitiesOnly yes
@@ -5893,7 +5989,10 @@ collector:
     # ...
 \end{lstlisting}
 
-\begin{lstlisting}[language=shell, xleftmargin=\parindent, alsoletter={*.-@/}, morekeywords={[4]{Ciphers, MACs, PubkeyAuthentication, PasswordAuthentication, ChallengeResponseAuthentication, AllowTcpForwarding, GatewayPorts, X11Forwarding, Subsystem}}, keywordstyle={[5]\color{shellGreen}}, morekeywords={[5]{no, yes, sftp, /usr/lib/ssh/sftp-server, chacha20-poly1305@openssh.com, aes256-gcm@openssh.com, aes128-gcm@openssh.com, aes256-ctr, aes192-ctr, aes128-ctr, hmac-sha2-512-etm@openssh.com, hmac-sha2-256-etm@openssh.com, umac-128-etm@openssh.com, hmac-sha2-512, hmac-sha2-256, umac-128@openssh.com}}, label={lst:sshd_config}, caption=TODO]
+SSH server configuration file (\texttt{sshd\_config}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/configs/ssh/sshd_config}})
+is shown in Listing \ref{lst:sshd_config}.
+
+\begin{lstlisting}[language=shell, xleftmargin=\parindent, alsoletter={*.-@/}, morekeywords={[4]{Ciphers, MACs, PubkeyAuthentication, PasswordAuthentication, ChallengeResponseAuthentication, AllowTcpForwarding, GatewayPorts, X11Forwarding, Subsystem}}, keywordstyle={[5]\color{shellGreen}}, morekeywords={[5]{no, yes, sftp, /usr/lib/ssh/sftp-server, chacha20-poly1305@openssh.com, aes256-gcm@openssh.com, aes128-gcm@openssh.com, aes256-ctr, aes192-ctr, aes128-ctr, hmac-sha2-512-etm@openssh.com, hmac-sha2-256-etm@openssh.com, umac-128-etm@openssh.com, hmac-sha2-512, hmac-sha2-256, umac-128@openssh.com}}, label={lst:sshd_config}, caption=SSH server configuration file]
   Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,                                           aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
   MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,           hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com
   PubkeyAuthentication yes
