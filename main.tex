@@ -48,6 +48,8 @@
 \captionsetup[table]{position=bottom}
 % List
 \usepackage{enumitem}
+% Bibliography
+\usepackage{natbib}
 % Color
 \usepackage{xcolor}
 \definecolor{gray}{RGB}{102,102,102}
@@ -256,7 +258,6 @@ commentstyle=\color{graphqlGray}\upshape %
 
   % Chapters
   \input{chapters/introduction.tex}
-  \input{chapters/state_of_the_art.tex}
   \input{chapters/architecture.tex}
   \input{chapters/implementation.tex}
 
@@ -271,7 +272,8 @@ commentstyle=\color{graphqlGray}\upshape %
   \addcontentsline{toc}{chapter}{Bibliography}
   % Alphabetical order of authors
   \bibliographystyle{plain}
-  \bibliography{bibliography}
+  \renewcommand{\bibpreamble}{All icons in custom Figures (i.e. no \texttt{Source}) are from \url{www.flaticon.com} and were created by one of the following authors: \texttt{Fathema Khanom}, \texttt{Freepik}, \texttt{Iconpro86}, \texttt{juicy\_fish}, \texttt{Kiranshastry}, \texttt{Pixel perfect}, \texttt{Roundicons}, \texttt{Smashicons}, \texttt{Uniconlab}, \texttt{Vectors Market}, and \texttt{Vitaly Gorbachev}}
+  \bibliography{bibliography.bib}
 
 
   % Attachments
