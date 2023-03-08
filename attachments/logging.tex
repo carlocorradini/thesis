@@ -1,39 +1,41 @@
 \chapter{Logging}
 \label{cha:logging}
 
-Logging is the process of preserving a record of events that occur in a computer
-system, such as issues, errors, or just information on current operations. These
-events might happen in the operating system or other applications. For each such
-event, a message or log entry is recorded. These log messages may subsequently
-be used to monitor and understand the system's operation, troubleshoot problems,
-or during an audit. Logging is very crucial in multi-user applications to provide
-a centralized view of the system's functionality\cite{logging}. \\ %
+Logging\footnote{\url{https://wikipedia.org/wiki/Logging_(computing)}} is the process
+of preserving a record of events that occur in a computer system, such as issues,
+errors, or just information on current operations. These events might happen in the
+operating system or other applications. For each such event, a message or log entry
+is recorded. These log messages may subsequently be used to monitor and
+understand the system's operation, troubleshoot problems, or during an audit. Logging
+is very crucial in multi-user applications to provide a centralized view of the system's
+functionality. \\ %
 It is critical in the architecture implementation to log the numerous operations
-that occur in each component of the cluster. The latter not only assists in understanding
-how the general architecture performs and its status, but also the potential
-causes of an incident. During the cluster's development, if any components
-failed or did not behave as they should (e.g., no autonomous upscaling or downscaling),
-monitoring and analyzing the numerous log files created was the only method to solve
-the problems and understanding what and why happened. Furthermore, a logging system
-is available for the multitude of utility scripts and applications that are not directly
-employed with the cluster but rather during its general development. \\ %
+that occur in each component of the cluster. The latter not only assists in
+understanding how the general architecture performs and its status, but also the
+potential causes of an incident. During the cluster's development, if any components
+failed or did not behave as they should (e.g., no autonomous upscaling or
+downscaling), monitoring and analyzing the numerous log files created was the
+only method to solve the problems and understanding what and why happened. Furthermore,
+a logging system is available for the multitude of utility scripts and
+applications that are not directly employed with the cluster but rather during
+its general development. \\ %
 Log interpretation is a challenging process. Log management system collects data
-from a variety of sources with varying forms, purposes, and granularities. Maintaining
-defined log levels helps give each entry meaning and better understand the significance
-of the related log message\cite{logging_levels}. Section \ref{sec:logging_levels}
-describes common logging levels that are also employed in cluster development and
-implementation.
+from a variety of sources with varying forms, purposes, and granularities.
+Maintaining defined log levels helps give each entry meaning and better
+understand the significance of the related log message\cite{logging_levels}.
+Section \ref{sec:logging_levels} describes common logging levels that are also
+employed in cluster development and implementation.
 
 \section{Levels}
 \label{sec:logging_levels}
 
-A log level is a piece of information that indicates the importance of a log
-message. It is a basic yet effective method of identifying log events from one another.
-Furthermore, it is utilized to filter crucial information regarding the system state
-to only those that are solely informational\cite{logging_levels}. \\ %
-During the initialization phase, a level is chosen from the list below (sorted
-in descending order of importance), with the expectation that the lower levels
-are ignored in favor of the higher ones.
+A log level is a piece of information that indicates the importance of a log message.
+It is a basic yet effective method of identifying log events from one another. Furthermore,
+it is utilized to filter crucial information regarding the system state to only
+those that are solely informational\cite{logging_levels}. \\ %
+During the initialization phase, a level is chosen from the list below (sorted in
+descending order of importance), with the expectation that the lower levels are ignored
+in favor of the higher ones.
 
 \begin{enumerate}
   \item[\protect\icircled{\texttt{7}}] \texttt{SILENT}
@@ -73,9 +75,9 @@ are ignored in favor of the higher ones.
     level is quite verbose.
 \end{enumerate}
 
-Table \ref{tbl:logging_levels}, shows the correlation between the logging level
-and the related logging message. The default logging level in various implementations
-is often set to \texttt{INFO} level.
+Table \ref{tbl:logging_levels}, shows the correlation between the logging level and
+the related logging message. The default logging level in various
+implementations is often set to \texttt{INFO} level.
 
 \begin{xltabular}
   {\textwidth} { >{\ttfamily}c | >{\large\ttfamily}c | >{\large\ttfamily}c | >{\large\ttfamily}c | >{\large\ttfamily}c | >{\large\ttfamily}c | >{\large\ttfamily}c }

@@ -242,67 +242,67 @@ distribution.
 \subsection{Init System}
 \label{subsec:implementation_distributions_init_system}
 
-The Init System, short for Initialization System, is the first process that runs
-when a Unix-based computer operating system is bootstrapped. Init is a daemon
-process that is normally given Process IDentifier 1 (PID 1) and runs until the
-system is shut down. It is the direct or indirect ancestor of all other processes
-and adopts all orphaned processes automatically. The kernel starts Init during
-the boot process; if the kernel is unable to start it, a kernel panic occurs\cite{init_system}.
-\\ %
-The Init System is logically positioned above the Kernel and is an essential component
-of every modern system. It frequently integrates sophisticated features over
-simple ones and is very customizable. Furthermore, it offers active control and
-monitoring over the running processes, keeping the entire system healthy and active.
-The latter is critical because it enables automated and continuous monitoring of
-cluster implementation architecture-related processes operating in the node
-without the need for a custom solution. For example, if a K8s instance executing
-in a worker node crashes (i.e. exits with a code different than 0), the Init
-System detects it and restarts the process automatically, making the node active
-and able to receive workload again. \\ %
+The Init System\footnote{\url{https://wikipedia.org/wiki/Init}}, short for
+Initialization System, is the first process that runs when a Unix-based computer
+operating system is bootstrapped. Init is a daemon process that is normally
+given Process IDentifier 1 (PID 1) and runs until the system is shut down. It is
+the direct or indirect ancestor of all other processes and adopts all orphaned processes
+automatically. The kernel starts Init during the boot process; if the kernel is unable
+to start it, a kernel panic occurs. \\ %
+The Init System is logically positioned above the Kernel and is an essential
+component of every modern system. It frequently integrates sophisticated features
+over simple ones and is very customizable. Furthermore, it offers active control
+and monitoring over the running processes, keeping the entire system healthy and
+active. The latter is critical because it enables automated and continuous monitoring
+of cluster implementation architecture-related processes operating in the node without
+the need for a custom solution. For example, if a K8s instance executing in a worker
+node crashes (i.e. exits with a code different than 0), the Init System detects it
+and restarts the process automatically, making the node active and able to
+receive workload again. \\ %
 When the node is bootstrapped, the Init System is set to start all cluster-related
-processes (i.e., K8s instance and Metric Server) and run a script that sends a
-message to the server component notifying it that the node is active and ready. Before
+processes (i.e., K8s instance and Metric Server) and run a script that sends a message
+to the server component notifying it that the node is active and ready. Before
 the node is shut down, it automatically terminates all cluster-related processes
-and sends a message to the server component informing that the node is shutting
-down and will be inactive. As previously stated, the cluster performs these two
-operations automatically: bootstrap for upscaling and shutdown for downscaling.
-However, there are scenarios in which a node is manually bootstrapped and/or shut
-down by human action without involving the server component directly. Despite
-the possibility of the latter, the overall cluster state remains consistent, and
-all node statuses are correctly updated, thanks to the Init System and its monitoring
-and configuration capabilities. \\ %
-The implementation currently supports two init systems: OpenRC (described in section
-\ref{subsec:implementation_distributions_init_system_openrc}) and Systemd (described
-in section \ref{subsec:implementation_distributions_init_system_systemd}). They are
-the two most popular and widely used Init Systems, and the vast majority of
-Linux distributions support one or both of them. Their capabilities are nearly identical.
-However, configuration files and available application(s) that interact with the
-bare-metal Init System API, are different, necessitating double effort to
-achieve the same objective. \\ %
-It should be noted that if the Init System daemon process crashes due to an
-error, the entire system crashes and becomes inactive, necessitating a manual
-restart. Even though the likelihood of the latter is extremely low, it is never
-zero. As a result, as stated in section
-\ref{subsec:architecture_components_server}, a heartbeat mechanism has been established
-in the cluster to constantly monitor and identify the status and availability of
-all active nodes. If there are no configuration or networking issues and a node's
-heartbeat is not received within the predefined interval, it indicates that the heartbeat
-daemon executing in the node has crashed and has not yet been restarted, or that
-the entire node has crashed and is not automatically recoverable. \\ %
-In each of the following sections, where an Init System distribution is described,
-an example of the related service configuration file is presented to illustrate
-its differences. A service configuration file contains information about a process
-that the Init System controls and monitors. The application used as a reference
-in this example is K3s, a lightweight Kubernetes distribution explained in further
-detail in section \ref{subsec:implementation_dependencies_k3s}. Before starting,
-it must clear any temporary files in the \texttt{tmp} directory and load
-environment variables from two distinct directories. Furthermore, anytime the
-application process crashes, the Init System must restart it within 5 seconds after
-detection. Even though each Init System has a unique service configuration file,
-the result is nearly identical. The list below highlights some of the most
-significant configuration requirements. To aid comprehension, the identification
-number for each requirement is also provided in the Init System's service
-configuration file.
+and sends a message to the server component informing that the node is shutting down
+and will be inactive. As previously stated, the cluster performs these two operations
+automatically: bootstrap for upscaling and shutdown for downscaling. However,
+there are scenarios in which a node is manually bootstrapped and/or shut down by
+human action without involving the server component directly. Despite the possibility
+of the latter, the overall cluster state remains consistent, and all node statuses
+are correctly updated, thanks to the Init System and its monitoring and
+configuration capabilities. \\ %
+The implementation currently supports two init systems: OpenRC (described in
+section \ref{subsec:implementation_distributions_init_system_openrc}) and Systemd
+(described in section
+\ref{subsec:implementation_distributions_init_system_systemd}). They are the two
+most popular and widely used Init Systems, and the vast majority of Linux distributions
+support one or both of them. Their capabilities are nearly identical. However,
+configuration files and available application(s) that interact with the bare-metal
+Init System API, are different, necessitating double effort to achieve the same objective.
+\\ %
+It should be noted that if the Init System daemon process crashes due to an error,
+the entire system crashes and becomes inactive, necessitating a manual restart.
+Even though the likelihood of the latter is extremely low, it is never zero. As
+a result, as stated in section \ref{subsec:architecture_components_server}, a
+heartbeat mechanism has been established in the cluster to constantly monitor
+and identify the status and availability of all active nodes. If there are no configuration
+or networking issues and a node's heartbeat is not received within the predefined
+interval, it indicates that the heartbeat daemon executing in the node has
+crashed and has not yet been restarted, or that the entire node has crashed and is
+not automatically recoverable. \\ %
+In each of the following sections, where an Init System distribution is
+described, an example of the related service configuration file is presented to illustrate
+its differences. A service configuration file contains information about a
+process that the Init System controls and monitors. The application used as a reference
+in this example is K3s, a lightweight Kubernetes distribution explained in
+further detail in section \ref{subsec:implementation_dependencies_k3s}. Before starting,
+it must clear any temporary files in the \texttt{tmp} directory and load environment
+variables from two distinct directories. Furthermore, anytime the application process
+crashes, the Init System must restart it within 5 seconds after detection. Even though
+each Init System has a unique service configuration file, the result is nearly
+identical. The list below highlights some of the most significant configuration requirements.
+To aid comprehension, the identification number for each requirement is also provided
+in the Init System's service configuration file.
 \begin{enumerate}[label=\protect\circled{\arabic{*}}]
   \item General information about the service.
     \newline
@@ -348,16 +348,16 @@ configuration file.
   \caption{Gentoo Linux logo}
 \end{wrapfigure}
 
-OpenRC is a dependency-based init system for Unix-like systems that maintain
-compatibility with the system's init system, which is generally found in \texttt{/sbin/init}.
-\\ %
-At boot, OpenRC starts the appropriate system services in the right sequence, manages
-them while the system is running, and stops them at shutdown. It can manage installed
-daemons, optionally monitor the processes it launches, and start processes in parallel
-when possible to reduce boot time. \\ %
-OpenRC was developed for Gentoo\footnote{\url{https://www.gentoo.org}}, but it
-may be used in other Linux distributions and BSD\footnote{\url{https://www.bsd.org}}
-systems as well\cite{openrc}. \\ %
+OpenRC\footnote{\url{https://wiki.gentoo.org/wiki/OpenRC}} is a dependency-based
+init system for Unix-like systems that maintain compatibility with the system's init
+system, which is generally found in \texttt{/sbin/init}. \\ %
+At boot, OpenRC starts the appropriate system services in the right sequence,
+manages them while the system is running, and stops them at shutdown. It can
+manage installed daemons, optionally monitor the processes it launches, and
+start processes in parallel when possible to reduce boot time. \\ %
+OpenRC was developed for Gentoo\footnote{\url{https://www.gentoo.org}}, but it may
+be used in other Linux distributions and BSD\footnote{\url{https://www.bsd.org}}
+systems as well. \\ %
 Listing \ref{lst:openrc} illustrates the example of the OpenRC service configuration
 file for K3s saved in \texttt{/etc/init.d/k3s}. Manual control of the service is
 possible using the \texttt{rc-service} command, which locates and runs the
@@ -410,9 +410,9 @@ commands/capabilities that OpenRC is capable of.
   \caption{systemd logo}
 \end{wrapfigure}
 
-systemd is a collection of building blocks for a Linux system. It provides a
-system and service manager that runs as PID 1 and starts the rest of the system.
-\\ %
+systemd\footnote{\url{https://systemd.io}} is a collection of building blocks for
+a Linux system. It provides a system and service manager that runs as PID 1 and
+starts the rest of the system. \\ %
 systemd supports aggressive parallelization, on-demand daemon startup, process
 tracking through Linux control groups, mount and automount point management, and
 a complex transactional dependency-based service control logic. \\ %
@@ -420,17 +420,18 @@ Other components include a logging daemon, tools to handle basic system configur
 such as the hostname, date, and locale, a list of logged-in users and running
 containers and virtual machines, system accounts, runtime directories and
 settings, and daemons to manage simple network configuration, network time
-synchronization, log forwarding, and name resolution\cite{systemd}. \\ %
-Listing \ref{lst:systemd} illustrates the example of the systemd service configuration
-file for K3s saved in \texttt{/etc/systemd/system/k3s.service}. The \texttt{systemctl}
-command, which manages the systemd system and the service manager, may be used to
-manually control the service: \texttt{systemd <CMD> k3s [...]}. \texttt{<CMD>} can
-be replaced with \texttt{start} to start the service, \texttt{stop} to stop it, \texttt{restart}
-to restart it, and \texttt{status} to obtain the service status. Furthermore,
-the service may be enabled to start automatically when the system boots up by
-using the commands \texttt{systemctl enable k3s} followed by \texttt{systemctl daemon-reload}
-to reload the systemd management configuration. The latter examples are only a small
-portion of all the commands and capabilities provided by systemd.
+synchronization, log forwarding, and name resolution. \\ %
+Listing \ref{lst:systemd} illustrates the example of the systemd service
+configuration file for K3s saved in \texttt{/etc/systemd/system/k3s.service}. The
+\texttt{systemctl} command, which manages the systemd system and the service manager,
+may be used to manually control the service: \texttt{systemd <CMD> k3s [...]}. \texttt{<CMD>}
+can be replaced with \texttt{start} to start the service, \texttt{stop} to stop it,
+\texttt{restart} to restart it, and \texttt{status} to obtain the service status.
+Furthermore, the service may be enabled to start automatically when the system boots
+up by using the commands \texttt{systemctl enable k3s} followed by \texttt{systemctl
+daemon-reload} to reload the systemd management configuration. The latter
+examples are only a small portion of all the commands and capabilities provided
+by systemd.
 
 \begin{lstlisting}[language=ini, escapeinside={(*@}{@*)}, morekeywords={Description, Documentation, Wants, After, StartLimitBurst, WantedBy, Type, ExecStartPre, ExecStart, EnvironmentFile, KillMode, Delegate, TimeoutStartSec, Restart, RestartSec}, xleftmargin=\parindent, label={lst:systemd}, caption=\texttt{systemd} service configuration file for K3s]
   [Unit]
@@ -459,26 +460,26 @@ portion of all the commands and capabilities provided by systemd.
 \subsection{ISO Image}
 \label{subsec:implementation_distributions_iso_image}
 
-This section briefly describes the two original Linux distributions, Alpine
-Linux and Arch Linux, which served as the foundation for the two custom Linux distributions.
-They were both utilized and tested together in the implementation cluster. Furthermore,
-it is shown how the two custom ISO image files are customized and generated by
-the use of a simple script. \\ %
-The ISO image can be burned into physical media such as a CD, or a USB flash drive
-or can be mounted as an ISO file. The latter shows the high level of flexibility
-and overall compatibility that an ISO file has. Moreover, it is extremely
-portable since it is intrinsically only a single file making it the perfect
-format for a release bundle and very useful in an Air-Gap environment. \\ %
-After an ISO image of a Linux distribution has been burned to media, it can be easily
-installed on multiple systems by attaching the media to the system and selecting
-it as the default boot. It starts a live (volatile) OS that is not currently
+This section briefly describes the two original Linux distributions, Alpine Linux
+and Arch Linux, which served as the foundation for the two custom Linux
+distributions. They were both utilized and tested together in the implementation
+cluster. Furthermore, it is shown how the two custom ISO image files are customized
+and generated by the use of a simple script. \\ %
+The ISO image can be burned into physical media such as a CD, or a USB flash
+drive or can be mounted as an ISO file. The latter shows the high level of flexibility
+and overall compatibility that an ISO file has. Moreover, it is extremely portable
+since it is intrinsically only a single file making it the perfect format for a release
+bundle and very useful in an Air-Gap environment. \\ %
+After an ISO image of a Linux distribution has been burned to media, it can be
+easily installed on multiple systems by attaching the media to the system and
+selecting it as the default boot. It starts a live (volatile) OS that is not currently
 installed on the primary disk. The live Linux distribution may then be installed
-directly into the primary disk, making it permanently available on the system
-without the need for removable media. The latter step may be performed manually,
-but it is more complex than it appears since it necessitates an understanding of
-disk formatting, partitioning, as well as other topics. Fortunately, most Linux
-distributions, including the two custom ones, have simple tools that automate
-the installation procedure by asking only a few simple questions to the user/administrator.
+directly into the primary disk, making it permanently available on the system without
+the need for removable media. The latter step may be performed manually, but it is
+more complex than it appears since it necessitates an understanding of disk formatting,
+partitioning, as well as other topics. Fortunately, most Linux distributions,
+including the two custom ones, have simple tools that automate the installation procedure
+by asking only a few simple questions to the user/administrator.
 
 \subsubsection{Alpine Linux}
 \label{subsubsec:implementation_distributions_iso_alpine_linux}
@@ -491,52 +492,53 @@ the installation procedure by asking only a few simple questions to the user/adm
   \caption{Alpine Linux logo}
 \end{wrapfigure}
 
-Alpine Linux\footnote{\url{https://www.alpinelinux.org}} is a lightweight, security-focused,
-and resource-efficient distribution. In recent years, has grown in popularity as
-the foundation for the majority of Docker images. It is based on musl\footnote{\url{https://musl.libc.org}}
-(an implementation of the C standard library, an alternative to glibc\footnote{\url{https://www.gnu.org/software/libc}}),
-BusyBox\footnote{\url{https://busybox.net}} (a single, small executable that combines
-tiny versions of many common UNIX utilities), a custom package manager called APK\footnote{\url{https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper}}
+Alpine Linux\footnote{\url{https://www.alpinelinux.org}} is a lightweight,
+security-focused, and resource-efficient distribution. In recent years, has grown
+in popularity as the foundation for the majority of Docker images. It is based
+on musl\footnote{\url{https://musl.libc.org}} (an implementation of the C standard
+library, an alternative to glibc\footnote{\url{https://www.gnu.org/software/libc}}),
+BusyBox\footnote{\url{https://busybox.net}} (a single, small executable that
+combines tiny versions of many common UNIX utilities), a custom package manager
+called APK\footnote{\url{https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper}}
 and the OpenRC Init System\cite{alpine_linux}. \\ %
-Alpine Linux is the preferred reCluster distribution since it has been widely
-used and tested throughout the development process.
+Alpine Linux is the preferred reCluster distribution since it has been widely used
+and tested throughout the development process.
 
 The official documentation\footnote{\url{https://wiki.alpinelinux.org/wiki/How_to_make_a_custom_ISO_image_with_mkimage}}
-provides a brief guideline on how to build a custom Alpine Linux ISO image. Unfortunately,
-it is not exhaustive, and it assumes a lot of information and configurations. A
-simpler, easy-to-use, and portable solution is required for cluster
+provides a brief guideline on how to build a custom Alpine Linux ISO image.
+Unfortunately, it is not exhaustive, and it assumes a lot of information and
+configurations. A simpler, easy-to-use, and portable solution is required for cluster
 implementation. This resulted in the creation of a POSIX script that handles all
 of the burdens, as explained below. \\ %
 Building a custom Alpine Linux ISO image involves three prerequisites: an Alpine
-Linux system, specific tools/packages to configure and build the image, and a general
-configuration with a special administrator user and the generation of signing keys.
-These requirements remain constant over time and can be regarded as essentially
-static. Furthermore, having a physical Alpine Linux system dedicated just to
-generating custom images is a waste of resources. As a result, a custom
-Dockerfile\footnote{\url{https://docs.docker.com/engine/reference/builder}}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/alpine/Dockerfile}}
-based on Alpine Linux has been created to allow building the image in different
-environments without the need for a physical machine and with all of the
-previous requirements already fulfilled. \\ %
+Linux system, specific tools/packages to configure and build the image, and a
+general configuration with a special administrator user and the generation of
+signing keys. These requirements remain constant over time and can be regarded as
+essentially static. Furthermore, having a physical Alpine Linux system dedicated
+just to generating custom images is a waste of resources. As a result, a custom Dockerfile\footnote{\url{https://docs.docker.com/engine/reference/builder}}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/alpine/Dockerfile}}
+based on Alpine Linux has been created to allow building the image in different environments
+without the need for a physical machine and with all of the previous requirements
+already fulfilled. \\ %
 The ISO image is customized using the \texttt{mkimg.recluster.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/alpine/mkimg.recluster.sh}}
-file, which defines and integrates a custom recluster profile, based on the basic
-Alpine Linux profile. This file, whose content is shown in listing \ref{lst:alpine},
-is not included in the Dockerfile because it is considered dynamic, in the sense
-that it could be updated and customized over time to meet potential new cluster specifications.
-\\ %
-Finally, to create the ISO image, the container image must be launched in detached
-mode, a local volume mounted to the container, the \texttt{mkimg.recluster.sh}
-file loaded, and the official \texttt{mkimage.sh} script executed with extra
-configuration parameters. When performed manually, the latter tasks are
-extremely difficult and prone to human error. As a result, all operations have
-been included in a POSIX script, simply named \texttt{build.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/alpine/build.sh}},
+file, which defines and integrates a custom recluster profile, based on the
+basic Alpine Linux profile. This file, whose content is shown in listing
+\ref{lst:alpine}, is not included in the Dockerfile because it is considered dynamic,
+in the sense that it could be updated and customized over time to meet potential
+new cluster specifications. \\ %
+Finally, to create the ISO image, the container image must be launched in
+detached mode, a local volume mounted to the container, the \texttt{mkimg.recluster.sh}
+file loaded, and the official \texttt{mkimage.sh} script executed with extra configuration
+parameters. When performed manually, the latter tasks are extremely difficult and
+prone to human error. As a result, all operations have been included in a POSIX script,
+simply named \texttt{build.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/distributions/alpine/build.sh}},
 that does everything automatically, including cleanup procedures when the image(s)
-has been generated or an error occurs. Moreover, all ISO images created are saved
-in the current working directory under the directory \texttt{iso}. As an example,
-a custom image based on Alpine Linux version 3.17 and generated with the
+has been generated or an error occurs. Moreover, all ISO images created are
+saved in the current working directory under the directory \texttt{iso}. As an
+example, a custom image based on Alpine Linux version 3.17 and generated with the
 recluster profile for architecture \texttt{x86\_64} is saved as \texttt{alpine-recluster-v3.17-x86\_64.iso}
 and is just \texttt{190MiB} in size. \\ %
-To configure and install Alpine Linux permanently on the primary disk, simply
-run the \texttt{setup-alpine}\footnote{\url{https://docs.alpinelinux.org/user-handbook/0.1a/Installing/setup_alpine.html}}
+To configure and install Alpine Linux permanently on the primary disk, simply run
+the \texttt{setup-alpine}\footnote{\url{https://docs.alpinelinux.org/user-handbook/0.1a/Installing/setup_alpine.html}}
 program and answer a few easy questions.
 
 \begin{lstlisting}[language=shell, morekeywords={[2]{profile_recluster, profile_base}}, morekeywords={[4]{title, desc, profile_abbrev, image_ext, arch, output_format, apks, apkovl}}, xleftmargin=\parindent, label={lst:alpine}, caption=Contents of \texttt{mkimg.recluster.sh} file which shows the reCluster profile definition]
@@ -564,16 +566,16 @@ program and answer a few easy questions.
   \caption{Arch Linux logo}
 \end{wrapfigure}
 
-Arch Linux\footnote{\url{https://archlinux.org}} is a general-purpose
-distribution that focuses on simplicity, minimalism, and code elegance. It is based
-on Systemd Init System and strives to stay bleeding edge, offering the latest
-stable versions of most software through Pacman\footnote{\url{https://wiki.archlinux.org/title/Pacman}}
+Arch Linux\footnote{\url{https://archlinux.org}} is a general-purpose distribution
+that focuses on simplicity, minimalism, and code elegance. It is based on
+Systemd Init System and strives to stay bleeding edge, offering the latest stable
+versions of most software through Pacman\footnote{\url{https://wiki.archlinux.org/title/Pacman}}
 package manager. Uses a rolling release system that allows one-time installation
 and perpetual software upgrades, allowing to not reinstall or upgrade the system
-from one version to the next. Notably, Arch Linux is the foundation for several
-many popular enterprise-grade distributions, such as Manjaro\footnote{\url{https://manjaro.org}}
-and SteamOS\footnote{\url{https://store.steampowered.com/steamos}},
-demonstrating its customizability, power, and stability\cite{arch_linux}.
+from one version to the next. Notably, Arch Linux is the foundation for several many
+popular enterprise-grade distributions, such as Manjaro\footnote{\url{https://manjaro.org}}
+and SteamOS\footnote{\url{https://store.steampowered.com/steamos}}, demonstrating
+its customizability, power, and stability.
 
 The official documentation\footnote{\url{https://wiki.archlinux.org/title/archiso}}
 includes precise guidelines for building a custom Arch Linux ISO image. For
@@ -740,9 +742,9 @@ object-relational database system that uses and extends the \texttt{SQL}
 language with several capabilities for properly storing and scaling the most
 complex data workloads. It is designed to assist developers in building applications,
 and administrators in preserving data integrity and building fault-tolerant
-systems\cite{postgresql}. \\ %
-PostgreSQL has a direct mapping with the cluster architecture's Database component.
-\\ %
+systems. \\ %
+PostgreSQL has a direct mapping with the cluster architecture's Database
+component. \\ %
 PostgreSQL was chosen over all other possible alternatives for three key reasons,
 which are detailed below:
 \begin{enumerate}
@@ -776,24 +778,25 @@ which are detailed below:
   \caption{K3s logo}
 \end{wrapfigure}
 
-K3s is a lightweight Kubernetes distribution designed for production workloads
-in resource-constrained, high-availability, unattended, and remote environments\cite{k3s}.
-K3s is the cluster implementation's core, where all Kubernetes-related
-operations are managed and processed. Because K3s is an element of both a Worker
-and a Controller Node has no clear mapping to an architectural component. \\ %
+K3s\footnote{\url{https://k3s.io}} is a lightweight Kubernetes distribution designed
+for production workloads in resource-constrained, high-availability, unattended,
+and remote environments. K3s is the cluster implementation's core, where all
+Kubernetes-related operations are managed and processed. Because K3s is an element
+of both a Worker and a Controller Node has no clear mapping to an architectural component.
+\\ %
 K3s is distributed as a single small binary (less than 60MiB) that reduces the requirements
 and procedures required to install, run, and automatically update a production Kubernetes
-cluster\cite{k3s}. It is completely compatible with both the \texttt{OpenRC} and
-\texttt{systemd} Init Systems and can run on any Linux distribution with a Kernel
-that satisfies the basic Kubernetes requirements.
+cluster. It is completely compatible with both the \texttt{OpenRC} and \texttt{systemd}
+Init Systems and can run on any Linux distribution with a Kernel that satisfies
+the basic Kubernetes requirements.
 
 \subsubsection{Enhancements}
 \label{subsubsec:implementation_dependencies_k3s_enhancements}
 
-K3s is a fully compliant Kubernetes distribution that has removed the majority
-of legacy, alpha, and cloud-provider-specific code to minimize overall
-application size and hardware requirements. Furthermore, K3s provides the
-following enhancements over a conventional Kubernetes distribution\cite{k3s}:
+K3s is a fully compliant Kubernetes distribution that has removed the majority of
+legacy, alpha, and cloud-provider-specific code to minimize overall application size
+and hardware requirements. Furthermore, K3s provides the following enhancements over
+a conventional Kubernetes distribution\footnote{\url{https://docs.k3s.io}}:
 \begin{itemize}
   \item All required dependencies are pre-packaged within a single binary file,
     necessitating only a modern Kernel and \texttt{cgroup} mounts.
@@ -822,10 +825,11 @@ following enhancements over a conventional Kubernetes distribution\cite{k3s}:
 \subsubsection{Architecture}
 \label{subsubsec:implementation_dependencies_k3s_architecture}
 
-K3s architecture clearly distinguishes between two types of Nodes, Server nodes and
-Agent nodes, which are described below\cite{k3s}. Furthermore, figure \ref{fig:k3s}
-depicts the distinction between the two node types by displaying the various components
-provided on each node.
+K3s architecture\footnote{\url{https://docs.k3s.io/architecture}} clearly
+distinguishes between two types of Nodes, Server nodes and Agent nodes, which
+are described below. Furthermore, figure \ref{fig:k3s} depicts the distinction
+between the two node types by displaying the various components provided on each
+node.
 \begin{enumerate}
   \item \texttt{Server} node
     \newline
@@ -859,8 +863,8 @@ provided on each node.
 \end{figure}
 
 Additionally, the K3s architecture is completely adaptable and may accommodate a
-variety of different setups, as shown in the list below, depending on the cluster's
-usage and ultimate goal\cite{k3s}.
+variety of different setups, as shown in the list below, depending on the
+cluster's usage and ultimate goal.
 \begin{enumerate}
   \item \texttt{Single Server with an Embedded Database}
     \newline
@@ -893,7 +897,7 @@ including the official one, for the four main reasons, listed below.
 
 \begin{enumerate}
   \item Minimal hardware requirements that are simple to satisfy, even on older
-    systems\cite{k3s}:
+    systems\footnote{\url{https://docs.k3s.io/installation/requirements}}:
     \begin{itemize}
       \item A Server node requires 1 GiB of memory and 1 CPU core.
         \newline
@@ -910,13 +914,13 @@ including the official one, for the four main reasons, listed below.
         time of writing), is fully compatible with K3s and can operate as a
         Worker node without any difficulty.
     \end{itemize}
-    In comparison, the official Kubernetes distribution, \texttt{kubeadm},
-    necessitates at least 2 GiB of memory and 2 CPU cores\cite{k8s}.
+    In comparison, the official Kubernetes distribution, \texttt{kubeadm}\footnote{\url{https://kubernetes.io/docs/setup/production-environment/tools/kubeadm}},
+    necessitates at least 2 GiB of memory and 2 CPU cores.
 
-  \item Configurability, modularity, and usability\cite{k3s}.
+  \item Configurability, modularity, and usability\footnote{\url{https://docs.k3s.io/installation/configuration}}.
     \newline
-    As an example, it is extremely simple to bootstrap a small Kubernetes
-    cluster using K3s in a Single Server with an Embedded Database setup:
+    As an example, it is extremely simple to bootstrap a small Kubernetes cluster
+    using K3s in a Single Server with an Embedded Database setup:
     \begin{itemize}
       \item Start the Server node with a unique token (used to join a Server or
         Agent nodes to the cluster).
@@ -930,20 +934,20 @@ including the official one, for the four main reasons, listed below.
         morekeywords={[4]{agent}}, xleftmargin=\parindent]{ k3s agent --token "<TOKEN>" --server "<SERVER_ADDRESS>"}
     \end{itemize}
 
-  \item K3s can be easily installed in an Air-Gap environment. The only
-    additional steps necessary to have a fully functional cluster in comparison
-    to a standard installation are the deployment of a private registry (see section
-    \ref{subsec:implementation_dependencies_docker_registry}) and the manual
-    deployment of particular container images on each node\cite{k3s}.
+  \item K3s can be easily installed in an Air-Gap environment\footnote{\url{https://docs.k3s.io/installation/airgap}}.
+    The only additional steps necessary to have a fully functional cluster in
+    comparison to a standard installation are the deployment of a private
+    registry (see section \ref{subsec:implementation_dependencies_docker_registry})
+    and the manual deployment of particular container images on each node.
     \newline
-    By default, the cluster implementation installation (see section
-    \ref{sec:implementation_installer}) already meets the latter two requirements.
-    As a result, an organization that has to deploy a cluster in an Air-Gap environment
-    already has received all of the required files and programs without the need
-    for any additional data transfer involving an internet connection. As a
-    result, an organization that has to deploy a cluster in an Air-Gap environment
-    already has all of the necessary files and applications without the need for
-    any additional data transfer involving an internet connection.
+    By default, the cluster implementation installation (see section \ref{sec:implementation_installer})
+    already meets the latter two requirements. As a result, an organization that
+    has to deploy a cluster in an Air-Gap environment already has received all
+    of the required files and programs without the need for any additional data
+    transfer involving an internet connection. As a result, an organization that
+    has to deploy a cluster in an Air-Gap environment already has all of the
+    necessary files and applications without the need for any additional data
+    transfer involving an internet connection.
 
   \item On August 19th, 2020, the K3s project was approved into the Cloud Native
     Computing Foundation\footnote{\url{https://www.cncf.io}} (CNCF) with Sandbox
@@ -961,12 +965,13 @@ including the official one, for the four main reasons, listed below.
 \subsection{Node Exporter}
 \label{subsec:implementation_dependencies_node_exporter}
 
-Node Exporter provides hardware and OS-related metrics exposed by the \texttt{*NIX}
-Kernel\cite{node_exporter}. It is widely used in both testing and production
-environments thanks to its broad compatibility, simplicity of configuration, and
-reliability, and it can be regarded as the reference implementation for a Metrics
-Server. Because it is an element that constitutes both a Worker and a Controller
-Node, Node Exporter does not have a clear mapping to an architectural component.
+Node Exporter\footnote{\url{https://github.com/prometheus/node_exporter}}
+provides hardware and OS-related metrics exposed by the \texttt{*NIX} Kernel. It
+is widely used in both testing and production environments thanks to its broad compatibility,
+simplicity of configuration, and reliability, and it can be regarded as the
+reference implementation for a Metrics Server. Because it is an element that constitutes
+both a Worker and a Controller Node, Node Exporter does not have a clear mapping
+to an architectural component.
 
 \subsubsection{Collectors}
 \label{subsubsec:implementation_dependencies_node_exporter-collectors}
@@ -974,10 +979,11 @@ Node, Node Exporter does not have a clear mapping to an architectural component.
 For each Operating System, such as Linux or OpenBSD\footnote{\url{https://www.openbsd.org}},
 Node Exporter supports a wide range of different collectors, such as \texttt{cpu}
 for providing CPU statistics or \texttt{meminfo} for exposing memory statistics\footnote{\url{https://github.com/prometheus/node_exporter\#collectors}}.
-A collector is an element of an exporter, which represents a collection of metrics.
-If it is part of direct instrumentation, it may be a single metric, or it may be
-multiple metrics if it is pulling metrics from another system\cite{prometheus}.
-Collectors can be enabled (\lstinline[language=shell, basicstyle=\ttfamily, alsoletter={_, -, ., <, >},
+A collector\footnote{\url{https://prometheus.io/docs/introduction/glossary/\#collector}}
+is an element of an exporter, which represents a collection of metrics. If it is
+part of direct instrumentation, it may be a single metric, or it may be multiple
+metrics if it is pulling metrics from another system. Collectors can be enabled
+(\lstinline[language=shell, basicstyle=\ttfamily, alsoletter={_, -, ., <, >},
 morekeywords={[2]{node_exporter}}, morekeywords={[3]{--collector.<NAME>}}]{node_exporter --collector.<NAME>})
 or disabled (\lstinline[language=shell, basicstyle=\ttfamily, alsoletter={_, -, ., <, >},
 morekeywords={[2]{node_exporter}}, morekeywords={[3]{--no-collector.<NAME>}}]{node_exporter --no-collector.<NAME>})
@@ -1072,28 +1078,30 @@ not supported by any official and/or reliable exporter program.
   \caption{Docker Registry logo}
 \end{wrapfigure}
 
-Docker Registry is a stateless, highly scalable server-side service for storing
-and distributing container-based application images. A registry is a storage and
-content delivery system that holds container images in different tagged versions\cite{docker_registry}.
+Docker Registry\footnote{\url{https://docs.docker.com/registry}} is a stateless,
+highly scalable server-side service for storing and distributing container-based
+application images. A registry is a storage and content delivery system that holds
+container images in different tagged versions\footnote{\url{https://docs.docker.com/registry/introduction}}.
 \\ %
-The Docker Registry, thus the name, has a direct mapping to the Registry
-component of the cluster architecture.
+The Docker Registry, thus the name, has a direct mapping to the Registry component
+of the cluster architecture.
 
 \subsubsection{Image Naming}
 \label{subsubsec:implementation_dependencies_docker_registry_image_naming}
 
 \texttt{[REGISTRY\_HOSTNAME][:REGISTRY\_PORT]IMAGE[:TAG]} \\ %
-An image name is made up of slash-separated name fields that are optionally
-prefixed with a registry hostname, complying with standard DNS\footnote{\url{https://wikipedia.org/wiki/Domain_Name_System}}
-(Domain Name System) rules, and optionally postfixed with a tag name that
-identifies different versions of the same series of images. If a hostname is specified,
-it may be followed by a port number in the format \texttt{:PORT}. If the registry
-hostname is not provided, Docker, Kubernetes, Podman, and practically every other
-software that deals with container images by default utilizes Docker's public registry
-(Docker Hub\footnote{\url{https://hub.docker.com}}, which is hosted at \texttt{docker.io}
-at port \texttt{443}). If no tag name is supplied, the value \texttt{latest} is automatically
-assigned, indicating that the image is designated as the most recent available
-release version\cite{docker_registry}. \\ %
+An image name is made up of slash-separated name fields that are optionally prefixed
+with a registry hostname, complying with standard DNS\footnote{\url{https://wikipedia.org/wiki/Domain_Name_System}}
+(Domain Name System) rules, and optionally postfixed with a tag name that identifies
+different versions of the same series of images. If a hostname is specified, it may
+be followed by a port number in the format \texttt{:PORT}. If the registry
+hostname is not provided, Docker, Kubernetes, Podman, and practically every
+other software that deals with container images by default utilizes Docker's
+public registry (Docker Hub\footnote{\url{https://hub.docker.com}}, which is
+hosted at \texttt{docker.io} at port \texttt{443}). If no tag name is supplied, the
+value \texttt{latest} is automatically assigned, indicating that the image is designated
+as the most recent available release version\footnote{\url{https://docs.docker.com/engine/reference/commandline/tag}}.
+\\ %
 For example, the image name \texttt{node:18} (short for \texttt{docker.io:443/node:18})
 indicates the container image of Node.js version 18 accessible on the Docker
 public registry at port \texttt{443}. Instead, the name \texttt{registry.recluster.local:5000/node:18}
@@ -1156,22 +1164,23 @@ The registry must store the available container images in persistent storage to
 keep them if a failure occurs or the registry instance is restarted. Storage operation
 and management are not handled by the registry itself but are delegated to specialized
 drivers, the default driver of which is the local POSIX file system of the node
-executing the registry instance\cite{docker_registry}. \\ %
+executing the registry instance\footnote{\url{https://docs.docker.com/registry/introduction}}.
+\\ %
 Saving all container images on a single node is considered bad practice since it
-creates a single point of failure that might result in the loss of all images.
-Therefore, the cluster should be equipped with extra and more powerful storage drivers
-intended to tolerate multiple storage device failures at the same time as well as
-automated data recovery. It should be noted, however, that the driver(s) chosen must
-be compatible with the cluster environment, nodes hardware, and/or meet certain extra
-requirements. Almost every cloud provider supplies its customized driver that is
-compatible with the underlying high-performance and distributed data center
-storage system. Implementing a custom storage driver for the cluster implementation
-that meets all of the above requirements is extremely difficult owing to the overall
-complexity. Thankfully, a storage driver, Longhorn, from the same creators of K3s,
-already exists to address the latter with extra features and customization. Thankfully,
-a storage driver that addresses the latter problem with extra features and
-customization already exist: Longhorn, developed by the same team that created
-K3s.
+creates a single point of failure that might result in the loss of all images. Therefore,
+the cluster should be equipped with extra and more powerful storage drivers
+intended to tolerate multiple storage device failures at the same time as well
+as automated data recovery. It should be noted, however, that the driver(s)
+chosen must be compatible with the cluster environment, nodes hardware, and/or
+meet certain extra requirements. Almost every cloud provider supplies its customized
+driver that is compatible with the underlying high-performance and distributed data
+center storage system. Implementing a custom storage driver for the cluster
+implementation that meets all of the above requirements is extremely difficult
+owing to the overall complexity. Thankfully, a storage driver, Longhorn, from
+the same creators of K3s, already exists to address the latter with extra features
+and customization. Thankfully, a storage driver that addresses the latter problem
+with extra features and customization already exist: Longhorn, developed by the same
+team that created K3s.
 
 \begin{wrapfigure}
   {r}{.25\textwidth} %
@@ -1181,14 +1190,14 @@ K3s.
   \caption{Longhorn logo}
 \end{wrapfigure}
 
-Longhorn\footnote{\url{https://longhorn.io}} is an Open Source and CNCF Incubating
-project\footnote{\url{https://www.cncf.io/projects/longhorn}} that provides a lightweight,
-reliable, and simple distributed block storage system for Kubernetes. Longhorn
-provides a dedicated storage controller for each volume and replicates it
-synchronously across multiple replicas stored on multiple nodes. Kubernetes is used
-to orchestrate and manage the storage controller and replicas\cite{longhorn}. Figure
-\ref{fig:longhorn} depicts Longhorn's architecture overview and Read/Write Data Flow
-between the Volume, Longhorn Engine, Replica Instances, and Disks.
+Longhorn\footnote{\url{https://longhorn.io}} is an Open Source and CNCF
+Incubating project\footnote{\url{https://www.cncf.io/projects/longhorn}} that
+provides a lightweight, reliable, and simple distributed block storage system
+for Kubernetes. Longhorn provides a dedicated storage controller for each volume
+and replicates it synchronously across multiple replicas stored on multiple nodes.
+Kubernetes is used to orchestrate and manage the storage controller and replicas.
+Figure \ref{fig:longhorn} depicts Longhorn's architecture overview and Read/Write
+Data Flow between the Volume, Longhorn Engine, Replica Instances, and Disks.
 
 \begin{figure}[htbp]
   \centering
@@ -1229,28 +1238,30 @@ database and media services.
   \caption{MetalLB logo}
 \end{wrapfigure}
 
-MetalLB is a load-balancer implementation for bare-metal Kubernetes clusters
-that leverages standard networking and routing protocols\cite{metallb}. \\ %
-MetalLB has a direct mapping to the cluster architecture's Load Balancer component,
-and because it is operated directly on and managed by Kubernetes, it is also regarded
-as an internal Load Balancer that does not require any external system to work.
+MetalLB\footnote{\url{https://metallb.universe.tf}} is a load-balancer
+implementation for bare-metal Kubernetes clusters that leverages standard
+networking and routing protocols. \\ %
+MetalLB has a direct mapping to the cluster architecture's Load Balancer
+component, and because it is operated directly on and managed by Kubernetes, it
+is also regarded as an internal Load Balancer that does not require any external
+system to work.
 
 \subsubsection{LoadBalancer Service Type}
 \label{subsubsec:implementation_dependencies_metallb__loadbalancer_service_type}
 
-By default, Kubernetes does not provide a fully functional implementation of a network
-load balancer (Service of type \texttt{LoadBalancer}\footnote{\url{https://kubernetes.io/docs/concepts/services-networking/service/\#loadbalancer}})
+By default, Kubernetes does not provide a fully functional implementation of a
+network load balancer (Service of type \texttt{LoadBalancer}\footnote{\url{https://kubernetes.io/docs/concepts/services-networking/service/\#loadbalancer}})
 for bare-metal clusters\footnote{\url{https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer}}.
-The native Kubernetes implementation of network load balancers is just a collection
-of predefined interfaces that are explicitly designed/mapped to be compatible with
-the external and sophisticated load balancers running within the different cloud
-providers' large and energy-hungry data centers. These interfaces are not a real
-network load balancer implementations, but rather proxies that translate
-different API/function calls from the Kubernetes ecosystem to the individual
-cloud provider's load balancer and vice versa. As a result, all Kubernetes
-Services of type \texttt{LoadBalancer} on bare-metal clusters remain in a \texttt{pending}
-state indefinitely, making any deployments that rely on the latter services unavailable
-from outside the Kubernetes network\cite{metallb}. \\ %
+The native Kubernetes implementation of network load balancers is just a
+collection of predefined interfaces that are explicitly designed/mapped to be
+compatible with the external and sophisticated load balancers running within the
+different cloud providers' large and energy-hungry data centers. These
+interfaces are not a real network load balancer implementations, but rather proxies
+that translate different API/function calls from the Kubernetes ecosystem to the
+individual cloud provider's load balancer and vice versa. As a result, all Kubernetes
+Services of type \texttt{LoadBalancer} on bare-metal clusters remain in a
+\texttt{pending} state indefinitely, making any deployments that rely on the
+latter services unavailable from outside the Kubernetes network. \\ %
 Without the capability of using Kubernetes services of LoadBalancer type, the only
 alternatives for enabling external traffic to establish connections with internal
 deployments are primarily two; they are briefly described below.
@@ -1265,7 +1276,7 @@ deployments are primarily two; they are briefly described below.
     and forward traffic to one of the Service's ready endpoints. \\ %
     Any external traffic that connects to any node in the cluster using the
     proper protocol (i.e., \texttt{TCP} or \texttt{UDP}) and port (i.e., \texttt{31234}
-    or \texttt{32000}) is forwarded to a matching internal service instance\cite{k8s}.
+    or \texttt{32000}) is forwarded to a matching internal service instance.
 
   \item \texttt{ExternalIPs}\footnote{\url{https://kubernetes.io/docs/concepts/services-networking/service/\#external-ips}}
     \newline
@@ -1274,7 +1285,7 @@ deployments are primarily two; they are briefly described below.
     IP address (as the destination IP) on the corresponding Service port is then
     forwarded to one of the Service endpoints. \\ %
     External IP addresses are not managed by Kubernetes and are therefore the responsibility
-    of the cluster administrator\cite{k8s}.
+    of the cluster administrator.
 \end{itemize}
 
 Both of these service types have considerable disadvantages, making bare-metal clusters
@@ -1303,29 +1314,30 @@ service. \\ %
 It should be noted that if all available IP addresses have already been allocated,
 subsequent \texttt{LoadBalancer} services remain in the \texttt{pending} state
 until an IP address from a pool becomes available for assignment or a newer pool
-is created\cite{metallb}.
+is created.
 
 \subsubsection{External Announcement}
 \label{subsubsec:implementation_dependencies_metallb__external_announcement}
 
-Once MetalLB has allocated a pool's IP address to a \texttt{LoadBalancer} service
-type, the network outside Kubernetes, i.e. the Internal Network, must be aware that
-the IP address has been assigned and is accessible ("\textit{lives}" in the network)
-for any kind of communication to take place. To accomplish this, MetalLB deploys
-a \texttt{DaemonSet}\footnote{\url{https://kubernetes.io/docs/concepts/workloads/controllers/daemonset}}
+Once MetalLB has allocated a pool's IP address to a \texttt{LoadBalancer}
+service type, the network outside Kubernetes, i.e. the Internal Network, must be
+aware that the IP address has been assigned and is accessible ("\textit{lives}"
+in the network) for any kind of communication to take place. To accomplish this,
+MetalLB deploys a \texttt{DaemonSet}\footnote{\url{https://kubernetes.io/docs/concepts/workloads/controllers/daemonset}}
 component called \texttt{Speaker} on each cluster node, which is in charge of IP
-address announcements on the network\cite{metallb}. \\ %
-MetalLB supports two external IP announcement modes, which are explained below and
-are based on common networking or routing protocols.
+address announcements on the network\footnote{\url{https://metallb.universe.tf/installation}}.
+\\ %
+MetalLB supports two external IP announcement modes\footnote{\url{https://metallb.universe.tf/concepts/\#external-announcement}},
+which are explained below and are based on common networking or routing protocols.
 \begin{itemize}
   \item \texttt{BGP mode}\footnote{\url{https://metallb.universe.tf/concepts/bgp}}
     \newline
     In \texttt{BGP mode}, all nodes in the cluster establish BGP\footnote{\url{https://wikipedia.org/wiki/Border_Gateway_Protocol}}
     (Border Gateway Protocol) peering sessions with adjacent routers and advise
-    them on how to forward traffic to the service IPs\cite{metallb}. \\ %
-    Due to the requirement of BGP-capable routers and a complex configuration,
-    this mode cannot be employed in cluster implementation. Furthermore, BGP is
-    utilized to link with various and external Autonomous Systems\footnote{\url{https://wikipedia.org/wiki/Autonomous_system_(Internet)}}
+    them on how to forward traffic to the service IPs. \\ %
+    Due to the requirement of BGP-capable routers and a complex configuration, this
+    mode cannot be employed in cluster implementation. Furthermore, BGP is utilized
+    to link with various and external Autonomous Systems\footnote{\url{https://wikipedia.org/wiki/Autonomous_system_(Internet)}}
     (AS).
 
   \item \texttt{Layer 2 mode}\footnote{\url{https://metallb.universe.tf/concepts/layer2}}
@@ -1341,7 +1353,7 @@ are based on common networking or routing protocols.
     pods. \\ %
     \texttt{Layer 2 mode} does not employ a true load balancer method, but
     rather a failover strategy in which a new node replaces the current leader
-    node if it fails for any reason.\cite{metallb}
+    node if it fails for any reason.
 \end{itemize}
 Due to the inability of using \texttt{BGP mode} and its inherent universality to
 operate on any Ethernet network without the need for additional hardware,
@@ -1388,44 +1400,45 @@ distinct Kubernetes namespaces, services, and pods, as well as network connectio
   \caption{Prometheus logo}
 \end{wrapfigure}
 
-Prometheus is an Open Source system that is specifically designed for monitoring
-and alerting. It is the only system that Kubernetes natively supports and the de
-facto standard across the Cloud Native ecosystem. Prometheus joined CNCF in 2016\footnote{\url{https://www.cncf.io/projects/prometheus}}
+Prometheus\footnote{\url{https://prometheus.io}} is an Open Source system that
+is specifically designed for monitoring and alerting. It is the only system that
+Kubernetes natively supports and the de facto standard across the Cloud Native ecosystem.
+Prometheus joined CNCF in 2016\footnote{\url{https://www.cncf.io/projects/prometheus}}
 as the second hosted project with a Graduated maturity level, only after Kubernetes
-itself\cite{prometheus}. Prometheus has no mapping to a cluster component, and
-the architecture overview indicates no monitoring component at all. This is because
-having Prometheus deployed and continually operating in the cluster is a choice of
-the organization operating the cluster rather than a hard necessity; even if the
-Metrics Server is required on each Node. Furthermore, Prometheus may be deployed
-outside of the cluster environment and configured to access node metrics from
-the external network, or it can be run exclusively for certain periods, allowing
-monitoring of the cluster for testing or performance evaluation. Nonetheless,
-Prometheus remains an important tool for monitoring and analyzing how the
-cluster is behaving, which is why it is specified as a dependency and is also included
-in the final archive bundle.
+itself. Prometheus has no mapping to a cluster component, and the architecture overview
+indicates no monitoring component at all. This is because having Prometheus
+deployed and continually operating in the cluster is a choice of the
+organization operating the cluster rather than a hard necessity; even if the Metrics
+Server is required on each Node. Furthermore, Prometheus may be deployed outside
+of the cluster environment and configured to access node metrics from the external
+network, or it can be run exclusively for certain periods, allowing monitoring of
+the cluster for testing or performance evaluation. Nonetheless, Prometheus remains
+an important tool for monitoring and analyzing how the cluster is behaving,
+which is why it is specified as a dependency and is also included in the final
+archive bundle.
 
-As previously stated, Prometheus' primary function is to collect metrics data generated
-by exporters and query/interpolate this data. Moreover, Prometheus can monitor itself
-since, like Node Exporter, it provides its metrics via an HTTP endpoint. There
-is a plethora of available exporters and possible integrations\footnote{\url{https://prometheus.io/docs/instrumenting/exporters}}.
-In addition to the default exporter installed on each node in the cluster implementation,
-an organization managing the cluster can choose to add as many exporters as the
-number of components and applications running on it, resulting in a better,
-clearer, and finer-grained overview of the entire cluster status both in real-time
-and over a period. For example, in addition to the Database component, it is
-possible to install its corresponding exporter, which allows the monitoring of Database
-metrics such as health, performance and resource usage.
+As previously stated, Prometheus' primary function is to collect metrics data
+generated by exporters and query/interpolate this data. Moreover, Prometheus can
+monitor itself since, like Node Exporter, it provides its metrics via an HTTP
+endpoint. There is a plethora of available exporters and possible integrations\footnote{\url{https://prometheus.io/docs/instrumenting/exporters}}.
+In addition to the default exporter installed on each node in the cluster
+implementation, an organization managing the cluster can choose to add as many exporters
+as the number of components and applications running on it, resulting in a
+better, clearer, and finer-grained overview of the entire cluster status both in
+real-time and over a period. For example, in addition to the Database component,
+it is possible to install its corresponding exporter, which allows the
+monitoring of Database metrics such as health, performance and resource usage.
 
 \subsubsection{Features}
 \label{subsubsec:implementation_dependencies_prometheus_features}
 
 Prometheus has several features\footnote{\url{https://prometheus.io/docs/introduction/overview/\#features}},
-but the two most essential for the cluster implementation are described below\cite{prometheus}:
+but the two most essential for the cluster implementation are described below:
 \begin{enumerate}
   \item A multidimensional data model that contains time series data that is uniquely
     identified by metric name and optional key-value pairs known as labels. Time
     series data are streams of timestamped values from the same metric and set
-    of labeled dimensions\cite{prometheus}.
+    of labeled dimensions\footnote{\url{https://prometheus.io/docs/introduction/overview}}.
     \begin{enumerate}
       \item \texttt{Metrics}
         \newline
@@ -1437,9 +1450,9 @@ but the two most essential for the cluster implementation are described below\ci
         metric defines the total amount of physical memory (in bytes) that is
         not in use.
         \newline
-        Each metric has a distinct type (\lstinline[language=prometheus]{# TYPE ...}).
-        There is a total of four different types of metrics, which are briefly outlined
-        below\cite{prometheus}:
+        Each metric has a distinct type\footnote{\url{https://prometheus.io/docs/concepts/metric_types}}
+        (\lstinline[language=prometheus]{# TYPE ...}). There is a total of four
+        different types of metrics, which are briefly outlined below:
         \begin{enumerate}
           \item \texttt{Counter}\footnote{\url{https://prometheus.io/docs/concepts/metric_types/\#counter}}
             \newline
@@ -1479,7 +1492,7 @@ but the two most essential for the cluster implementation are described below\ci
     time series data in real-time. The outcome of an expression can be shown as a
     graph, tabulated data, or consumed by external systems (such as Grafana, see
     section \ref{subsubsec:implementation_dependencies_prometheus_grafana}) via
-    the HTTP API\cite{prometheus}.
+    the HTTP API.
 \end{enumerate}
 
 Two examples of \texttt{PromQL} queries that have been widely used for cluster
@@ -1515,46 +1528,48 @@ obtain the amount of memory usage in percent (\texttt{0} to \texttt{100}).
 \end{wrapfigure}
 
 Prometheus is frequently used in conjunction with Grafana\footnote{\url{https://grafana.com/grafana}},
-an interactive data visualization platform\cite{grafana}. \\ %
+an interactive data visualization platform. \\ %
 Prometheus collects metrics and provides the sophisticated \texttt{PromQL} query
-language; Grafana then translates these metrics and/or query results into relevant
-charts and graphs that may be consolidated into one or more dashboards. \\ %
-It should be noted that Grafana is not considered a dependency in the cluster implementation
-and therefore is not distributed in the release archive bundle.
+language; Grafana then translates these metrics and/or query results into
+relevant charts and graphs that may be consolidated into one or more dashboards.
+\\ %
+It should be noted that Grafana is not considered a dependency in the cluster
+implementation and therefore is not distributed in the release archive bundle.
 
 \subsection{Management}
 \label{subsec:implementation_dependencies_management}
 
-To create a cluster release bundle, all of the dependencies must be managed and downloaded
-(see section \ref{sec:good_practices_bundle}). Furthermore, as stated in previous
-sections, having all of the required dependencies locally during cluster
-initialization without the need for an internet connection is essential for an
-Air-Gap environment but can also be beneficial for speeding up the overall
-installation time because there is no need to download them from the Internet. It
-should be noted that if the cluster is made up of many systems with various architectures,
-such as \texttt{amd64} or \texttt{arm64}, the necessary dependencies must be downloaded
-for all architectures, otherwise, the installation procedure will fail with an error.
-\\ %
+To create a cluster release bundle, all of the dependencies must be managed and
+downloaded (see section \ref{sec:good_practices_bundle}). Furthermore, as stated
+in previous sections, having all of the required dependencies locally during cluster
+initialization without the need for an internet connection is essential for an Air-Gap
+environment but can also be beneficial for speeding up the overall installation time
+because there is no need to download them from the Internet. It should be noted
+that if the cluster is made up of many systems with various architectures, such as
+\texttt{amd64} or \texttt{arm64}, the necessary dependencies must be downloaded
+for all architectures, otherwise, the installation procedure will fail with an
+error. \\ %
 The management of dependencies should be as straightforward as possible, with as
-few manual tasks as possible. As a result, the entire procedure has been
-entirely automated using a simple configuration file called \texttt{dependencies.config.yaml}
-and detailed in the section \ref{subsec:implementation_dependencies_management_configuration},
-as well as a POSIX script called \texttt{dependencies.sh} and explained in section
+few manual tasks as possible. As a result, the entire procedure has been entirely
+automated using a simple configuration file called \texttt{dependencies.config.yaml}
+and detailed in the section
+\ref{subsec:implementation_dependencies_management_configuration}, as well as a POSIX
+script called \texttt{dependencies.sh} and explained in section
 \ref{subsec:implementation_dependencies_management_script}. \\ %
-It should be mentioned that dependencies management has been designed to be as compatible
-as possible, with no restrictions on what dependency and version must be
-downloaded. The procedure is compatible with any publicly accessible software on
-\texttt{GitHub}\footnote{\url{https://github.com}} that has at least one release\footnote{\url{docs.github.com/repositories/releasing-projects-on-github/managing-releases-in-a-repository}}.
-Because compatibility with just GitHub is due to certain API calls, future
-versions will also include support for custom solutions as well as both \texttt{GitLab}\footnote{\url{gitlab.com}}
+It should be mentioned that dependencies management has been designed to be as
+compatible as possible, with no restrictions on what dependency and version must
+be downloaded. The procedure is compatible with any publicly accessible software
+on \texttt{GitHub}\footnote{\url{https://github.com}} that has at least one release\footnote{\url{docs.github.com/repositories/releasing-projects-on-github/managing-releases-in-a-repository}}.
+Because compatibility with just GitHub is due to certain API calls, future versions
+will also include support for custom solutions as well as both \texttt{GitLab}\footnote{\url{gitlab.com}}
 and \texttt{Bitbucket}\footnote{\url{https://bitbucket.org}}.
 \subsubsection{Configuration}
 \label{subsec:implementation_dependencies_management_configuration}
 
 The dependencies management configuration file, \texttt{dependencies.config.yaml},
 is written in YAML\footnote{\url{https://yaml.org}} format. \\ %
-The attributes for each dependency declared as a root object, are defined in
-table \ref{tbl:dependency_attributes}.
+The attributes for each dependency declared as a root object, are defined in table
+\ref{tbl:dependency_attributes}.
 
 \begin{xltabular}
   {\textwidth} { >{\ttfamily}l | >{\ttfamily}l | X }
@@ -1604,10 +1619,10 @@ table \ref{tbl:dependency_attributes}.
   \label{tbl:dependency_attributes}
 \end{xltabular}
 
-Listing \ref{lst:dependencies_config} displays the content of the dependencies configuration
-file, \texttt{dependencies.config.yaml}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/dependencies/dependencies.config.yaml}},
-which is used in the cluster implementation. It is worth noting the use of the \texttt{latest}
-value in the \texttt{releases} attribute, as well as the use of Regular
+Listing \ref{lst:dependencies_config} displays the content of the dependencies
+configuration file, \texttt{dependencies.config.yaml}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/dependencies/dependencies.config.yaml}},
+which is used in the cluster implementation. It is worth noting the use of the
+\texttt{latest} value in the \texttt{releases} attribute, as well as the use of Regular
 Expression in the \texttt{prometheus} and \texttt{node\_exporter} \texttt{assets}
 attribute. Furthermore, the \texttt{files} attribute specifies the corresponding
 \texttt{LICENSE} file for each dependency.
@@ -1671,12 +1686,12 @@ attribute. Furthermore, the \texttt{files} attribute specifies the corresponding
 
 A POSIX script named \texttt{dependencies.sh}\footnote{\url{https://github.com/carlocorradini/reCluster/blob/main/dependencies/dependencies.sh}}
 is used to automate all dependencies-related procedures. Its primary function is
-to read the dependencies configuration file and synchronize (download) the dependencies
-listed therein. \\ %
-The script requires some \texttt{coreutils} package's utility programs and the
-\texttt{yq} application to correctly handle \texttt{YAML} file and syntax. \\ %
-Dependencies' script behavior is customizable by using argument flags, which
-begin with a double dash followed by the property name and an optional value (\texttt{--NAME
+to read the dependencies configuration file and synchronize (download) the
+dependencies listed therein. \\ %
+The script requires some \texttt{coreutils} package's utility programs and the \texttt{yq}
+application to correctly handle \texttt{YAML} file and syntax. \\ %
+Dependencies' script behavior is customizable by using argument flags, which begin
+with a double dash followed by the property name and an optional value (\texttt{--NAME
 [VALUE]}). \\ %
 The accepted configuration parameters are listed in the table below.
 
@@ -1732,113 +1747,113 @@ The accepted configuration parameters are listed in the table below.
   \caption{Dependencies script parameters}
 \end{xltabular}
 
-To synchronize (force) all of the dependencies listed in the configuration file
-with the script, just execute: \lstinline[language=shell, alsoletter={.-},
-morekeywords={[2]{dependencies.sh}}, morekeywords={[3]{--sync-force}}]{./dependencies.sh --sync-force}
+To synchronize (force) all of the dependencies listed in the configuration file with
+the script, just execute: \lstinline[language=shell, alsoletter={.-}, morekeywords={[2]{dependencies.sh}},
+morekeywords={[3]{--sync-force}}]{./dependencies.sh --sync-force}
 
 \section{Server}
 \label{sec:implementation_server}
 
 Server\footnote{\url{https://github.com/carlocorradini/reCluster/tree/main/server}}
-is a completely custom implementation that manages all low-level cluster operations,
-such as turning on and off nodes, as well as user operations, such as
+is a completely custom implementation that manages all low-level cluster
+operations, such as turning on and off nodes, as well as user operations, such as
 authentication and authorization. The server is written entirely in \texttt{TypeScript}\footnote{\url{https://www.typescriptlang.org}},
 a strongly typed programming language that is compiled/transpiled\footnote{\url{https://wikipedia.org/wiki/Source-to-source_compiler}}
-to \texttt{JavaScript}, and executed by the \texttt{Node.js} runtime. When dealing
-with particular cluster processes, it has a strong policy of resource-waste
-minimization, attempting to reduce overall cluster power consumption while also enhancing
-the resource utilization of active nodes. It is intended to be completely
-interoperable with a Kubernetes cluster composed of heterogeneous systems. It provides
-a rich, type-safe, and secure \texttt{GraphQL API} (see section \ref{subsec:implementation_server_graphql_api})
-that can be utilized manually by administrators and basic users or automatically
-by scripts and other cluster components, such as the Cluster Autoscaler (see
-section \ref{subsec:implementation_autoscaling_cluster_autoscaler}). Server, as the
-name implies, has a direct mapping to the cluster architecture's Server
+to \texttt{JavaScript}, and executed by the \texttt{Node.js} runtime. When
+dealing with particular cluster processes, it has a strong policy of resource-waste
+minimization, attempting to reduce overall cluster power consumption while also
+enhancing the resource utilization of active nodes. It is intended to be completely
+interoperable with a Kubernetes cluster composed of heterogeneous systems. It
+provides a rich, type-safe, and secure \texttt{GraphQL API} (see section
+\ref{subsec:implementation_server_graphql_api}) that can be utilized manually by
+administrators and basic users or automatically by scripts and other cluster components,
+such as the Cluster Autoscaler (see section \ref{subsec:implementation_autoscaling_cluster_autoscaler}).
+Server, as the name implies, has a direct mapping to the cluster architecture's Server
 component. \\ %
-To query, monitor (see section \ref{subsec:implementation_server_monitoring}),
-and manipulate the state of the Kubernetes cluster, Server implementation mainly
-relies on the Kubernetes API. The Kubernetes API server, which is operating on a
-Controller node, listens on port \texttt{6443} and is secured with TLS. TLS
-certificates can be signed using a private Certificate Authority (CA) or with a
-Public Key Infrastructure (PKI) linked to a well-known CA\cite{k8s}. Because the
-cluster implementation supports deployment in an Air-Gap environment, without any
-connection to an external network, and leveraging a fully-fledged certificate
-infrastructure for most of the conceivable use-case scenarios might be regarded
-a waste of resources and an unnecessary effort, it is recommended to utilize the
-solution with the private Certificate Authority, which is also the default one. If
-the Kubernetes cluster implementation is configured to work with a certificate signed
-by a private CA, then any K8s client, including the one employed by the Server,
-must have a local copy of the certificate, which is available within the corresponding
-\texttt{kubeconfig} file generated by the Controller, to mutually trust the connection
-(client-controller and controller-client) and be confident that it is not intercepted\cite{k8s}.
-The overall cluster implementation is meant to operate with a certificate signed
-by a private CA by default, hence the Server requires a copy of the \texttt{kubeconfig}
-file. If the Kubernetes Server and the Server are deployed on the same node, as is
-the case with reCluster, the latter is completely automated by the installation
-script (see section \ref{sec:implementation_installer}). \\ %
-The server resource-waste reduction strategy is maintained automatically and in
-conjunction with the Cluster Autoscaler component implementation, without any human/physical
+To query, monitor (see section \ref{subsec:implementation_server_monitoring}), and
+manipulate the state of the Kubernetes cluster, Server implementation mainly
+relies on the Kubernetes API\footnote{\url{https://kubernetes.io/docs/concepts/security/controlling-access}}.
+The Kubernetes API server, which is operating on a Controller node, listens on port
+\texttt{6443} and is secured with TLS. TLS certificates can be signed using a private
+Certificate Authority (CA) or with a Public Key Infrastructure (PKI) linked to a
+well-known CA. Because the cluster implementation supports deployment in an Air-Gap
+environment, without any connection to an external network, and leveraging a
+fully-fledged certificate infrastructure for most of the conceivable use-case
+scenarios might be regarded a waste of resources and an unnecessary effort, it is
+recommended to utilize the solution with the private Certificate Authority,
+which is also the default one. If the Kubernetes cluster implementation is configured
+to work with a certificate signed by a private CA, then any K8s client, including
+the one employed by the Server, must have a local copy of the certificate, which
+is available within the corresponding \texttt{kubeconfig} file generated by the
+Controller, to mutually trust the connection (client-controller and controller-client)
+and be confident that it is not intercepted. The overall cluster implementation
+is meant to operate with a certificate signed by a private CA by default, hence the
+Server requires a copy of the \texttt{kubeconfig} file. If the Kubernetes Server
+and the Server are deployed on the same node, as is the case with reCluster, the
+latter is completely automated by the installation script (see section
+\ref{sec:implementation_installer}). \\ %
+The server resource-waste reduction strategy is maintained automatically and in conjunction
+with the Cluster Autoscaler component implementation, without any human/physical
 interaction. As stated in chapter \ref{cha:architecture}, the Server and Cluster
-Autoscaler are required and operate as a single entity. Because it only has a
-low-level understanding of the cluster, the Server does not know when to scale (automatically)
-without the Cluster Autoscaler, which monitors the overall cluster workload and
-each active node resource utilization. Vice versa, without the Server, which has
-global low-level knowledge of the whole cluster, including active and inactive
-nodes, the Cluster Autoscaler only knows when to scale nodes up or down but not how
-to do so.
+Autoscaler are required and operate as a single entity. Because it only has a low-level
+understanding of the cluster, the Server does not know when to scale (automatically)
+without the Cluster Autoscaler, which monitors the overall cluster workload and each
+active node resource utilization. Vice versa, without the Server, which has
+global low-level knowledge of the whole cluster, including active and inactive nodes,
+the Cluster Autoscaler only knows when to scale nodes up or down but not how to
+do so.
 
-This section is split into five segments, each of which requires the knowledge
-provided by the previous segment to be completely understood. The first segment depicts
-the Database structure, its tables, and their relationships. The schema, which contains
-the core knowledge of the cluster and users, is constantly updated and
-persistently stored. The second segment depicts the GraphQL API and its queries (queries
-and mutations). The API provides advanced knowledge, the foundation of which is the
-database and its schema, in that certain queryable data are not available in the
-database but are calculated using multiple raw data from persistent storage. The
-latter is prominent throughout the autoscaling procedure. Certain queries are
-secured by authentication, authorization, or both, while others are exposed to any
-entity making the request (users, nodes, etc...). The third segment focuses on the
-autoscaling technique, illustrating how nodes are automatically powered on (from
-an inactive to active state) or powered off (from an active to inactive state). The
-latter are fully automated procedures that are triggered via specific GraphQL queries
-and consumed by either automatic entities like the Cluster Autoscaler or human entities
-like an administrator. The fourth segment demonstrates how the server
-continuously monitors the Kubernetes cluster using a specialized node informer
-that checks to see whether a node resource is added, deleted, or updated. The latter
-aids in keeping the cluster's knowledge consistent and up to date by using the Kubernetes
-heartbeat and resource systems. The final segment is about server configuration:
+This section is split into five segments, each of which requires the knowledge provided
+by the previous segment to be completely understood. The first segment depicts
+the Database structure, its tables, and their relationships. The schema, which
+contains the core knowledge of the cluster and users, is constantly updated and persistently
+stored. The second segment depicts the GraphQL API and its queries (queries and mutations).
+The API provides advanced knowledge, the foundation of which is the database and
+its schema, in that certain queryable data are not available in the database but
+are calculated using multiple raw data from persistent storage. The latter is
+prominent throughout the autoscaling procedure. Certain queries are secured by authentication,
+authorization, or both, while others are exposed to any entity making the
+request (users, nodes, etc...). The third segment focuses on the autoscaling
+technique, illustrating how nodes are automatically powered on (from an inactive
+to active state) or powered off (from an active to inactive state). The latter
+are fully automated procedures that are triggered via specific GraphQL queries
+and consumed by either automatic entities like the Cluster Autoscaler or human
+entities like an administrator. The fourth segment demonstrates how the server continuously
+monitors the Kubernetes cluster using a specialized node informer that checks to
+see whether a node resource is added, deleted, or updated. The latter aids in
+keeping the cluster's knowledge consistent and up to date by using the
+Kubernetes heartbeat and resource systems. The final segment is about server configuration:
 how it may be configured and the many available parameters.
 
 \subsection{Database}
 \label{subsec:implementation_server_database}
 
-This section is concerned with the Database, its structure (schema), and the
-interactions between it and the Server. \\ %
-To interface with the Database, the Server implementation does not directly involve
-any raw SQL queries but instead depends on a kind of middleware layer that automatically
-translates any Database specific \texttt{TypeScript} functions and data
-structures into raw \texttt{SQL} queries and vice versa. Section
-\ref{subsubsec:implementation_server_database_object_relational_mapping}
+This section is concerned with the Database, its structure (schema), and the interactions
+between it and the Server. \\ %
+To interface with the Database, the Server implementation does not directly
+involve any raw SQL queries but instead depends on a kind of middleware layer
+that automatically translates any Database specific \texttt{TypeScript} functions
+and data structures into raw \texttt{SQL} queries and vice versa. Section \ref{subsubsec:implementation_server_database_object_relational_mapping}
 explains the latter, as well as the procedures and technologies involved. \\ %
-Section \ref{subsubsec:implementation_server_database_schema} depicts the Database
-schema, which is a pure mapping of the cluster's low-level knowledge in the form
-of raw data, its many nodes (both active and inactive), and the various
-registered users. The schema not only illustrates how the various data are defined
-and organized in the Database, but it also reflects the cluster's knowledge and
-what data and information constitute it.
+Section \ref{subsubsec:implementation_server_database_schema} depicts the
+Database schema, which is a pure mapping of the cluster's low-level knowledge in
+the form of raw data, its many nodes (both active and inactive), and the various
+registered users. The schema not only illustrates how the various data are
+defined and organized in the Database, but it also reflects the cluster's knowledge
+and what data and information constitute it.
 
 \subsubsection{Object-Relational Mapping}
 \label{subsubsec:implementation_server_database_object_relational_mapping}
 
 Prisma ORM\footnote{\url{https://wikipedia.org/wiki/Object-relational_mapping}}\footnote{\url{https://www.prisma.io}}
-manages all database-related operations in the Server implementation, removing
-the need for raw \texttt{SQL} queries and replacing them with more natural, easy-to-use,
+manages all database-related operations in the Server implementation, removing the
+need for raw \texttt{SQL} queries and replacing them with more natural, easy-to-use,
 and maintainable \texttt{TypeScript} functions and data structures. \\ %
-Consider a database with a table that represents the nodes in the cluster and
-has a structure similar to the one shown in section
-\ref{subsubsec:implementation_server_database_schema}. The \texttt{name} and
-\texttt{memory} properties of the node with the identifier \texttt{e2b87848-bba0-46d5-923b-403f7141564f}
-should be selected. The raw \texttt{SQL} query looks like the following code:
+Consider a database with a table that represents the nodes in the cluster and has
+a structure similar to the one shown in section \ref{subsubsec:implementation_server_database_schema}.
+The \texttt{name} and \texttt{memory} properties of the node with the identifier
+\texttt{e2b87848-bba0-46d5-923b-403f7141564f} should be selected. The raw
+\texttt{SQL} query looks like the following code:
 
 \begin{lstlisting}[language=typescript, xleftmargin=\parindent, morekeywords={[2]{id, result}}, morekeywords={[3]{query}}, caption=Raw SQL query to retrieve the \texttt{name} and \texttt{memory} attributes of the node with the identifier \texttt{e2b87848-bba0-46d5-923b-403f7141564f}]
   const id = "e2b87848-bba0-46d5-923b-403f7141564f";
@@ -1863,19 +1878,19 @@ In contrast, the same query using the Prisma ORM looks like the following code:
 \end{lstlisting}
 
 Take note of the differences, particularly how the ORM query is simpler, type-safe,
-and does not directly involve any \texttt{SQL} code but rather pure programming language
-primitives. \\ %
-ORMs are not the only tool for interfacing with a Relational Database;
-alternative options, such as Raw SQL and SQL query builders, are available; nonetheless,
-ORMs provide the finest balance between application productivity and database
-control. Raw SQL provides complete control over database operations, but
-productivity suffers since interacting with raw SQL in code is time-consuming, error-prone,
-and produces a lot of overhead and maintainability issues. SQL query builders maintain
-a high level of control over database operations and give somewhat higher productivity,
-but they do it by relying on logical thinking in SQL rather than programming
-objects, functions, and primitives\cite{prisma}. Figure
-\ref{fig:orm_productivity_control} depicts the productivity vs control tradeoff
-of the various database tools, including Prisma.
+and does not directly involve any \texttt{SQL} code but rather pure programming
+language primitives. \\ %
+ORMs are not the only tool for interfacing with a Relational Database; alternative
+options, such as Raw SQL and SQL query builders, are available; nonetheless, ORMs
+provide the finest balance between application productivity and database control.
+Raw SQL provides complete control over database operations, but productivity suffers
+since interacting with raw SQL in code is time-consuming, error-prone, and produces
+a lot of overhead and maintainability issues. SQL query builders maintain a high
+level of control over database operations and give somewhat higher productivity,
+but they do it by relying on logical thinking in SQL rather than programming objects,
+functions, and primitives\footnote{\url{https://www.prisma.io/docs/concepts/overview/why-prisma}}.
+Figure \ref{fig:orm_productivity_control} depicts the productivity vs control
+tradeoff of the various database tools, including Prisma.
 
 \begin{wrapfigure}
   {l}{.25\textwidth} %
@@ -1890,7 +1905,7 @@ model structure using a Prisma Schema file\footnote{\url{https://www.prisma.io/d
 which is then used to construct the mapping between the database and the programming
 language with a rich and user-friendly API. Furthermore, because Prisma is not designed
 as a standard ORM but instead employs an intermediary Schema file, it can
-improve overall productivity and control over traditional ORMs\cite{prisma}.
+improve overall productivity and control over traditional ORMs\footnote{\url{https://www.prisma.io/docs/concepts/overview/what-is-prisma}}.
 Figure \ref{fig:orm_productivity_control} reflects the latter.
 
 \begin{figure}[htbp]
@@ -1912,28 +1927,26 @@ Figure \ref{fig:orm_productivity_control} reflects the latter.
 \label{subsubsec:implementation_server_database_schema}
 
 This section depicts and describes the database schema structure, as well as how
-the various entities (tables) are connected. Figure \ref{fig:erm} displays the
-overall high-level representation of the database schema as an Entity
-Relationship Model\footnote{\url{https://wikipedia.org/wiki/Entity-relationship_model}}
-(ERM), where \fcolorbox{black}{ermGray}{\rule{0pt}{6pt}\rule{6pt}{0pt}} represents
-an Entity, \fcolorbox{black}{ermBlue}{\rule{0pt}{6pt}\rule{6pt}{0pt}} an Enum, and
-\textbf{---} a relation between two entities. An Entity has a header and a body,
-with the header representing the entity's name and the body representing the
-attributes that make it up. The body is divided into three columns: the first
-column provides the attribute names, the second column is the type of the related
-attributes, and the third column contains extra information and context about
-the corresponding attribute (e.g. \texttt{PK} indicates that the attribute is a Primary
-Key\footnote{\url{https://wikipedia.org/wiki/Primary_key}} of the entity). An enum
-has the same form as an entity, with a header and a body, but the body has a single
-column that represents all of the Enum's possible values. \\ %
-Following the schema, each entity is extensively described, as are the attributes
-that comprise it, as well as the relation(s) cardinality and why it is important.
-\\ %
-This part's information is crucial for gaining a better understanding of the data
-that the server requires and the installation script (see section
-\ref{sec:implementation_installer}) collects from a node. Additionally, the latter
-is necessary for comprehending the raw data provided and processed by the GraphQL
-API (see section \ref{subsec:implementation_server_graphql_api}).
+the various entities (tables) are connected. Figure \ref{fig:erm} displays the overall
+high-level representation of the database schema as an Entity Relationship Model\footnote{\url{https://wikipedia.org/wiki/Entity-relationship_model}}
+(ERM), where \fcolorbox{black}{ermGray}{\rule{0pt}{6pt}\rule{6pt}{0pt}}
+represents an Entity, \fcolorbox{black}{ermBlue}{\rule{0pt}{6pt}\rule{6pt}{0pt}}
+an Enum, and \textbf{---} a relation between two entities. An Entity has a
+header and a body, with the header representing the entity's name and the body representing
+the attributes that make it up. The body is divided into three columns: the first
+column provides the attribute names, the second column is the type of the
+related attributes, and the third column contains extra information and context about
+the corresponding attribute (e.g. \texttt{PK} indicates that the attribute is a
+Primary Key\footnote{\url{https://wikipedia.org/wiki/Primary_key}} of the entity).
+An enum has the same form as an entity, with a header and a body, but the body
+has a single column that represents all of the Enum's possible values. \\ %
+Following the schema, each entity is extensively described, as are the
+attributes that comprise it, as well as the relation(s) cardinality and why it
+is important. \\ %
+This part's information is crucial for gaining a better understanding of the
+data that the server requires and the installation script (see section \ref{sec:implementation_installer})
+collects from a node. Additionally, the latter is necessary for comprehending
+the raw data provided and processed by the GraphQL API (see section \ref{subsec:implementation_server_graphql_api}).
 
 \clearpage
 \newpage
@@ -1959,15 +1972,15 @@ API (see section \ref{subsec:implementation_server_graphql_api}).
 \end{figure}
 
 The user entity represents all of the cluster's registered users. \\ %
-A user can logically be a real person, such as an administrator, or an
-automation system, such as the Cluster Autoscaler. \\ %
+A user can logically be a real person, such as an administrator, or an automation
+system, such as the Cluster Autoscaler. \\ %
 The user entity is currently solely used for authentication and authorization in
-the GraphQL API. Certain queries are only available to authenticated users, while
-others are only available to users with specified roles and/or permissions, or
-both. Yet, nothing prevents the future implementation of additional capabilities
-or the extension of the entity with extra attributes and/or relationships with
-other (new) entities. Because of the latter, this entity differs from the others
-in that it exists independently of other entities. \\ %
+the GraphQL API. Certain queries are only available to authenticated users,
+while others are only available to users with specified roles and/or permissions,
+or both. Yet, nothing prevents the future implementation of additional capabilities
+or the extension of the entity with extra attributes and/or relationships with other
+(new) entities. Because of the latter, this entity differs from the others in that
+it exists independently of other entities. \\ %
 The \texttt{user} entity attributes are as follows:
 \begin{itemize}
   \item \texttt{id}
@@ -2119,23 +2132,21 @@ The \texttt{user} entity attributes are as follows:
   \includegraphics[width=.75\textwidth]{images/implementation/erm_node.pdf}
 \end{figure}
 
-The node entity represents all of the cluster's physical nodes, both active and
-inactive. It holds critical information about a node, and from this entity, other
-information like the current status or the hardware components may be obtained.
-\\ %
-Certain GraphQL API queries can only be performed by an authorized node. The
-node lacks a \texttt{password} attribute like the user entity, both because it
-is bad practice keeping the plain password in the node system and also because
-it is an entirely new kind of object that must handle the various operations
-differently. When the node record is created in the database for the first time,
-the auth token (in the user returned when it is successfully authenticated after
-providing the correct \texttt{username} and \texttt{password} attributes, see
-section \ref{subsubsec:implementation_server_graphql_api_mutations}) is returned
-only once and it cannot be obtained again. As a result, the auth token is securely
-stored only in the corresponding node, and if it is lost for any reason, indicating
-that the node is faulty or compromised, the only way to retrieve a new token and
-perform secure operations on the specific node is to register the node in the
-cluster again (removing the old record). \\ %
+The node entity represents all of the cluster's physical nodes, both active and inactive.
+It holds critical information about a node, and from this entity, other
+information like the current status or the hardware components may be obtained. \\ %
+Certain GraphQL API queries can only be performed by an authorized node. The node
+lacks a \texttt{password} attribute like the user entity, both because it is bad
+practice keeping the plain password in the node system and also because it is an
+entirely new kind of object that must handle the various operations differently.
+When the node record is created in the database for the first time, the auth token
+(in the user returned when it is successfully authenticated after providing the
+correct \texttt{username} and \texttt{password} attributes, see section \ref{subsubsec:implementation_server_graphql_api_mutations})
+is returned only once and it cannot be obtained again. As a result, the auth
+token is securely stored only in the corresponding node, and if it is lost for any
+reason, indicating that the node is faulty or compromised, the only way to retrieve
+a new token and perform secure operations on the specific node is to register the
+node in the cluster again (removing the old record). \\ %
 The \texttt{node} entity attributes are as follows:
 \begin{itemize}
   \item \texttt{id}
@@ -2452,27 +2463,28 @@ The \texttt{node} entity attributes are as follows:
 
 The cpu entity contains information about the CPU (Central Processing Unit).
 \newline
-The entity includes the most important information about a particular CPU model
-obtained from the Linux Kernel data available at the virtual path \texttt{/proc/cpuinfo}\footnote{\url{https://www.kernel.org/doc/html/latest/filesystems/proc.html\#kernel-data}}.
+The entity includes the most important information about a particular CPU model obtained
+from the Linux Kernel data available at the virtual path \texttt{/proc/cpuinfo}\footnote{\url{https://www.kernel.org/doc/html/latest/filesystems/proc.html\#kernel-data}}.
 \newline
-Because a particular CPU model can be present in numerous nodes (as is the case
-with worker nodes in reCluster), it is checked before registering a node that
-the CPU is already listed in the database. If not, it is registered using the
-provided information; otherwise, the information is combined with certain
-attributes to minimize potential deviation errors (i.e. \texttt{benchmarks}) or
-to update the attribute with the most recent known information (i.e. \texttt{vulnerabilities}).
+Because a particular CPU model can be present in numerous nodes (as is the case with
+worker nodes in reCluster), it is checked before registering a node that the CPU
+is already listed in the database. If not, it is registered using the provided information;
+otherwise, the information is combined with certain attributes to minimize potential
+deviation errors (i.e. \texttt{benchmarks}) or to update the attribute with the most
+recent known information (i.e. \texttt{vulnerabilities}).
 \newline
 As stated in the node entity, modern Processors, such as Arm Big.LITTLE\footnote{\url{https://www.arm.com/technologies/big-little}}
 or Intel Performance Hybrid Architecture\footnote{\url{https://www.intel.com/content/www/us/en/gaming/resources/how-hybrid-design-works.html}},
-are beginning to include hybrid technology (heterogeneous processing architecture)
-which employs two kinds of processors. The first type of processor is intended for
-maximum power efficiency, which reduces overall performance, whereas the second type
-of processor is designed for maximum compute performance, which increases power
-consumption. This form of Processor can instantly adapt to the variable workload
-by switching from one type to the other\cite{cpu_arm}\cite{cpu_intel}. Even
-though the latter technology is new and difficult to monitor (understanding when
-the CPU decides to transition from one type to the other and vice versa), it is represented
-in the entity with two dedicated attributes (\texttt{efficiency\_threshold} and \texttt{performance\_threshold}).
+are beginning to include hybrid technology (heterogeneous processing
+architecture) which employs two kinds of processors. The first type of processor
+is intended for maximum power efficiency, which reduces overall performance,
+whereas the second type of processor is designed for maximum compute performance,
+which increases power consumption. This form of Processor can instantly adapt to
+the variable workload by switching from one type to the other\cite{cpu_arm}\cite{cpu_intel}.
+Even though the latter technology is new and difficult to monitor (understanding
+when the CPU decides to transition from one type to the other and vice versa),
+it is represented in the entity with two dedicated attributes (\texttt{efficiency\_threshold}
+and \texttt{performance\_threshold}).
 \newline
 The \texttt{cpu} entity attributes are as follows:
 
@@ -2753,30 +2765,32 @@ The \texttt{cpu} entity attributes are as follows:
   \includegraphics[width=.75\textwidth]{images/implementation/erm_storage.pdf}
 \end{figure}
 
-The storage entity represents the persistence storage(s) accessible on the associated
-node.
+The storage entity represents the persistence storage(s) accessible on the
+associated node.
 \newline
 The information is obtained by reading the block devices identified by the Linux
 kernel and made available via the virtual path \texttt{/sys/block}\footnote{\url{https://www.kernel.org/doc/html/next/filesystems/sysfs.html}}.
 Block devices, such as a Hard Disk, SSD, CD-ROM, and RAM disk, are distinguished
-by random access to data organized in fixed-size blocks\cite{block_device}.
-Because the implementation only requires persistent storage(s), the collection
-of block devices is filtered to retrieve only Disk(s)/SSD(s) block devices that
-are not removable devices (i.e. USB flash drive). The latter is done
-automatically by the installation script while reading the node information.
+by random access to data organized in fixed-size blocks\cite{block_device}. Because
+the implementation only requires persistent storage(s), the collection of block devices
+is filtered to retrieve only Disk(s)/SSD(s) block devices that are not removable
+devices (i.e. USB flash drive). The latter is done automatically by the installation
+script while reading the node information.
 \newline
 A node can have zero or multiple storage devices. Nonetheless, it is usual for a
-consumer system to include at least one storage device, and modern (consumer)
-systems may include a combination of a Hard Disk (cheap with large capacity but slow)
-and an SSD (expensive but faster than a Hard Disk). Using a multi-SSD configuration
-can significantly improve cluster performance. Furthermore, if certain nodes have
-three or more storage devices, Longhorn (see section \ref{subsubsec:implementation_dependencies_docker_registry_image_storage})
-can utilize them to create a distributed block storage system.
+consumer system to include at least one storage device, and modern (consumer) systems
+may include a combination of a Hard Disk (cheap with large capacity but slow) and
+an SSD (expensive but faster than a Hard Disk). Using a multi-SSD configuration
+can significantly improve cluster performance. Furthermore, if certain nodes
+have three or more storage devices, Longhorn (see section
+\ref{subsubsec:implementation_dependencies_docker_registry_image_storage}) can utilize
+them to create a distributed block storage system.
 \newline
-Even though \texttt{Sysbench} (see section \ref{subsec:implementation_installer_benchmarks})
-supports it, the application currently does not support a scoring system for a storage
-device that can help determine its performance under various conditions. The
-\texttt{storage} entity attributes are as follows:
+Even though \texttt{Sysbench} (see section
+\ref{subsec:implementation_installer_benchmarks}) supports it, the application
+currently does not support a scoring system for a storage device that can help
+determine its performance under various conditions. The \texttt{storage} entity
+attributes are as follows:
 
 \begin{itemize}
   \item \texttt{id}
@@ -2848,32 +2862,32 @@ device that can help determine its performance under various conditions. The
   \includegraphics[width=.75\textwidth]{images/implementation/erm_interface.pdf}
 \end{figure}
 
-The interface entity depicts the network interface(s) accessible within the cluster's
-Internal Network that are associated with the node.
+The interface entity depicts the network interface(s) accessible within the
+cluster's Internal Network that are associated with the node.
 \newline
 The \texttt{ip}\footnote{\url{https://linux.die.net/man/8/ip}} command/application
-is used to obtain a node's available network interfaces (\texttt{ip -details link
-show}). However, the returned list contains both logical interfaces (such as
-\texttt{lo}\footnote{\url{https://tldp.org/LDP/nag/node66.html}}) and physical
-interfaces (such as \texttt{eth0} or \texttt{wlan0}), and must be filtered to retrieve
-only the physical one. The latter action is performed automatically by the
-installation script that discards all network interfaces that have the \texttt{info\_kind}
+is used to obtain a node's available network interfaces (\texttt{ip -details
+link show}). However, the returned list contains both logical interfaces (such as
+\texttt{lo}\footnote{\url{https://tldp.org/LDP/nag/node66.html}}) and physical interfaces
+(such as \texttt{eth0} or \texttt{wlan0}), and must be filtered to retrieve only
+the physical one. The latter action is performed automatically by the installation
+script that discards all network interfaces that have the \texttt{info\_kind}
 information object and is of type \texttt{loopback}.
 \newline
-A physical interface is a Network Interface Card (NIC) that is installed on the node
-and can thus be used to acquire information about the NIC as well as be configured
-to modify some key parameters (i.e. Wake-on-Lan flags) to function properly in
-the cluster environment. The information obtained is critical for understanding which
-nodes are available for automated bootstrapping by the Server (see section
-\ref{subsec:implementation_server_upscaling}) and to which specific physical address
-(MAC address) the magic wake-up message must be sent.
+A physical interface is a Network Interface Card (NIC) that is installed on the
+node and can thus be used to acquire information about the NIC as well as be
+configured to modify some key parameters (i.e. Wake-on-Lan flags) to function properly
+in the cluster environment. The information obtained is critical for
+understanding which nodes are available for automated bootstrapping by the
+Server (see section \ref{subsec:implementation_server_upscaling}) and to which
+specific physical address (MAC address) the magic wake-up message must be sent.
 \newline
-A node must have at least one NIC to communicate with/from it. The latter verification
-is done by both the installation script and the Server component when the registration
-query is executed. Nonetheless, (almost) every system is equipped with at least one
-NIC and, if possible/needed, can have also extra NICs. It is standard practice
-in data centers and almost every enterprise environment to have a system with
-multiple NICs.
+A node must have at least one NIC to communicate with/from it. The latter
+verification is done by both the installation script and the Server component
+when the registration query is executed. Nonetheless, (almost) every system is
+equipped with at least one NIC and, if possible/needed, can have also extra NICs.
+It is standard practice in data centers and almost every enterprise environment to
+have a system with multiple NICs.
 \newline
 The \texttt{interface} entity attributes are as follows:
 
@@ -3062,39 +3076,39 @@ The \texttt{interface} entity attributes are as follows:
 The status entity, as the name implies, represents the node's current status, as
 updated with the most recently available information.
 \newline
-The status entity's information is critical for gaining a better understanding of
-the node, its condition, and if any potential problems, such as a crash or an
-anomaly/unprogrammed shutdown, arise. Furthermore, it is widely used in autoscaling
-procedures (see section \ref{subsec:implementation_server_upscaling} and section
-\ref{subsec:implementation_server_downscaling}). When upscaling, the Server determines
-what are the list of nodes that are in an inactive status and, vice versa, when downscaling,
-the Server determines what are the list of nodes that are in an active status. It
-should be emphasized that the status entity is composed of multiple attributes,
-not just one, each of which specifies a particular knowledge that can also be correlated
-to other attributes.
+The status entity's information is critical for gaining a better understanding
+of the node, its condition, and if any potential problems, such as a crash or an
+anomaly/unprogrammed shutdown, arise. Furthermore, it is widely used in
+autoscaling procedures (see section \ref{subsec:implementation_server_upscaling}
+and section \ref{subsec:implementation_server_downscaling}). When upscaling, the
+Server determines what are the list of nodes that are in an inactive status and,
+vice versa, when downscaling, the Server determines what are the list of nodes that
+are in an active status. It should be emphasized that the status entity is
+composed of multiple attributes, not just one, each of which specifies a
+particular knowledge that can also be correlated to other attributes.
 \newline
-A node must have only one (unique) status record, and a status record must identify
-only one (unique) node record. When a node successfully registers, the status record
-is automatically created, and it is continuously updated while the node is
-operational. Because there are no status information updates sent by the node when
-it is inactive, all of the attribute's values reflect the most recent status
+A node must have only one (unique) status record, and a status record must
+identify only one (unique) node record. When a node successfully registers, the
+status record is automatically created, and it is continuously updated while the
+node is operational. Because there are no status information updates sent by the
+node when it is inactive, all of the attribute's values reflect the most recent status
 information before the node is shut down.
 \newline
 The status information is automatically updated by leveraging the Kubernetes API,
-which provides access to the node's status information, which is constantly updated
-by periodic Heartbeats sent by the Kubernetes node to the API Server (Controllers).
-The information (attributes) of the status entity is only a subset of the
-multitude made available by the Kubernetes API, as most of them are unnecessary for
-low-level cluster operation and administration. Furthermore, some status updates
-are performed without leveraging the Kubernetes API, either because the latter
-is unavailable or because the node autonomously sends a request (i.e. after
-successfully bootstrapping and before starting all cluster services) to specific
-protected GraphQL queries, generating intrinsic knowledge that the node is
-somewhat active and performing a status update.
+which provides access to the node's status information, which is constantly
+updated by periodic Heartbeats sent by the Kubernetes node to the API Server (Controllers).
+The information (attributes) of the status entity is only a subset of the multitude
+made available by the Kubernetes API, as most of them are unnecessary for low-level
+cluster operation and administration. Furthermore, some status updates are
+performed without leveraging the Kubernetes API, either because the latter is unavailable
+or because the node autonomously sends a request (i.e. after successfully bootstrapping
+and before starting all cluster services) to specific protected GraphQL queries,
+generating intrinsic knowledge that the node is somewhat active and performing a
+status update.
 \newline
-It should be noted that this entity lacks the \texttt{created\_at} attribute
-because it is created automatically when the associated node is created, and thus
-the two timestamps will have the same value.
+It should be noted that this entity lacks the \texttt{created\_at} attribute because
+it is created automatically when the associated node is created, and thus the
+two timestamps will have the same value.
 \newline
 The \texttt{status} entity attributes are as follows:
 
@@ -3405,14 +3419,14 @@ The \texttt{status} entity attributes are as follows:
 
   \item \texttt{last\_heartbeat}
     \newline
-    Date and time of the most recent Heartbeat message.
+    Date and time of the most recent Heartbeat message\footnote{\footnote{\url{https://kubernetes.io/docs/concepts/architecture/nodes/\#heartbeats}}}.
     \newline
     The attribute indicates the most recent timestamp at which a Controller node
     received a HeartBeat message sent by the associated node (Kubernetes \texttt{kubelet}).
     The attribute is of type \texttt{timestamptz}.
     \newline
     A HeartBeat message is sent whenever the node's Kubernetes status changes or
-    there is no update in the defined HeartBeat interval\cite{k8s}. During the initialization
+    there is no update in the defined HeartBeat interval. During the initialization
     phase, Kubernetes bootstraps numerous components, and the \texttt{reason}
     and \texttt{message} attributes are constantly changed, resulting in
     frequent updates to the \texttt{last\_heartbeat} attribute. Far from it, when
@@ -3432,10 +3446,10 @@ The \texttt{status} entity attributes are as follows:
     all deployments (pods) that are scheduled on the node and the node's status
     is changed to \texttt{UNKNOWN}. Note that the pods scheduled on the node may
     still operate, and because the Controller is unable to communicate with the disconnected
-    node, the pods status is also set to \texttt{Terminating} or \texttt{Unknown}\cite{k8s}.
+    node, the pods status is also set to \texttt{Terminating} or \texttt{Unknown}.
     \newline
-    To summarize, the previously mentioned threshold time values are outlined below
-    (along with their respective default value):
+    To summarize, the previously mentioned threshold time values are outlined
+    below (along with their respective default value):
     \begin{enumerate}
       \item \texttt{node-status-update-frequency}\footnote{\url{https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/\#node-status-update-frequency}}
         \newline
@@ -3459,10 +3473,10 @@ The \texttt{status} entity attributes are as follows:
         \newline
         The default value is \texttt{300} seconds (\texttt{5m}).
     \end{enumerate}
-    It should be noted that the latter threshold values can be tailored to
-    cluster-specific use-case scenarios, yielding approximately three configurations:
-    \texttt{Fast Update/Fast Reaction}, \texttt{Medium Update/Average Reaction} and
-    \texttt{Low Update/Slow reaction}\cite{k8s}.
+    It should be noted that the latter threshold values can be tailored to cluster-specific
+    use-case scenarios, yielding approximately three configurations\footnote{\url{https://github.com/kubernetes-sigs/kubespray/blob/master/docs/kubernetes-reliability.md}}:
+    \texttt{Fast Update/Fast Reaction}, \texttt{Medium Update/Average Reaction}
+    and \texttt{Low Update/Slow reaction}.
     \newline
     Because the reception of the most recent Heartbeat message is not always
     known, this attribute can be \texttt{NULL} (\texttt{NULLABLE}). Furthermore,
@@ -3511,63 +3525,63 @@ The \texttt{status} entity attributes are as follows:
   \includegraphics[width=.75\textwidth]{images/implementation/erm_node_pool.pdf}
 \end{figure}
 
-The node pool entity represents a collection of nodes with similar hardware
-characteristics.
+The node pool entity represents a collection of nodes with similar hardware characteristics.
 \newline
-This entity is critical for autoscaling, and the Cluster Autoscaler component
-makes extensive use of the available registered node groups, their respective information,
-and the corresponding nodes. Indeed, the Cluster Autoscaler relies on both high-level
-knowledge obtained from the Kubernetes API to continuously monitor the nodes and
-all scheduled workloads across the cluster, and low-level knowledge obtained from
-this entity (via the GraphQL API) to determine whether there are node pools with
-inactive nodes that can be booted up (upscaling) or nodes that can be turned off
-(downscaling) if some nodes are underutilized.
+This entity is critical for autoscaling, and the Cluster Autoscaler component makes
+extensive use of the available registered node groups, their respective
+information, and the corresponding nodes. Indeed, the Cluster Autoscaler relies on
+both high-level knowledge obtained from the Kubernetes API to continuously monitor
+the nodes and all scheduled workloads across the cluster, and low-level
+knowledge obtained from this entity (via the GraphQL API) to determine whether
+there are node pools with inactive nodes that can be booted up (upscaling) or
+nodes that can be turned off (downscaling) if some nodes are underutilized.
 \newline
-The current implementation combines nodes based on their respective number of
-CPU cores and memory (RAM) amount, which is also reflected in the \texttt{name}
-attribute. It should be noted that in future implementations, the GPU model may
-also be used. Because the number of CPU cores is relatively small, dealing with
-comparisons is relatively simple. However, for two primary causes, the latter is
-far from true for memory quantity. Firstly, the memory quantity unit is in byte (\texttt{B}),
-the data type is \texttt{bigint}, and therefore comparisons are performed on extremely
-large integers. Secondly, even if two nodes are from the same manufacturer and have
-the same hardware components, it is not always guaranteed that the memory
-quantity in bytes is identical. The latter has happened in reCluster, where the
-four Worker nodes are the same model from the same manufacturer and equipped
-with the same hardware, but their memory quantities in bytes vary slightly. One
-potential explanation is that some memory cells are faulty (this is more likely with
-older hardware, on which reCluster is designed), and the memory controller hides
-them from the Operating System, causing the total to be slightly different. To
-address the latter issues, the memory amount is first converted to GigaBytes (\texttt{GiB})
-and then rounded to the closest half, yielding \texttt{0.5} or a multiple of it.
-It is now simple to organize the nodes in groups. It should be noted that the
-\texttt{512 MiB} (\texttt{0.5 GiB}) value is not random, but rather reflects the
-minimal hardware requirements of the Kubernetes Orchestrator (K3s). As an
-example, consider the following four nodes: the first has a \texttt{4} core CPU and
-\texttt{4 GiB} of memory, the second has an \texttt{8} core CPU and \texttt{7.5
-GiB} of memory, the third has a \texttt{4} core CPU and \texttt{4 GiB} of memory,
-and the fourth has an \texttt{8} core CPU and \texttt{8 GiB} of memory. The
-first and third nodes are assigned to the same node pool, whereas the second and
-fourth nodes are assigned to separate node pools.
+The current implementation combines nodes based on their respective number of CPU
+cores and memory (RAM) amount, which is also reflected in the \texttt{name} attribute.
+It should be noted that in future implementations, the GPU model may also be used.
+Because the number of CPU cores is relatively small, dealing with comparisons is
+relatively simple. However, for two primary causes, the latter is far from true
+for memory quantity. Firstly, the memory quantity unit is in byte (\texttt{B}),
+the data type is \texttt{bigint}, and therefore comparisons are performed on
+extremely large integers. Secondly, even if two nodes are from the same
+manufacturer and have the same hardware components, it is not always guaranteed that
+the memory quantity in bytes is identical. The latter has happened in reCluster,
+where the four Worker nodes are the same model from the same manufacturer and equipped
+with the same hardware, but their memory quantities in bytes vary slightly. One potential
+explanation is that some memory cells are faulty (this is more likely with older
+hardware, on which reCluster is designed), and the memory controller hides them from
+the Operating System, causing the total to be slightly different. To address the
+latter issues, the memory amount is first converted to GigaBytes (\texttt{GiB}) and
+then rounded to the closest half, yielding \texttt{0.5} or a multiple of it. It
+is now simple to organize the nodes in groups. It should be noted that the \texttt{512
+MiB} (\texttt{0.5 GiB}) value is not random, but rather reflects the minimal
+hardware requirements of the Kubernetes Orchestrator (K3s). As an example,
+consider the following four nodes: the first has a \texttt{4} core CPU and
+\texttt{4 GiB} of memory, the second has an \texttt{8} core CPU and \texttt{7.5 GiB}
+of memory, the third has a \texttt{4} core CPU and \texttt{4 GiB} of memory, and
+the fourth has an \texttt{8} core CPU and \texttt{8 GiB} of memory. The first and
+third nodes are assigned to the same node pool, whereas the second and fourth
+nodes are assigned to separate node pools.
 \newline
-The System has two logical node pools: one for Controller nodes and one for Worker
-nodes. Worker node pools function as previously explained, and they're employed for
-autoscaling by default. While all Controller nodes are merged into a single node
-pool called \texttt{controllers}, no hardware components are examined, and auto-scaling
-is disabled. The latter is done because, by design, the cluster cannot auto-scale
-Controller nodes, leaving hardware comparisons meaningless. If a controller node
-needs to be converted to a Worker node, it must first be deleted by the Kubernetes
-cluster, then removed by the Server/Database (via a single GraphQL API call made
-by an administrator), and finally re-registered in the cluster as a Worker node.
+The System has two logical node pools: one for Controller nodes and one for
+Worker nodes. Worker node pools function as previously explained, and they're
+employed for autoscaling by default. While all Controller nodes are merged into a
+single node pool called \texttt{controllers}, no hardware components are examined,
+and auto-scaling is disabled. The latter is done because, by design, the cluster
+cannot auto-scale Controller nodes, leaving hardware comparisons meaningless. If
+a controller node needs to be converted to a Worker node, it must first be
+deleted by the Kubernetes cluster, then removed by the Server/Database (via a
+single GraphQL API call made by an administrator), and finally re-registered in
+the cluster as a Worker node.
 \newline
 The node must be assigned to a node pool during the registration process. If the
-node pool does not exist, it is created automatically; otherwise, the node is
-assigned to the appropriate node pool with the same amount of CPU cores and
-transformed memory quantity.
+node pool does not exist, it is created automatically; otherwise, the node is assigned
+to the appropriate node pool with the same amount of CPU cores and transformed memory
+quantity.
 \newline
 The node pool entity has the attributes \texttt{min\_nodes} and \texttt{auto\_scale},
-which can be modified by an administrator via a GraphQL API node pool update
-request to change the associated node pool's autoscaling behavior.
+which can be modified by an administrator via a GraphQL API node pool update request
+to change the associated node pool's autoscaling behavior.
 \newline
 As previously stated, a node is assigned to a single and unique node pool, but a
 node pool can be assigned to zero or multiple nodes.
@@ -3696,10 +3710,10 @@ The \texttt{node\_pool} entity attributes are as follows:
 \subsection{GraphQL API}
 \label{subsec:implementation_server_graphql_api}
 
-This description shows the GraphQL API made available by the Server, which
-enables users and nodes to interact with both the high-level cluster, which represents
-the Kubernetes cluster and its overall workload, and the low-level cluster, which
-represents the bare-metal knowledge stored inside the Database. As previously
+This description shows the GraphQL API made available by the Server, which enables
+users and nodes to interact with both the high-level cluster, which represents
+the Kubernetes cluster and its overall workload, and the low-level cluster,
+which represents the bare-metal knowledge stored inside the Database. As previously
 mentioned, the API can provide more advanced capabilities and calculated data/attributes
 that are not present in the pure Database schema, such as the \texttt{count} and
 \texttt{max\_nodes} attributes of the Node Pool entity.
@@ -3712,22 +3726,23 @@ that are not present in the pure Database schema, such as the \texttt{count} and
   \caption{GraphQL logo}
 \end{wrapfigure}
 
-GraphQL is a query language and server-side runtime for running queries using a type
-system specified in a schema. A GraphQL service is built by specifying types and
-fields on those types, then providing methods (resolvers) for each field on each
-type. Before any operation is made, it is first verified that it only pertains to
-the types and variables specified in the schema. Declarative data fetching with
-GraphQL allows clients to define precisely which data are needed, eliminating over-
-and under-fetching. Additionally, a GraphQL server only provides a single API
-endpoint rather than multiple endpoints that yield fixed data structures, as is the
-case with \texttt{REST} (REpresentational State Transfer)\cite{graphql}. The
-GraphQL endpoint in the Server implementation is accessible at \texttt{/graphql},
-but it can be modified to better suit the requirements of the cluster's organization.
-It requires considerable effort/time to understand how GraphQL operates and how
-its overall structure/architecture is composed of all the various types, fields,
-queries, mutations, etc. The latter, however, is outside the scope of this document,
-so it is strongly advised to visit the official website at \texttt{https://graphql.org}
-for a better comprehension of how GraphQL works. \\ %
+GraphQL\footnote{\url{https://graphql.org}} is a query language and server-side
+runtime for running queries using a type system specified in a schema. A GraphQL
+service is built by specifying types and fields on those types, then providing
+methods (resolvers) for each field on each type. Before any operation is made,
+it is first verified that it only pertains to the types and variables specified
+in the schema. Declarative data fetching with GraphQL allows clients to define precisely
+which data are needed, eliminating over- and under-fetching. Additionally, a GraphQL
+server only provides a single API endpoint rather than multiple endpoints that yield
+fixed data structures, as is the case with \texttt{REST} (REpresentational State
+Transfer). The GraphQL endpoint in the Server implementation is accessible at
+\texttt{/graphql}, but it can be modified to better suit the requirements of the
+cluster's organization. It requires considerable effort/time to understand how
+GraphQL operates and how its overall structure/architecture is composed of all
+the various types, fields, queries, mutations, etc. The latter, however, is outside
+the scope of this document, so it is strongly advised to visit the official
+website at \texttt{https://graphql.org} for a better comprehension of how GraphQL
+works. \\ %
 It is nearly unfeasible to provide a detailed explanation of the \textit{generated}
 GraphQL schema for the Server implementation because it consists of almost
 \texttt{2000} lines of code. Therefore, the explanations in this section (hence

@@ -337,19 +337,20 @@ not override the original input file.
 Available at \url{https://github.com/carlocorradini/graphql-auth-directive} \\ %
 Used in the \texttt{GraphQL} API (see section \ref{subsec:implementation_server_graphql_api}).
 \\ %
-A custom \texttt{GraphQL} directive that protects resources from unauthenticated
-and unauthorized access in high-security contexts. It is available in all major
-\texttt{Node.js} registries as \texttt{graphql-auth-directive}. \\ %
+A custom \texttt{GraphQL} directive\footnote{\url{https://spec.graphql.org/October2021/\#sec-Language.Directives}}
+that protects resources from unauthenticated and unauthorized access in high-security
+contexts. It is available in all major \texttt{Node.js} registries as \texttt{graphql-auth-directive}.
+\\ %
 A directive is an identifier preceded by a \texttt{@} character, optionally
 followed by a list of named arguments, which can appear after almost any form of
-syntax in the \texttt{GraphQL} query or schema languages\cite{graphql}. \\ %
-The \texttt{GraphQL} context holds all important information about the current
-request. A \texttt{GraphQL} context is an object that is shared by all resolvers
-in a given execution. It helps store data such as authentication information,
-the current user, database connections, data sources, and other information required
-to operate the business logic\cite{graphql}. It is important to note that the context
-does not have to follow a predefined structure; rather, it is highly flexible to
-the user's implementation.
+syntax in the \texttt{GraphQL} query or schema languages. \\ %
+The \texttt{GraphQL} context\footnote{\url{https://the-guild.dev/graphql/modules/docs/essentials/context}}
+holds all important information about the current request. A \texttt{GraphQL} context
+is an object that is shared by all resolvers in a given execution. It helps
+store data such as authentication information, the current user, database
+connections, data sources, and other information required to operate the
+business logic. It is important to note that the context does not have to follow
+a predefined structure; rather, it is highly flexible to the user's implementation.
 
 \subsection{Configuration}
 \label{subsec:corollary_projects_graphql_auth_diretive_configuration}
@@ -405,8 +406,9 @@ as well as a transformer function that applies the auth logic to the executable
       Defines the array type, which is by default a \texttt{String}.
       \newline
       It is standard practice in \texttt{GraphQL} and in programming languages
-      to map a set of values to an enum. An enumeration type is a special kind of
-      scalar that is restricted to a particular set of allowed values\cite{graphql}.
+      to map a set of values to an enum. An enumeration type\footnote{\url{https://spec.graphql.org/October2021/\#sec-Enum-Value}}
+      is a special kind of scalar that is restricted to a particular set of allowed
+      values.
       \newline
       This option restricts the allowed values of roles to a specific set rather
       than a general string.
@@ -453,11 +455,10 @@ as well as a transformer function that applies the auth logic to the executable
 \label{subsec:corollary_projects_graphql_auth_diretive_type_definition}
 
 GraphQL has its language for writing GraphQL Schemas: the GraphQL Schema
-Definition Language (SDL). SDL is incredibly powerful and expressive while being
-simple and intuitive to use. The syntax is well-defined and is included in the
-official GraphQL specification\footnote{\url{https://spec.graphql.org}}. Schema Definitions
-are also known as IDL (Interface Definition Language) or SDL (Schema Definition
-Language)\cite{graphql}. \\ %
+Definition Language\footnote{\url{https://www.prisma.io/blog/graphql-sdl-schema-definition-language-6755bcb9ce51}}
+(SDL). SDL is incredibly powerful and expressive while being simple and intuitive
+to use. The syntax is well-defined and is included in the official GraphQL
+specification\footnote{\url{https://spec.graphql.org}}. \\ %
 The Type Definition of the GraphQL auth directive generated with default
 settings is shown below:
 

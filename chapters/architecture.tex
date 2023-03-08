@@ -63,10 +63,11 @@ component, which monitors the current cluster state. More details about Cluster
 Autoscaler may be found in section
 \ref{subsec:architecture_components_cluster_autoscaler}. \\ %
 Two core services are continuously operating on each node. The first service is a
-Kubernetes-compliant distribution. Kubernetes, also known as K8s, is an open-source
-solution for automating containerized application deployment, scaling, and
-administration\cite{k8s}. The second service, Metrics Server, is a server that
-constantly monitors the node, exposing hardware and operating system metrics. \\ %
+Kubernetes-compliant distribution. Kubernetes\footnote{\url{https://kubernetes.io}},
+also known as K8s, is an open-source solution for automating containerized
+application deployment, scaling, and administration\cite{k8s}. The second
+service, Metrics Server, is a server that constantly monitors the node, exposing
+hardware and operating system metrics. \\ %
 Finally, each node is conceptually divided into two types depending on its role
 in the cluster: Worker nodes and Controller nodes. These are discussed in the
 sections that follow.
@@ -299,13 +300,14 @@ reducing disk utilization. The cached data is stored in the main volatile memory
 The registry component is a private container registry that the K8s orchestrator
 uses in the cluster to download a specific image or collection of images. A
 container registry is a stateless, highly scalable server-side application that stores
-and distributes container-based application images\cite{docker_registry}. \\ %
+and distributes container-based application images\footnote{\url{https://docs.docker.com/registry}}.
+\\ %
 A registry is regarded as a non-essential component because the whole system may
-function without it. If an internet connection is available and one of the numerous
-public container registries (such as Docker Hub\footnote{\url{https://hub.docker.com}})
-is accessible, the cluster downloads and runs the requested image from the
-external network. Having a private register in the cluster, on the other hand, may
-solve a plethora of potential difficulties. Some of them are as follows:
+function without it. If an internet connection is available and one of the
+numerous public container registries (such as Docker Hub\footnote{\url{https://hub.docker.com}})
+is accessible, the cluster downloads and runs the requested image from the external
+network. Having a private register in the cluster, on the other hand, may solve
+a plethora of potential difficulties. Some of them are as follows:
 
 \begin{itemize}
   \item The K8s orchestrator fails to download the requested images in an Air-Gapped
@@ -344,26 +346,25 @@ solve a plethora of potential difficulties. Some of them are as follows:
 \end{itemize}
 
 In practice, the registry is used to distribute the Cluster Autoscaler image (see
-\ref{subsec:architecture_components_cluster_autoscaler}) that is specifically
-built to function with reCluster. \\ %
-Even though it is supported out of the box, the component does not need to be instantiated
-on a specific physical node; rather, it is deployed directly in the K8s environment.
-The registry may be accessible from both inside and outside the K8s network, thanks
-to a correctly configured Load Balancer component (further information in
-section \ref{subsec:architecture_components_load_balancer}) that exposes the service
-to a non-K8s-related external network. Exposing the K8s service is critical for
-conveniently allowing the upload (push) and download (pull) of an image without
+\ref{subsec:architecture_components_cluster_autoscaler}) that is specifically built
+to function with reCluster. \\ %
+Even though it is supported out of the box, the component does not need to be
+instantiated on a specific physical node; rather, it is deployed directly in the
+K8s environment. The registry may be accessible from both inside and outside the
+K8s network, thanks to a correctly configured Load Balancer component (further information
+in section \ref{subsec:architecture_components_load_balancer}) that exposes the
+service to a non-K8s-related external network. Exposing the K8s service is critical
+for conveniently allowing the upload (push) and download (pull) of an image without
 the user requiring any extra settings. The approach must remain the same as when
-utilizing a publicly accessible registry, but with the cluster's registry
-address provided. Because the registry is externally accessible, it must be
-properly configured to improve overall security. HTTPS, which enables secure
-communication over a cryptographic channel, and authentication, which permits
-access only to a limited group of authenticated users, must be set up and/or implemented.
-\\ %
-The registry is deployed in the K8s environment, but the K8s orchestrator needs
-it to fetch the required images, leading to a circular dependence. To avoid the
-latter, the registry image should be made available on each node, eliminating
-the need for a registry request.
+utilizing a publicly accessible registry, but with the cluster's registry address
+provided. Because the registry is externally accessible, it must be properly configured
+to improve overall security. HTTPS, which enables secure communication over a cryptographic
+channel, and authentication, which permits access only to a limited group of authenticated
+users, must be set up and/or implemented. \\ %
+The registry is deployed in the K8s environment, but the K8s orchestrator needs it
+to fetch the required images, leading to a circular dependence. To avoid the latter,
+the registry image should be made available on each node, eliminating the need for
+a registry request.
 
 \subsection{Cluster Autoscaler}
 \label{subsec:architecture_components_cluster_autoscaler}
@@ -374,37 +375,37 @@ the need for a registry request.
   \includegraphics[width=\linewidth]{images/architecture/cluster_autoscaler.pdf}
 \end{wrapfigure}
 
-The Cluster Autoscaler component is a program that automatically adjusts the
-number of nodes in the cluster to guarantee that all deployed services have a
-location to execute and no nodes are underutilized\cite{cluster_autoscaler}. It
-is not in charge of node behavior and registration in the cluster; it only determines
-if a node should be turned on or off, but not how. As a result, for low-level
-control, it must rely on the Server component. Nonetheless, the autoscaler is an
-essential component of the cluster due to its automation, which eliminates the
-need for human interaction and dramatically lowers resource waste. \\ %
-The Cluster Autoscaler is deployed in the K8s environment rather than on a
-separate node. After the registry becomes available, the container image of the
-Cluster Autoscaler is uploaded and made available to the whole cluster during
-the initialization phase. Because the registry is defined as a critical K8s service,
-it may be scheduled on any node, both workers and controllers. Since the cluster
-may scale to zero workers, this applies to every critical component in the K8s environment,
-preventing a service outage. Furthermore, the cluster autoscaler must be
-maintained operational at all times: if a crash or error happens, it must be
-restarted. The latter is accomplished automatically by the K8s system, removing
-the need for a custom solution. \\ %
-The component has both a high-level and a low-level view of the cluster. The high-level
-view is accomplished by continuously monitoring the cluster's condition to ensure
-its integrity: workload and active nodes. As a result, it is aware of whether
-there are services that cannot be deployed owing to a lack of resources, or if there
-are underutilized active nodes for the present demand, resulting in resource
-waste. This is accomplished by directly querying the protected API provided by the
-controller nodes. Far from it, the low-level view is obtained by continually updating
-a local cache that contains all of the available nodes in the cluster, both
+The Cluster Autoscaler component is a program that automatically adjusts the number
+of nodes in the cluster to guarantee that all deployed services have a location to
+execute and no nodes are underutilized\cite{cluster_autoscaler}. It is not in charge
+of node behavior and registration in the cluster; it only determines if a node
+should be turned on or off, but not how. As a result, for low-level control, it
+must rely on the Server component. Nonetheless, the autoscaler is an essential
+component of the cluster due to its automation, which eliminates the need for human
+interaction and dramatically lowers resource waste. \\ %
+The Cluster Autoscaler is deployed in the K8s environment rather than on a separate
+node. After the registry becomes available, the container image of the Cluster Autoscaler
+is uploaded and made available to the whole cluster during the initialization phase.
+Because the registry is defined as a critical K8s service, it may be scheduled on
+any node, both workers and controllers. Since the cluster may scale to zero workers,
+this applies to every critical component in the K8s environment, preventing a service
+outage. Furthermore, the cluster autoscaler must be maintained operational at all
+times: if a crash or error happens, it must be restarted. The latter is
+accomplished automatically by the K8s system, removing the need for a custom solution.
+\\ %
+The component has both a high-level and a low-level view of the cluster. The
+high-level view is accomplished by continuously monitoring the cluster's
+condition to ensure its integrity: workload and active nodes. As a result, it is
+aware of whether there are services that cannot be deployed owing to a lack of resources,
+or if there are underutilized active nodes for the present demand, resulting in resource
+waste. This is accomplished by directly querying the protected API provided by
+the controller nodes. Far from it, the low-level view is obtained by continually
+updating a local cache that contains all of the available nodes in the cluster, both
 active and inactive, to know how many nodes are available and their status. As a
 result, it is aware of the nodes that can be turned on or off, as well as if the
-system can be scaled up or down. As previously stated, the latter is
-accomplished by accessing the server on a series of secured API endpoints that
-provide direct control over how the cluster's nodes are handled. \\ %
+system can be scaled up or down. As previously stated, the latter is accomplished
+by accessing the server on a series of secured API endpoints that provide direct
+control over how the cluster's nodes are handled. \\ %
 The prerequisites and solutions for automatically adjusting the cluster size are
 outlined below:
 \begin{itemize}
@@ -449,10 +450,10 @@ outlined below:
   \includegraphics[width=\linewidth]{images/architecture/load_balancer.pdf}
 \end{wrapfigure}
 
-The load balancer component provides an externally accessible IP address to an
-internal K8s application. It may be seen as an abstract mechanism of exposing the
-application as a network service without requiring an unfamiliar service discovery
-mechanism\cite{k8s}. \\ %
+The Load Balancer\footnote{\url{https://kubernetes.io/docs/concepts/services-networking/service/\#loadbalancer}}
+component provides an externally accessible IP address to an internal K8s application.
+It may be seen as an abstract mechanism of exposing the application as a network
+service without requiring an unfamiliar service discovery mechanism. \\ %
 An application can be composed of multiple replicas that are generated and
 destroyed to maintain the cluster in the desired state. The replicas can be spread
 over many active nodes, improving overall performance, availability, and fault
@@ -712,11 +713,12 @@ Sharing computers often necessitates ensuring that two applications do not
 attempt to use the same ports. Port coordination, also known as dynamic port
 allocation, is extremely difficult to do at scale and exposes cluster-level issues.
 Kubernetes, on the other hand, takes a different approach. \\ %
-Every Pod, which are the smallest deployable units of computing that can be created
-and managed in a cluster\cite{k8s}, is assigned its cluster-wide IP address.
-This eliminates the need to explicitly construct connections between Pods and
-deal with container ports mapping to node ports. As a result, Kubernetes
-enforces the following basic criteria for any networking implementation:
+Every Pod\footnote{\url{https://kubernetes.io/docs/concepts/workloads/pods}}, which
+are the smallest deployable units of computing that can be created and managed in
+a cluster, is assigned its cluster-wide IP address. This eliminates the need to explicitly
+construct connections between Pods and deal with container ports mapping to node
+ports. As a result, Kubernetes enforces the following basic criteria for any networking
+implementation:
 \begin{itemize}
   \item Pods can communicate with all other pods on any other node without the use
     of NAT (Network Address Translation). NAT is a means of transparently
@@ -725,10 +727,10 @@ enforces the following basic criteria for any networking implementation:
   \item Kubernetes agents (such as system daemons, \texttt{kubelet}, and so on)
     on a node can communicate with all pods on that node.
 \end{itemize}
-Kubernetes IP addresses exist at the Pod scope; containers within a Pod share
-their network namespaces, including their IP address and MAC address. This
-implies that containers within a Pod may all contact each other's ports on
-\texttt{localhost}; requiring port coordination. \\ %
+Kubernetes IP addresses exist at the Pod scope; containers within a Pod share their
+network namespaces, including their IP address and MAC address. This implies that
+containers within a Pod may all contact each other's ports on \texttt{localhost};
+requiring port coordination. \\ %
 Four concerns are addressed by Kubernetes networking:
 \begin{enumerate}
   \item \textit{Highly-coupled container-to-container communications}
@@ -750,21 +752,22 @@ Four concerns are addressed by Kubernetes networking:
     exposing it as a Service. The Load Balancer Service component, mentioned in
     the section \ref{subsec:architecture_components_load_balancer}, is one example.
 \end{enumerate}
-The container runtime on each node implements the Kubernetes network model.
-Container runtime software, such as containerd\footnote{\url{urlhttps://containerd.io}}
-or CRI-O\footnote{\url{https://cri-o.io}}, is responsible for operating the
-containers. Container runtimes handle their network and security capabilities via
-the Container Network Interface (CNI)\cite{k8s}. CNI is composed of a specification
-and libraries for designing plugins that configure network interfaces in Linux containers.
-CNI is only concerned with the network connectivity of containers and removing
-allocated resources when the container is destroyed\cite{cni}.
+The container runtime on each node implements the Kubernetes network model. Container
+runtime software, such as containerd\footnote{\url{urlhttps://containerd.io}} or
+CRI-O\footnote{\url{https://cri-o.io}}, is responsible for operating the containers.
+Container runtimes handle their network and security capabilities via the
+Container Network Interface (CNI). CNI\footnote{\url{https://www.cni.dev}} is composed
+of a specification and libraries for designing plugins that configure network interfaces
+in Linux containers. CNI is only concerned with the network connectivity of
+containers and removing allocated resources when the container is destroyed.
 
 \section{Cluster}
 \label{sec:architecture_cluster}
 
 The architecture has a real-world implementation in the reCluster project\footnote{\url{https://github.com/carlocorradini/reCluster}}.
-It employs several hardware components decommissioned by the University of Trento\footnote{\url{https://www.unitn.it}}
-that were formerly utilized by students in the computer classroom.
+It employs several hardware components decommissioned by the University of
+Trento\footnote{\url{https://www.unitn.it}} that were formerly utilized by
+students in the computer classroom.
 
 \begin{figure}[htbp]
   \centering
