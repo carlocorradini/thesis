@@ -1,28 +1,239 @@
 \chapter{Conclusions}
 \label{cha:conclusions}
 
-% CA no docs
+Current cluster architectures are mainly concerned with maximizing service performance
+and achieving near-instantaneous responsiveness while ignoring the energy impact
+and the various resources involved. As a result, it is becoming more and more necessary---almost
+a requirement---to reconsider and transform existing designs to create architectures
+that are more resource-aware and sustainable. These latter requirements must be
+considered just as vital as performance and responsiveness. \\ %
+The context and fundamental principles on which the new and more sustainable
+cluster architectures should either completely or partially rely on have been
+initially explained in this document. Moreover, due to the outsourcing
+phenomenon that shifts local and physical architectures towards remote, intangible,
+and virtual architectures, users tend to forget the numerous implications of this
+decision that not only can have privacy and/or security concerns but also, and
+most importantly in this case, completely removes the direct control and the resource
+awareness of the overall system. \\ %
+Following the introduction, a possible theoretical design that is more
+sustainable has been put forward, prioritizing the reduction of resource waste and
+energy consumption while maintaining a certain degree of adaptability and configurability.
+Every component that constitutes the architecture has been thoroughly explained,
+highlighting its main purpose and different capabilities. A cluster is not a
+cluster if the different components are not connected. In the design, there are
+three major network groups; the External Network may even be removed if external
+resources and connections are not required. The reCluster project, which is a practical
+and sustainable cluster implementation of the theorized architecture, has also
+been presented. All of its hardware components have been recycled following decommissioning.
+\\ %
+The implementation thoroughly explains how the reCluster was put into practice while
+adhering to both the fundamental requirements and the theoretical architecture behind
+the networks and components. It begins with the foundations, which are composed of
+GNU/Linux, a collection of programs, and the Init System, all of which are
+packaged together as a custom distribution into a portable and simple-to-install
+ISO image file. Then, each theorized component is mapped to a real-world
+application, and some of its most important features used in reCluster are explained.
+The way the Server and Cluster Autoscaler components are implemented is
+different because the first one was entirely built from scratch, whereas the second
+one used an existing core that had been modified to be compatible with the cluster
+version. The Server component represents the low-level knowledge of the cluster
+and is deeply described, including the database structure, GraphQL queries and
+mutations API, how the upscaling and downscaling procedures are handled, and how
+to exploit Kubernetes monitoring without the need for a custom implementation. The
+Cluster Autoscaler, on the other hand, represents the high-level knowledge of the
+cluster, and it is used in conjunction with the Server component to perform the
+upscaling or downscaling operations. The Cluster Autoscaler only scales the number
+of nodes and, because it is not the only method of autoscaling in a cluster, the
+other two approaches are also explained: Vertical Pod Autoscaler, which automatically
+adjusts the resources of a Pod, and Horizontal Pod Autoscaler, which automatically
+adjusts the number of Pods. The combination of the Horizontal Pod Autoscaler and
+the Cluster Autoscaler is critical for improving total automation and minimizing
+the need for human intervention, as well as lowering overall power consumption while
+maintaining scalability. \\ %
+Lastly, because manually installing the cluster and providing all of the
+necessary information is tedious, the installation script that automatically performs
+the installation operation while following a specific set of configuration parameters
+has been discussed and proposed. Moreover, it is demonstrated how the node's benchmarks
+and power consumption data are measured. Finally, the most essential elements of
+the configuration and deployment files of the various components and/or technologies
+used are illustrated and discussed, so that the employed features of each can be
+recognized. \\ %
+With all of the prior information and technology, building and deploying a more sustainable
+and resource-aware cluster is feasible without incurring into breaking trade-offs;
+while it may be regarded as a tiny step towards greener computing, it, along
+with other initiatives, attempts to bring the end result closer to realization.
 
-\section{Difficulties}
-\label{sec:conclusions_difficulties}
+\section{Limitations And Future Work}
+\label{sec:conclusions_limitations_and_future_works}
 
-\section{Criticalities}
-\label{sec:conclusions_criticalities}
+This section depicts some of the difficulties encountered, existing criticalities
+and limitations, and relevant future ideas that can enhance and extend the
+current architecture and implementation. Because one of the project's main points
+is FOSS (Free and Open Source Software) compliance, anyone from anywhere can
+contribute to it. The latter not only can increase the overall number of features
+but also improve overall stability thanks to intrinsic testing in various use-case
+scenarios and heterogeneous environments, which allows for the discovery and
+correction of previously unknown bugs and/or errors. External contributions from
+a wide variety of users are so valuable that they are frequently undervalued and
+underestimated in current contexts. \\ %
 
-\section{Limitations}
-\label{sec:conclusions_limitations}
+\section{Internal Energy Source}
+\label{subsec:conclusions_limitations_and_future_works_internal_energy_source}
 
-\section{Future Work}
-\label{sec:conclusions_future_work}
+The combination of the installation script and the external device for measuring
+power consumption only conducts simple and basic readings on the instantaneously
+drawn energy. This is ideal for desktop computers and servers that require an
+external energy source, but it is incompatible with devices that use an internal
+energy source (batteries), such as laptop computers. \\ %
+If the existing implementation of the installation script is executed on a
+laptop computer, the resulting power consumption readings are inaccurate since it
+does not take into consideration the current absorbed energy from both the external
+(plug) and internal (battery) sources, but only the first. As a result, the
+obtained final power consumption data are always lower than what are in reality,
+leading to general inefficiency and erroneous selection by the algorithm in upscaling
+and downscaling operations, because the Server recognizes the node as a much
+more power-efficient system than it is. \\ %
+The script should determine whether the current node has internal energy sources
+and, when conducting power consumption readings and calculations, adjust with a
+more sophisticated but efficient and compatible algorithm that takes into
+account for both external and internal absorbed energy. Moreover, further
+testing on devices with an internal energy source is required to better
+understand how the system is powered, as it can solely use the external source,
+only use the internal source, or even employ both.
 
-% Platform and Architectures
+\section{Cluster Autoscaler Cloud Provider}
+\label{subsec:conclusions_limitations_and_future_works_cluster_autoscaler_cloud_provider}
 
-% Smartphones as workers
+One of the project's most significant difficulties has been developing the
+recluster Cloud Provider for the Cluster Autoscaler. There are three primary reasons
+for this. \\ %
+First off, the Cluster Autoscaler and the majority of the Kubernetes development
+environment are built using the Go\footnote{\url{https://go.dev}} programming
+language. I had never written a line of Go code before developing the \texttt{recluster}
+Cloud Provider, so I had to learn the language from the beginning as well as the
+package ecosystem, code style, and syntax. Although difficult at first, the effort
+paid off in the end. \\ %
+Second, neither official nor unofficial documentation exists that explains how
+to create a Cloud Provider for the Cluster Autoscaler. My entire knowledge of developing
+the \texttt{recluster} Cloud Provider is based on studying and evaluating the
+code developed by the other Cloud Providers. Additionally, because each Cloud
+Provider has a unique implementation, distinct Server logic, and a different API,
+I had to determine the similarities and fundamental elements that almost all of them
+share to transform it and make it compatible with reCluster. The lack of
+documentation is understandable given that only a small number of entities
+utilize and develop this technology, making it possible for them to access experts
+and/or specialized consulting from the main CA developers themselves. Keep in
+mind that the latter needs familiarity with the Go programming language, which was
+covered in the preceding point. \\ %
+Finally, it took longer than I anticipated to test the Cluster Autoscaler in
+conjunction with the Server and the general architecture since almost every time
+a new, minor error or bug that I hadn't considered appeared. However, the latter
+was not only beneficial for reCluster; it additionally helped in identifying an
+issue\footnote{\url{https://github.com/kubernetes/autoscaler/issues/5378}} in
+the Cluster Autoscaler's main code, which was submitted to the maintainers and promptly
+fixed within a week.
 
-% GUI
+\section{Dashboard}
+\label{subsec:conclusions_limitations_and_future_works_dashboard}
 
-\section{Rust}
-\label{sec:conclusions_rust}
+Currently, the only way for a user or administrator to interact with the cluster
+is to use applications such as \texttt{curl}, \texttt{wget}, or similarities to directly
+use the various set of GraphQL queries and mutation API, or use the GraphQL
+Studio Explorer, which is not available in production and is only a nicer interface
+for low-level interactions with the GraphQL API. As a result, there is a need to
+create a UI dashboard, such as the one from Kubernetes\footnote{\url{https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard}},
+where all of the information provided by the Server is visually available without
+involving the user in low-level GraphQL API interactions. The majority of
+operations should be simple and intuitive, without needing the user to better understand
+the requirements and outcomes. \\ %
+Because the web application must consider the authentication mechanism, only
+authorized and/or authenticated users may access specific information or do
+certain operations. Furthermore, to provide a better overview of all the
+information accessible to the user, the dashboard should be capable of generating
+faster-to-understand graphs and/or charts. Consider a pie chart in which the
+number of active/working nodes (green color) is visually compared against the
+number of inactive nodes (gray color). The user can immediately understand the current
+cluster capacity/demand, where if the chart is almost entirely green, there is an
+overall high workload in the cluster, whereas if the chart is almost entirely
+gray, there is an overall low workload in the cluster, and thus the number of
+inactive nodes predominates. \\ %
+With so many tools, technologies, and frameworks available for developing a web
+application nowadays, the most difficult and critical phase is choosing which one
+to use before even beginning development. \\ %
+
+Also, there may be a desire to improve the simplicity with which each node is managed
+without directly requiring \texttt{SSH} or similar technologies. \\ %
+The latter can be accomplished by directly integrating a protected graphical
+dashboard on each node that displays the various information of the associated
+node as well as the ability to install, upgrade, or delete packages and perform
+additional operations. \\ %
+\texttt{YunoHost}\footnote{\url{https://yunohost.org}}, which leverages a simple
+and easy-to-use, but incredibly powerful, web UI dashboard to completely
+administer the node, is a starting point for what may be accomplished or developed.
+
+\section{Mobile Devices}
+\label{subsec:conclusions_limitations_and_future_works_mobile_devices}
+
+Computers are the only systems that are currently used and supported in the
+cluster. But, there are an enormous number of unused smartphone and tablet
+devices that might be employed in the cluster. Most of these devices are ideal for
+becoming worker nodes in a cluster because the previous owners replaced them due
+to an upgrade to a newer model or because there is hardware damage, such as on
+the screen or camera, but this has not affected important components such as the
+main board. Furthermore, these devices have become so powerful in recent years that
+they may be compared to the same performance as medium/low-end PCs while having a
+significantly lower power consumption thanks to different internal architecture and
+a prior design on energy consumption optimizations. \\ %
+Developing for mobile devices might be challenging since there may be incompatibilities
+between the software used for the cluster related to the internal Operating System
+and missing libraries or Kernel requirements. A viable alternative is to
+uninstall the existing operating system (\texttt{Android} or \texttt{iOS}) and
+replace it with a pure GNU/Linux distribution designed exclusively for mobile
+devices, such as \texttt{postmarketOS}\footnote{\url{https://postmarketos.org}}.
+It should be noted that the overall compatibility of the Operating System with the
+device varies from device to device, and the OS may need to be patched. Mobile development
+should not be hard, however, this is the current status and/or only method for quickly
+porting applications designed for GNU/Linux on PCs to mobile devices. \\ %
+As previously stated, the power consumption of mobile devices is extremely small
+compared to what they can provide. When compared to desktop computers and even laptop
+computers, the performance-to-power-consumption ratio is enormous. There are no simple
+techniques for remotely powering on a mobile device that does not involve custom
+solutions. However, it should be mentioned that the sleep mode of mobile devices
+is so efficient that a device in sleep mode consumes almost zero energy and may last
+for more than a week on a single charge. As a result, if the remote wake-up solution
+is too expensive or unfeasible, the concept of keeping a mobile device
+constantly in sleep mode might be considered.
+
+\section{Architectures}
+\label{subsec:conclusions_limitations_and_future_works_architectures}
+
+The cluster currently supports only \texttt{amd64} and \texttt{arm64} architectures.
+Because the majority of the employed software and technologies support a wide
+range of different architectures by default, such as \texttt{mips}\footnote{\url{https://wikipedia.org/wiki/MIPS_architecture}}
+or \texttt{mipsel}, the remaining incompatible components, such as the Cluster Autoscaler,
+can be ported and/or transformed to be compatible with additional and different
+architectures. \\ %
+Expanding the number of supported architectures allows more devices to be
+incorporated into the cluster, giving them new life while also improving the cluster's
+overall workload capacity.
+
+\section{Node Selection Algorithm}
+\label{subsec:conclusions_limitations_and_future_works_node_selection_algorithm}
+
+\section{Performance Management}
+\label{subsec:conclusions_limitations_and_future_works_performance_management}
+
+\section{Scenarios Evaluation}
+\label{subsec:conclusions_limitations_and_future_works_scenarios_evaluation}
+
+% Scenario evaluation school, redundancy, disaster
+
+\section{Server}
+\label{subsec:conclusions_limitations_and_future_works_server}
+
+% Server Simplification
+
+% Better errors and node management
 
 \begin{wrapfigure}
   {r}{.25\textwidth} %
@@ -31,3 +242,11 @@
   {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://foundation.rust-lang.org/policies/logo-policy-and-media-guide}} }
   \caption{Rust logo}
 \end{wrapfigure}
+
+\section{Closing Remarks}
+\label{sec:conclusions_closing_remarks}
+
+Adapting existing tools that are specifically developed for big and energy-hungry
+environments to a more sustainable and resource-aware design while maintaining
+nearly the same capabilities for a more green future for the computing industry
+is not only feasible, but also necessary.

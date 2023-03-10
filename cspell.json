@@ -72,6 +72,7 @@
     "erofs",
     "fathema",
     "firewalld",
+    "foss",
     "freepik",
     "granularities",
     "grayscale",
@@ -106,6 +107,7 @@
     "metallb",
     "microarchitectural",
     "microarchitecture",
+    "mipsel",
     "mkimage",
     "mkimg",
     "morecomment",
@@ -125,6 +127,7 @@
     "pidfile",
     "posix",
     "postbuild",
+    "postmarketos",
     "powerha-aix",
     "poweroff",
     "procps",
@@ -179,6 +182,7 @@
     "vitaly",
     "wlan",
     "xleftmargin",
+    "yunohost",
     "ztailpacking"
   ]
 }
