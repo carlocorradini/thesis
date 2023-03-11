@@ -761,27 +761,47 @@ of a specification and libraries for designing plugins that configure network in
 in Linux containers. CNI is only concerned with the network connectivity of
 containers and removing allocated resources when the container is destroyed.
 
-\section{Cluster}
-\label{sec:architecture_cluster}
+\section{reCluster}
+\label{sec:architecture_recluster}
 
 The architecture has a real-world implementation in the reCluster project\footnote{\url{https://github.com/carlocorradini/reCluster}}.
-It employs several hardware components decommissioned by the University of
-Trento\footnote{\url{https://www.unitn.it}} that were formerly utilized by
-students in the computer classroom.
+\\ %
+reCluster employs several hardware components, such as decommissioned University
+of Trento\footnote{\url{https://www.unitn.it}} desktop and laptop computers that
+were previously used by students in the computer classroom, as well as additional
+personal hardware components, such as the switch/router, that were left to gather
+dust due to an upgrade to a newer model. \\ %
+Figure \ref{fig:recluster} illustrates the reCluster cluster. Worker nodes are
+the desktop computers and the two small single-board computers on the right, while
+the (single) Controller node is the laptop computer. All nodes are connected via
+Ethernet to the switch/router on the left, which is connected to the Internet.
+Furthermore, the smart plug in the foreground is utilized for power measurements
+throughout the installation procedure (see section
+\ref{subsec:implementation_installer_power_consumption}). \\ %
+The cluster is fully functional and can be scaled down to zero Worker nodes by default
+to consume the least amount of energy. Furthermore, because the cluster is small,
+there are (now) no critical services deployed, and to further decrease the overall
+power consumption, all essential components are directly deployed on the
+Controller node. As a result, the laptop computer acts as the Controller node, running
+instances of the Server and Database, and has the Registry, Load Balancer, and
+Cluster Autoscaler containers deployed by Kubernetes. \\ %
+If there is no need to use the cluster for some time, the Controller node (as
+well as the switch/router) can be terminated. Eventually, to restore the cluster,
+simply bootstrap the Controller node (along with the switch/router), and the rest
+is performed automatically by the Server and Cluster Autoscaler components according
+to the overall workload.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=.9\textwidth]{images/architecture/cluster.jpg}
   \caption{reCluster cluster}
+  \label{fig:recluster}
 \end{figure}
 
-\subsection{Hardware}
-\label{subsec:architecture_cluster_hardware}
+The following chapter, Implementation, describes the details and information of
+how reCluster was implemented by following the principles and the theorized
+architecture, as well as the numerous decisions that were made. \\ %
 
-% TODO WoL features, how to turn on nodes
-% TODO Prefer nodes with WoL upscaling
-
-\subsection{Example}
-\label{subsec:architecture_cluster_example}
-
-% TODO Move
+It should be mentioned that anybody can have a local implementation of reCluster
+since the required components are so minimal and ubiquitous that they can even
+be refurbished from old and unused components, as in this scenario.
