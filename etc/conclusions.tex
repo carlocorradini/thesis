@@ -220,6 +220,32 @@ overall workload capacity.
 \section{Node Selection Algorithm}
 \label{subsec:conclusions_limitations_and_future_works_node_selection_algorithm}
 
+The existing Node selection algorithm is effective, but it is a simplistic implementation
+because it just depends on maximum and minimum power consumptions and, if both
+are identical, falls back to performance data. \\ %
+The existing algorithm works, despite its simplicity and limited accessible data
+to perform all conceivable computations and evaluations. Nevertheless, there are
+several aspects where it may be refined to accomplish a more suitable node's
+final decision. As an example, while upscaling, the chosen node may have a lower
+power consumption and possibly greater performance, whereas when downscaling, it
+may have higher power consumption and potentially worse performance. Furthermore,
+in future versions, the more efficient and sophisticated algorithm should take
+into consideration other factors with a more advanced internal logic. There may be
+nodes that are more efficient while under medium workload conditions, while
+others are less efficient when under the same conditions but with lower minimum
+and maximum power consumption coefficients. The existing approach is deterministic,
+always preferring the second node type when upscaling and the first node type
+when downscaling. The new algorithm should perform extra computations and evaluations
+on which node type should bootstrap or terminate, and it's expected to follow
+the current overall cluster state as well as its overall power consumption. \\ %
+The algorithm may also be enhanced with a Kalman Filter\footnote{\url{https://wikipedia.org/wiki/Kalman_filter}}
+for estimating the combination of power consumption and workload to
+significantly reduce total (real) power consumption while also improving overall
+Quality of Service (QoS). \\ %
+The latter are merely possible ideas for what the new enhanced algorithm should
+include and what possible advancements, such as lowering power consumption while
+increasing overall performance, must be addressed.
+
 \section{Performance Management}
 \label{subsec:conclusions_limitations_and_future_works_performance_management}
 
