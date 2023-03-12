@@ -249,17 +249,86 @@ increasing overall performance, must be addressed.
 \section{Performance Management}
 \label{subsec:conclusions_limitations_and_future_works_performance_management}
 
+There are no graphs or charts in this document to demonstrate how the generally existing
+cluster implementation performs on different workloads and/or hardware. This is
+because the time and resources required to conduct such measurements accurately
+and precisely are presently insufficient for a single person. \\ %
+The cluster's performance management can be proposed as an extra document/paper
+that not only illustrates the various data collected, but also enhances and extends
+the existing design and algorithms with improvements determined from the performance
+management results. This task is currently assigned to another CRIT team member
+who employs this document as a foundation to better comprehend how the general
+architecture is designed and how to obtain correct and precise performance
+measurements. \\ %
+Even though this document lacks data on performance measurements, the current cluster
+implementation by default exposes data that can be used for analysis of general performance
+and resource utilization. Every node in the cluster provides real-time hardware
+and OS-related data thanks to the Node Exporter component, which is described in
+section \ref{subsec:implementation_dependencies_node_exporter}. These metrics
+are then collected and analyzed by the Prometheus component, as described in section
+\ref{subsubsec:implementation_dependencies_prometheus_features}, which allows
+for monitoring and querying/interpolating them with various results that can
+cover a specified period. \\ %
+Furthermore, because the overall architecture is already established and deployed
+automatically, control of overall performance may be employed not only
+occasionally or during testing but always. This not only gives reacher statistics,
+but it additionally has the potential to provide real-time alerts on the overall
+health of the cluster. Besides that, custom notifications that monitor the total
+cluster power consumption can be established. This can be critical in a variety of
+use-case situations. Consider the following scenario: the cluster is powered solely
+by batteries that are charged during the day by solar panels, similar to the Low-Tech
+magazine\footnote{\url{https://solar.lowtechmagazine.com}}, and there is a known
+overall threshold amount of energy consumption that, if exceeded, can cause the entire
+cluster to go offline until the next recharge. Employing an accurate performance
+management system to compute the threshold, as well as a monitoring and alerting
+system to notify an administrator, is critical; enabling the cluster to be online
+and active as much as possible while also performing its main routine of service
+orchestration. \\ %
+Nevertheless, this point is critical, and it must be addressed and implemented in
+future versions of reCluster.
+
 \section{Scenarios Evaluation}
 \label{subsec:conclusions_limitations_and_future_works_scenarios_evaluation}
 
-% Scenario evaluation school, redundancy, disaster
+In addition to the preceding point, there is a missing section where the various
+use-case scenarios are analyzed and tested owing to the same reasons of a single
+person's lack of time and resources. \\ %
+Currently, only two use-case scenarios have been successfully evaluated in a
+real-world context using the reCluster cluster architecture. The first scenario is
+a one-to-one mapping to a potential cluster used for hosting various services that
+need to be exposed to an external network or, more broadly, the Internet. It has
+a stable connection, and most of the components and their configurations may be downloaded,
+guaranteeing the most recent and up-to-date versions are used in the cluster. Having
+the most recent versions available might be beneficial since there may be bugs or
+security vulnerabilities that have been addressed, whereas the bundled ones may
+contain issues due to being outdated. The first scenario is the most common, in
+which practically anybody can deploy a cluster without difficulty. The second scenario,
+on the other hand, is an Air-Gap environment in which there is no Internet connection
+and all components and processes must be available and performed offline. The
+latter has been well detailed throughout the document, and it may also be regarded
+as a solid foundation/requirement for future environmental and availability crises
+in which having an internet connection is no longer obvious. Using Air-Gap
+measurements only during the installation procedure, while the normal execution is
+in normal conditions with an Internet connection, can be advantageous because it
+does not require any download, reducing overall installation time and also avoiding
+the involvement of networking equipment, which can consume unnecessary energy, and
+the installed software behavior is always predictable. \\ %
+In addition to the preceding two scenarios, the cluster might be deployed in two
+additional scenarios. The first instance is when the cluster may be used in education
+to evaluate students' work. The latter can be employed to test their Kubernetes abilities,
+as well as teach them basic and advanced web apps or APIs that include various
+software components, such as a server, a database, and a cache server. The
+second scenario is for redundancy, in which reCluster is being used only if the main
+cluster, which is more performant but consumes more energy, is no longer accessible
+due to a failure. reCluster uses decommissioned main cluster hardware and has
+just one Controller node active, whereas all worker nodes are inactive. If there
+is workload that has to be scheduled while the main cluster is unavailable, the worker
+nodes start to boot up. It is worth noting that, even if there are hundreds of worker
+nodes, the overall power consumption when the main cluster is healthy is that of
+the single Controller node, which is negligible.
 
 \section{Server}
 \label{subsec:conclusions_limitations_and_future_works_server}
-
-% Server Simplification
-
-% Better errors and node management
 
 \begin{wrapfigure}
   {r}{.25\textwidth} %
@@ -269,10 +338,42 @@ increasing overall performance, must be addressed.
   \caption{Rust logo}
 \end{wrapfigure}
 
+In future releases, the Server implementation may and must be improved. \\ %
+Replace any interpreted languages, such as \texttt{JavaScript} or \texttt{Python},
+in the Server with a compiled/low-level programming language, such as \texttt{C},
+\texttt{C++}, or \texttt{Rust}. Using these programming languages has two major advantages
+over the existing implementation. First, because the program must be compiled to
+produce the final executable, there is no need to distribute an archive or a
+folder containing many files and then download and install all of the required
+dependencies. The required dependencies must be available only on the machine performing
+the compilation procedure, and if the program is compiled statically, all used libraries,
+such as the OpenSSL library, are directly bundled inside the final executable,
+at the expense of being larger than a dynamically linked program. Furthermore,
+and this is critical, \cite{programming_languages_efficiency} reports that applications
+that are implemented with a system programming language and are compiled directly
+to machine code are significantly more efficient and demand fewer resources and energy
+to accomplish the same result as an interpreted language. I would prefer \texttt{Rust}\footnote{\url{https://www.rust-lang.org}}
+over the other two system languages because it guarantees memory safety and thread
+safety, increasing overall reliability and productivity, even though it has a steep
+learning curve at first, thanks to the various official tools, such as a package
+manager and auto formatter. Although the development and effort required by a
+compiled language is greater than that required by an interpreted language, the overall
+benefits in this circumstance are too significant to be ignored. \\ %
+Another area that needs to be enhanced is general error management and node administration,
+since there is currently just a simple management of the two that heavily relies
+on Kubernetes. Updated versions should improve error alerts to administrators as
+well as possible recovery mechanisms. The latter can also be extended to use
+various approaches based on the overall circumstances and deployment environment.
+\\ %
+Undoubtedly, many aspects of the Server could be improved but are not covered in
+this section. However, because the project is completely FOSS compliant, users
+can contribute and improve the code with ideas that I hadn't even considered
+before.
+
 \section{Closing Remarks}
 \label{sec:conclusions_closing_remarks}
 
 Adapting existing tools that are specifically developed for big and energy-hungry
-environments to a more sustainable and resource-aware design while maintaining
-nearly the same capabilities for a more green future for the computing industry
-is not only feasible, but also necessary.
+environments to a more sustainable and resource-aware design while maintaining nearly
+the same capabilities for a more green future for the computing industry is not only
+feasible, but also necessary.
