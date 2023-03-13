@@ -1,45 +1,156 @@
 \chapter{Introduction}
 \label{cha:introduction}
 
+The purpose of this chapter is not to illustrate any cluster architecture or implementation,
+but rather to provide an overview of the overall context, depicted in section \ref{sec:introduction_context},
+and core principles, depicted in section \ref{sec:introduction_principles}, that
+serve as foundations for the overall cluster design, both theoretical and implemented.
+\\ %
+These so-called foundations are not restricted to this project and/or environment,
+but can be considered as the minimum requirements and principles to obtain a
+greener, energy and resource-aware software in general that is not only for the present,
+but also, and must be, for the future, because we, as the overall ICT community,
+have mostly ignored them in the past without giving them the appropriate weight.
+\\ %
+
+reCluster is heterogeneous because it is composed of numerous and diverse
+components, ranging from computers to networking equipment, that have been
+reutilized after decommissioning. The fundamental goal of reCluster is to establish
+a cluster (hence the name) without reinventing the wheel, but rather to increase
+reusability by transforming and adapting heterogeneous hardware and software
+components designed for similar environments, enhancing the overall reduction of
+both energy consumption and resources involved without compromising overall performance,
+responsiveness, and ease of use.
+
 \section{Context}
 \label{sec:introduction_context}
 
-\subsection{Outsourcing}
-\label{subsec:introduction_context_outsourcing}
+There is a need to identify the overall context that the project, design, and
+architecture should and must address. A key aspect of the context is that it is not
+static, but rather dynamic, and therefore may be decreased, expanded, and reshaped
+to better meet the requirements of the organization in charge of the cluster while
+adhering to the core principles. \\ %
+A cluster is composed of several components, including hardware and software, that
+operate together as a single entity to accomplish one homogenous goal, or
+multiple and different goals. The hardware components, which are typically
+computers of different kinds ranging from desktop computers to single board
+computers, are connected in a single network: the cluster network, by additional
+hardware components particularly designed for communication. Because multiple
+applications can achieve the same result, are constantly evolving with newer features
+and capabilities, and can be employed or not depending on the (current) needs
+and requirements, the software components can vary and are as heterogeneous as the
+hardware, if not more. Between hardware and software, two major distinctions
+complement one another. The first distinction is that hardware, particularly
+reconditioned hardware, is limited in its ability to be modified and transformed,
+whereas software is essentially limitless in this regard and may achieve the
+same goal using multiple technologies and/or languages. Second, there is no
+distinction between the various hardware components in terms of whether they are
+used for cluster operations or user operations because they are all employed for
+cluster operations. Software components can be divided into low-level ones that are
+used to keep the overall cluster operational and high-level ones that are used by
+and for the users for their specific services. In this context, software in all of
+its aspects must be used to compensate for the shortcomings of the hardware since
+it can be customized to fill the gaps where the hardware lacks. \\ %
+Most used hardware components may be reconditioned by reusing decommissioned components
+from consumers and organizations due to upgrades. Because newer components are
+often more performant and energy-efficient than older ones, the hardware is directly
+and automatically managed by the various cluster-related software deployed. \\ %
+The cluster must be as simple as possible, with human interaction minimized to
+nearly zero, and automatic solutions preferred. The most essential automated
+solution that must be implemented in a cluster is autoscaling, both upscaling and
+downscaling. In upscaling, the cluster automatically bootstraps an inactive hardware
+component. Whereas in downscaling, the cluster automatically terminates an active
+hardware component. Selecting which component(s) to autoscale can follow multiple
+criteria, such as choosing nodes that are more power efficient or performant, or
+even a combination of the two. The latter is an excellent illustration of the
+combination of hardware and software that needs to be present in the cluster. \\ %
+The cluster should be used in a wide range of environments and use-case
+scenarios, from a modest and local deployment at home to a large and remote deployment
+comparable to that found in a data center. Given that the various software
+manages them automatically using the autoscaling technique, there should be no limit
+to the number of computers. \\ %
+If there is no need to operate the cluster for specific periods and it is therefore
+considered worthless, it can be completely shut down, with the benefit of reducing
+its overall power consumption to zero. When it is necessary again, it is reactivated
+and becomes operational. Although the latter may create some performance and/or
+responsiveness issues, because no physical machines are performing any service,
+it is far preferable to an always-on technique because the machine continues to
+drain energy for no purpose. The latter impacts can be mitigated if the organization
+can calculate different models and/or employs a single board computer as the always-on
+hardware component because its overall power consumption is lower than a normal lamp
+and substantially lower than a normal desktop computer. As stated previously, the
+context is dynamic, and hence the latter is dependent on the organization in
+charge of the cluster. \\ %
 
-\subsection{Direct Control}
-\label{subsec:introduction_context_direct_control}
+As a result, the fundamental focal point is the combination of all latter points,
+and there may be others, which makes the cluster resemble less heterogeneous and
+more of a distinct homogenous and automatic entity.
 
-\subsubsection{Energy Impact}
-\label{subsubsec:introduction_context_direct_control_energy_impact}
+\section{Principles}
+\label{sec:introduction_principles}
 
-\subsection{Dependencies Reduction}
-\label{subsec:introduction_solutions_dependencies_reduction}
+This section is dedicated to illustrating some of the fundamental principles around
+which the overall design is based. These principles should (must) be seen as the
+foundations for a more sustainable, resource-aware, free and open-source, and energy-efficient
+architecture that may be utilized not only in this specific context, but in all
+aspects of ICT. \\ %
+It should be highlighted that these principles should not have a negative impact
+on overall performance and responsiveness, but rather should be considered almost
+as important, if not more, than performance and responsiveness. The latter two
+currently constitute the sole and most significant characteristics to consider
+when examining software, but in the future, it should be necessary, almost mandatory,
+to include, maybe gradually but starting to consider them as parameters for comparisons
+and essential aspects of a program. \\ %
+The applicability of these principles is determined by the organization's requirements.
+Yet, some of these principles should be investigated and implemented in the future
+for greener and more resource-aware software. \\ %
 
-\subsubsection{Resource Awareness}
-\label{subsubsec:introduction_context_direct_control_resource_awareness}
+The proposed list can undoubtedly be improved upon and/or expanded with
+additional, and possibly more severe, principles. Nevertheless, since these are
+the ones on which the current architecture is based, it can be adjusted and transformed
+in the future. It is not only possible but also necessary for the software
+industry to move toward a greener and more sustainable future.
 
-\subsubsection{Privacy}
-\label{subsubsec:introduction_context_direct_control_privacy}
+\subsection{Sustainable Development Goals}
+\label{subsec:introduction_principles_sustainable_development_goals}
 
-\subsection{Standardization}
-\label{subsec:introduction_context_standardization}
+\subsection{Insourcing}
+\label{subsec:introduction_principles_insourcing}
 
-\subsubsection{Migration}
-\label{subsubsec:introduction_context_standardization_migration}
+% TODO Direct Control
+
+% TODO Privacy
+
+\subsection{Energy Impact}
+\label{subsec:introduction_principles_energy_impact}
+
+\subsection{Resource Awareness}
+\label{subsec:introduction_principles_resource_awareness}
 
 \subsection{Reusability}
-\label{subsec:introduction_context_reusability}
+\label{subsec:introduction_principles_reusability}
 
-\subsubsection{Electronic Waste}
-\label{subsubsec:introduction_context_reusability_electronic_waste}
+% TODO REPAIR: https://frame.work
 
-\subsection{Open-Source Software}
-\label{subsubsec:introduction_context_reusability_open_source_software}
+% TODO Electronic Waste
 
-\section{reCluster}
-\label{sec:introduction_recluster}
+\subsection{Standardization}
+\label{subsec:introduction_principles_standardization}
 
-% TODO CRIT
-% TODO Paper
-% TODO reCluster presentation
+% TODO Migration
+
+\subsection{Dependencies Reduction}
+\label{subsec:introduction_principles_dependencies_reduction}
+
+\subsection{Free And Open-Source Software}
+\label{subsec:introduction_principles_reusability_free_and_open_source_software}
+
+\section{State Of The Art}
+\label{sec:introduction_state_of_the_art}
+
+% TODO Problems/Discussions
+% TODO Responsiveness and SLA
+% TODO Cloud Provider
+% TODO SLA consumption
+
+% TODO reCluster paper
