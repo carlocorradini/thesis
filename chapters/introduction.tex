@@ -120,6 +120,11 @@ and other deprivations must be combined with initiatives to promote health and e
 decrease inequality, and stimulate economic growth - all while addressing climate
 change and striving to preserve the oceans and forests.
 
+% TODO
+\clearpage
+\newpage
+
+
 \begin{wrapfigure}
   {r}{.2\textwidth} %
   \centering
@@ -145,71 +150,85 @@ live in. A large end goal is nearly always comprised of a plethora of many small
 improvements/objectives that, when considered separately, may appear to be irrelevant,
 but when placed together form a genuine and authentic chain of progress.
 
-Invert the trend of constantly outsourcing applications and software in general
-to third-party cloud providers, deploying on massive and energy-intensive data centers.
-While there are undeniable benefits to outsourcing in terms of convenience and
-better pricing, it erodes institutional and human independence by centralizing a
-single point of failure and delegating relevant choices regarding privacy, data
-ownership, and environmental impact on these external actors\cite{conceptualising_resource_aware}.
+\begin{wrapfigure}
+  {r}{.2\textwidth} %
+  \centering
+  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/introduction/insourcing.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Icon made by \href{https://www.flaticon.com/authors/kerismaker}{kerismaker} from \href{http://www.flaticon.com}{www.flaticon.com} }}
+\end{wrapfigure}
+
+Invert the trend of constantly outsourcing applications and software in general to
+third-party cloud providers, deploying on massive and energy-intensive data
+centers. While there are undeniable benefits to outsourcing in terms of convenience
+and better pricing, it erodes institutional and human independence by
+centralizing a single point of failure and delegating relevant choices regarding
+privacy, data ownership, and environmental impact on these external actors\cite{conceptualising_resource_aware}.
 \\ %
-There is a need to obtain, or better yet, re-obtain, direct control over the whole
-software stack, beginning with the hardware infrastructure and progressing
-through the application's development and final release. At first look,
-returning to an insourcing approach may appear to be impracticable, unneeded,
-and comparable to an old and mostly outdated approach. Nonetheless, overall
-technology, tools, and usability have significantly improved in recent years. Most
-importantly, there has been a shift in the software community toward
-standardization and interoperability across heterogeneous systems, which has not
-only made deploying software locally and with an in-house infrastructure trivial,
-but has also aided in abstracting away from the final user common and not-so-trivial
-problems, such as handling and coordinating multiple connections across different
-hardware and software components/layers. \\ %
-As discussed in \cite{precarious_infrastructure} current infrastructures and approaches
-to climate change are mitigation-oriented, aiming only to support or investigate
-social changes that reduce the material causes of the more pernicious facets of
-global change, with the implicit assumption that these infrastructures will persist
-as the risks of current unsustainable practices become urgent threats to well-being
-and survival. Instead, new architectures, and possibly old ones through
-refactoring and rethinking the overall design, must take and address new approaches,
-denoted as post-apocalyptic computing, to address the many, dramatic, and complex
-phenomena associated with global change, allowing to prepare for nonlinear
-changes. If the organization has direct control over almost every aspect of the architecture,
-the latter can be accomplished with almost negligible effort, whereas if everything
-is outsourced to an external entity, the organization has only a limited amount
-of control over the possible future outcomes that can arise from unpredictable
-changes that will occur sooner or later. As a result, avoid remote and generally
-unknown architectures of third-party organizations that only raise the fragile
-state on which the application is deployed, establishing an inherent single point
-of failure that not only can be an issue for the present but, more significantly,
+There is a need to obtain, or better yet, re-obtain, direct control over the
+whole software stack, beginning with the hardware infrastructure and progressing
+through the application's development and final release. At first look, returning
+to an insourcing approach may appear to be impracticable, unneeded, and comparable
+to an old and mostly outdated approach. Nonetheless, overall technology, tools, and
+usability have significantly improved in recent years. Most importantly, there has
+been a shift in the software community toward standardization and interoperability
+across heterogeneous systems, which has not only made deploying software locally
+and with an in-house infrastructure trivial, but has also aided in abstracting away
+from the final user common and not-so-trivial problems, such as handling and
+coordinating multiple connections across different hardware and software
+components/layers. \\ %
+As discussed in \cite{precarious_infrastructure} current infrastructures and
+approaches to climate change are mitigation-oriented, aiming only to support or investigate
+social changes that reduce the material causes of the more pernicious facets of global
+change, with the implicit assumption that these infrastructures will persist as
+the risks of current unsustainable practices become urgent threats to well-being
+and survival. Instead, new architectures, and possibly old ones through refactoring
+and rethinking the overall design, must take and address new approaches, denoted
+as post-apocalyptic computing, to address the many, dramatic, and complex
+phenomena associated with global change, allowing to prepare for nonlinear changes.
+If the organization has direct control over almost every aspect of the
+architecture, the latter can be accomplished with almost negligible effort,
+whereas if everything is outsourced to an external entity, the organization has only
+a limited amount of control over the possible future outcomes that can arise from
+unpredictable changes that will occur sooner or later. As a result, avoid remote
+and generally unknown architectures of third-party organizations that only raise
+the fragile state on which the application is deployed, establishing an inherent
+single point of failure that not only can be an issue for the present but, more significantly,
 for the future. \\ %
-Another significant aspect of current architectures and approaches is that most operations
-are performed remotely and outsourced to external organizations, even though the
-participating entities are mostly close together, resulting in extra workload and
-networking equipment, which translates to an increased amount of overall power
-consumption. In this regard, the usage of external videoconferencing
-applications that enable remote entities to connect is a significant example. When
-two close entities, that can be even in the same building, seek to establish a teleconference,
-their data is routed to remote videoconferencing servers. Instead of depending on
-an external and remote service, it is possible to set up a local
-videoconferencing service in the local (insourced) architecture, employing open-source
-software and improving overall security and privacy. The distance between the
-entities and the local server instance may be drastically reduced, decreasing latency
-and lowering total power consumption for the videoconference, as theorized in
-\cite{comparison_energy_carbon_time_videoconferencing}, resulting in better outcomes
-and more sustainable service. \\ %
-Lastly, insourcing enables better fine-grained and conscious control over the
-whole application's data and everything that comes with it, such as privacy and security,
-because it is known where and how it is stored, distributed, and protected. Even
-though these later elements are not the primary focus of this document, they
-should not be ignored or underestimated because they are essential for almost
-every software application. Furthermore, various initiatives in recent years
-have attempted to improve data protection for individuals and organizations, including
-the well-known General Data Protection Regulation\footnote{\url{https://gdpr.eu}}
-(GDPR) drafted and passed by the European Union (EU). \\ %
-As a result, returning to an insourcing approach and having direct control over
-almost every aspect of the architecture and software stack is not only feasible
-and almost trivial nowadays, but also necessary for establishing a better and more
+Another significant aspect of current architectures and approaches is that most
+operations are performed remotely and outsourced to external organizations, even
+though the participating entities are mostly close together, resulting in extra
+workload and networking equipment, which translates to an increased amount of overall
+power consumption. In this regard, the usage of external videoconferencing applications
+that enable remote entities to connect is a significant example. When two close
+entities, that can be even in the same building, seek to establish a
+teleconference, their data is routed to remote videoconferencing servers.
+Instead of depending on an external and remote service, it is possible to set up
+a local videoconferencing service in the local (insourced) architecture,
+employing open-source software and improving overall security and privacy. The distance
+between the entities and the local server instance may be drastically reduced,
+decreasing latency and lowering total power consumption for the videoconference,
+as theorized in \cite{comparison_energy_carbon_time_videoconferencing},
+resulting in better outcomes and more sustainable service. \\ %
+Lastly, insourcing enables better fine-grained and conscious control over the whole
+application's data and everything that comes with it, such as privacy and
+security, because it is known where and how it is stored, distributed, and protected.
+Even though these later elements are not the primary focus of this document, they
+should not be ignored or underestimated because they are essential for almost every
+software application. Furthermore, various initiatives in recent years have attempted
+to improve data protection for individuals and organizations, including the well-known
+General Data Protection Regulation\footnote{\url{https://gdpr.eu}} (GDPR)
+drafted and passed by the European Union (EU). \\ %
+As a result, returning to an insourcing approach and having direct control over almost
+every aspect of the architecture and software stack is not only feasible and almost
+trivial nowadays, but also necessary for establishing a better and more
 sustainable future for everybody, not just the individual. \\ %
+
+\begin{wrapfigure}
+  {r}{.2\textwidth} %
+  \centering
+  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/introduction/energy.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Icon made by \href{https://www.flaticon.com/authors/freepik}{Freepik} from \href{http://www.flaticon.com}{www.flaticon.com} }}
+\end{wrapfigure}
 
 The architectures and software should strive to reduce their total energy footprint
 as much as possible while providing similar, if not identical, outcomes.
@@ -272,45 +291,52 @@ the world, highlighting the significant disparities between the various location
 Network shapes, rather than scales, provide new possibilities for assessing the
 existing and future Internet\cite{world_wide_web_carbon}. \\ %
 
-When available resources are limited, it is essential to preserve them and reduce
-their overall consumption as much as possible. It is important to note that the
-term resources in this context is more generalized and does not designate any
-specific resource type, but they may be regarded as a distinct entity that groups
-them. \\ %
-Rethink and change the availability of resources, and investigate a more
-realistic and conservative approach, referred to in \cite{computing_within_limits}
-as computing within limits or simply LIMITS. LIMITS incorporates three major
-topics: present and near-future ecological, material, and energy constraints;
-new forms of computing that may assist promote well-being while living within
-these limits; and the influence of these limits on the area of computing. Not
-only is the concept of LIMITS confined within a computing environment, but it also
-aims to integrate other, and sometimes uncorrelated, heterogeneous areas.
-Moreover, because resources are not exclusively available to individuals, there
-is a need to think about and focus on collectives and larger contexts engaging
-in stronger connections to sustainable activities in disciplines other than
-computing. The term resource(s) should be considered not just to describe actual
-elements, but also to encompass socioeconomic, more intangible, factors that may
-be enhanced by diverse techniques pursued by the computing community, such as
-promoting development rather than economic growth. \\ %
-As stated in \cite{ed_tech}, the incorrect underlying assumptions of endless,
-infinite, and replicable technological resources must be reconsidered. These
-assumptions are just unsuitable for a more constrained and sustainable future. To
-re-imagine how digital technologies may be developed and implemented in these new
-and limited computing architectures, new concepts of radically leaner and
-ecologically conscious techniques are necessary. \\ %
-Another element of the architecture's involved resources is the relationship
-between the software and the hardware. Because of the current amount of processing
-power, some software has ridiculously high hardware requirements for even the
-most simple operations. Better and more performant programming languages and algorithms
-need to be employed to rethink, modify, and/or improve software resource requirements.
-A different technique is necessary with the adoption of a more permacultural
-approach, which is referred to as permacomputing in a computing environment.
-Permacomputing, as depicted in \cite{permacomputing}, is both a concept and a
-community of practice centered on issues of resilience and regenerative in
-digital technology, transforming problems into solutions, competition into
-cooperation, and waste into resources. \\ %
-Transform what appears to be a disadvantage, a difficulty, or even a waste into a
-rich and valuable resource. \\ %
+\begin{wrapfigure}
+  {r}{.2\textwidth} %
+  \centering
+  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/introduction/resource.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Icon made by \href{https://www.flaticon.com/authors/freepik}{Freepik} from \href{http://www.flaticon.com}{www.flaticon.com} }}
+\end{wrapfigure}
+
+When available resources are limited, it is essential to preserve them and
+reduce their overall consumption as much as possible. It is important to note that
+the term resources in this context is more generalized and does not designate any
+specific resource type, but they may be regarded as a distinct entity that
+groups them. \\ %
+Rethink and change the availability of resources, and investigate a more realistic
+and conservative approach, referred to in \cite{computing_within_limits} as
+computing within limits or simply LIMITS. LIMITS incorporates three major topics:
+present and near-future ecological, material, and energy constraints; new forms of
+computing that may assist promote well-being while living within these limits;
+and the influence of these limits on the area of computing. Not only is the concept
+of LIMITS confined within a computing environment, but it also aims to integrate
+other, and sometimes uncorrelated, heterogeneous areas. Moreover, because
+resources are not exclusively available to individuals, there is a need to think
+about and focus on collectives and larger contexts engaging in stronger connections
+to sustainable activities in disciplines other than computing. The term resource(s)
+should be considered not just to describe actual elements, but also to encompass
+socioeconomic, more intangible, factors that may be enhanced by diverse
+techniques pursued by the computing community, such as promoting development rather
+than economic growth. \\ %
+As stated in \cite{ed_tech}, the incorrect underlying assumptions of endless, infinite,
+and replicable technological resources must be reconsidered. These assumptions are
+just unsuitable for a more constrained and sustainable future. To re-imagine how
+digital technologies may be developed and implemented in these new and limited
+computing architectures, new concepts of radically leaner and ecologically conscious
+techniques are necessary. \\ %
+Another element of the architecture's involved resources is the relationship between
+the software and the hardware. Because of the current amount of processing power,
+some software has ridiculously high hardware requirements for even the most simple
+operations. Better and more performant programming languages and algorithms need
+to be employed to rethink, modify, and/or improve software resource requirements.
+A different technique is necessary with the adoption of a more permacultural approach,
+which is referred to as permacomputing in a computing environment. Permacomputing,
+as depicted in \cite{permacomputing}, is both a concept and a community of practice
+centered on issues of resilience and regenerative in digital technology,
+transforming problems into solutions, competition into cooperation, and waste
+into resources. \\ %
+Transform what appears to be a disadvantage, a difficulty, or even a waste into
+a rich and valuable resource.
 
 Use reusability and repairability approaches to reduce resource waste as much as
 possible. \\ %
@@ -318,48 +344,66 @@ The majority of unused hardware is perfectly capable of fulfilling the majority
 of tasks and operations in sustainable architecture, such as hosting a website or
 a cache server, without any particular difficulty. Unused hardware is frequently
 created by an upgrade to a newer and more recent version or by (major) scheduled
-decommissioning. \\ %
-Typical electronic devices with even a single faulty hardware component are discarded
-and promptly replaced with newer hardware, even if the remaining components are
-healthy and completely functional. The expenses and work required for a repair vary
-depending on the device, but most of the time the repair may be performed
-quickly and cheaply by replacing the faulty component with a new one. Furthermore,
-and this is especially true for desktop computers, if two devices are compatible
-and one has some broken components that the other does not, the healthy
-components can be combined to re-create a single but healthy and usable device
-with the benefit of drastically reducing the overall amount of resource waste. \\ %
-The latter two approaches not only recycle abandoned technology but also reduce
-the overall quantity of electronic waste (e-waste) that they can generate. Consequently,
-the energy gap between overall utilization energy and production energy, formerly
-expressed as embodied energy, can be narrowed or even attained and exceeded. \\ %
-Yet, the ease and feasibility of a device's repairability is entirely dependent on
-its manufacturer. Moreover, there are cases where the devices have a planned obsolescence
-after which some of the components will probably break and the cost or effort required
-for a repair is unfeasible, and it is far easier to buy a new one while
-discarding the old and broken one, causing additional (e-)waste. It is difficult
-to avoid the latter, and almost certainly additional issues, induced by the
-manufacturer. Yet, in recent years, there have been an increasing number of consumer
-activities aimed at reducing or eliminating the behaviors perpetuated by these manufacturers.
-The Right To Repair\footnote{\url{https://www.repair.org}}\footnote{\url{https://repair.eu}}
-movement is the most well-known, to advocate for repair-friendly policies,
-regulations, statutes, and standards. Another approach is to provide a repairability
-index, such as the French repair index\footnote{\url{https://www.ecologie.gouv.fr/indice-reparabilite}},
+decommissioning.
+
+% TODO
+\clearpage
+\newpage
+
+
+\begin{wrapfigure}
+  {r}{.2\textwidth} %
+  \centering
+  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/introduction/recycle.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Icon made by \href{https://www.flaticon.com/authors/freepik}{Freepik} from \href{http://www.flaticon.com}{www.flaticon.com} }}
+\end{wrapfigure}
+
+Typical electronic devices with even a single faulty hardware component are
+discarded and promptly replaced with newer hardware, even if the remaining components
+are healthy and completely functional. The expenses and work required for a
+repair vary depending on the device, but most of the time the repair may be performed
+quickly and cheaply by replacing the faulty component with a new one.
+Furthermore, and this is especially true for desktop computers, if two devices
+are compatible and one has some broken components that the other does not, the healthy
+components can be combined to re-create a single but healthy and usable device with
+the benefit of drastically reducing the overall amount of resource waste. \\ %
+The latter two approaches not only recycle abandoned technology but also reduce the
+overall quantity of electronic waste (e-waste) that they can generate.
+Consequently, the energy gap between overall utilization energy and production energy,
+formerly expressed as embodied energy, can be narrowed or even attained and exceeded.
+\\ %
+Yet, the ease and feasibility of a device's repairability is entirely dependent
+on its manufacturer. Moreover, there are cases where the devices have a planned
+obsolescence after which some of the components will probably break and the cost
+or effort required for a repair is unfeasible, and it is far easier to buy a new
+one while discarding the old and broken one, causing additional (e-)waste. It is
+difficult to avoid the latter, and almost certainly additional issues, induced by
+the manufacturer. Yet, in recent years, there have been an increasing number of
+consumer activities aimed at reducing or eliminating the behaviors perpetuated
+by these manufacturers. The Right To Repair\footnote{\url{https://www.repair.org}}\footnote{\url{https://repair.eu}}
+movement is the most well-known, to advocate for repair-friendly policies, regulations,
+statutes, and standards. Another approach is to provide a repairability index, such
+as the French repair index\footnote{\url{https://www.ecologie.gouv.fr/indice-reparabilite}},
 for the products so that potential customers may know and understand how easy it
-is to repair the corresponding device before purchase. It should be noted that
-not all manufacturers are opposed to repairability, and there are certain,
-albeit small, manufacturers, such as framework\footnote{\url{https://frame.work}},
-that have repairability as one of their core missions, building longevity
-products and improving the overall availability of spare parts and ease of
-upgrade, customization, and repairability. The objective/hope is that more manufacturers
-will begin to design, produce, and distribute more sustainable products. \\ %
+is to repair the corresponding device before purchase. It should be noted that not
+all manufacturers are opposed to repairability, and there are certain, albeit small,
+manufacturers, such as framework\footnote{\url{https://frame.work}}, that have
+repairability as one of their core missions, building longevity products and improving
+the overall availability of spare parts and ease of upgrade, customization, and repairability.
+The objective/hope is that more manufacturers will begin to design, produce, and
+distribute more sustainable products. \\ %
 Instead of planned obsolescence, consider planned longevity. \\ %
 
-\subsection{Standardization}
-\label{subsec:introduction_principles_standardization}
+\begin{wrapfigure}
+  {r}{.2\textwidth} %
+  \centering
+  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/introduction/interoperability.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Icon made by \href{https://www.flaticon.com/authors/freepik}{Freepik} from \href{http://www.flaticon.com}{www.flaticon.com} }}
+\end{wrapfigure}
 
-% TODO Migration
+% Migration
 
-% interoperability
+% standardization interoperability
 
 % cloud-act & usb-c
 
@@ -368,8 +412,23 @@ Instead of planned obsolescence, consider planned longevity. \\ %
 \subsection{Dependencies Reduction}
 \label{subsec:introduction_principles_dependencies_reduction}
 
+\begin{wrapfigure}
+  {r}{.2\textwidth} %
+  \centering
+  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/introduction/packages.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Icon made by \href{https://www.flaticon.com/authors/freepik}{Freepik} from \href{http://www.flaticon.com}{www.flaticon.com} }}
+\end{wrapfigure}
+
 \subsection{Free And Open-Source Software}
 \label{subsec:introduction_principles_reusability_free_and_open_source_software}
+
+\begin{wrapfigure}
+  {r}{.2\textwidth} %
+  \centering
+  \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/logos/open_source.png} } %
+  {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://opensource.org/logo-usage-guidelines}} }
+  \caption{Open Source Initiative logo}
+\end{wrapfigure}
 
 \section{State Of The Art}
 \label{sec:introduction_state_of_the_art}
