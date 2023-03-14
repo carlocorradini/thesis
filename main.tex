@@ -239,7 +239,10 @@ commentstyle=\color{graphqlGray}\upshape %
   \pagenumbering{Roman}
   \tableofcontents
   \clearpage
-
+  \begingroup
+  \pagestyle{empty}
+  \cleardoublepage
+  \endgroup
 
   % Start page numbering
   \mainmatter
@@ -248,9 +251,9 @@ commentstyle=\color{graphqlGray}\upshape %
   % Group to define space between chapters
   \begingroup
   % Override format of title chapter
-  \titleformat{\chapter} {\normalfont\Huge\bfseries}{\thechapter}{1em}{} \titlespacing*{\chapter}{0pt}{0.59in}{0.02in}
-  \titlespacing*{\section}{0pt}{0.20in}{0.02in} \titlespacing*{\subsection}{0pt}{0.10in}{0.02in}
-  \titlespacing*{\subsubsection}{0pt}{0.05in}{0.02in}
+  \titleformat{\chapter} {\normalfont\Huge\bfseries}{\thechapter}{1em}{}
+  \titlespacing*{\chapter}{0pt}{0.59in}{0.02in} \titlespacing*{\section}{0pt}{0.20in}{0.02in}
+  \titlespacing*{\subsection}{0pt}{0.10in}{0.02in} \titlespacing*{\subsubsection}{0pt}{0.05in}{0.02in}
 
   % Abstract
   \input{etc/abstract}
@@ -272,7 +275,43 @@ commentstyle=\color{graphqlGray}\upshape %
   \addcontentsline{toc}{chapter}{Bibliography}
   % Alphabetical order of authors
   \bibliographystyle{plain}
-  \renewcommand{\bibpreamble}{Icons in all Figures, unless otherwise specified, are from \url{www.flaticon.com}. They were created by one or more of the following authors: \texttt{Fathema Khanom}, \texttt{Freepik}, \texttt{Iconpro86}, \texttt{juicy\_fish}, \texttt{Kiranshastry}, \texttt{Pixel perfect}, \texttt{Roundicons}, \texttt{Smashicons}, \texttt{Uniconlab}, \texttt{Vectors Market}, and \texttt{Vitaly Gorbachev}.}
+  \renewcommand{\bibpreamble}{Icons
+  in
+  all
+  Figures,
+  unless
+  otherwise
+  specified,
+  are
+  from
+  \url{www.flaticon.com}.
+  They
+  were
+  created
+  by
+  one
+  or
+  more
+  of
+  the
+  following
+  authors:
+  \texttt{Fathema
+  Khanom},
+  \texttt{Freepik},
+  \texttt{Iconpro86},
+  \texttt{juicy\_fish},
+  \texttt{Kiranshastry},
+  \texttt{Pixel
+  perfect},
+  \texttt{Roundicons},
+  \texttt{Smashicons},
+  \texttt{Uniconlab},
+  \texttt{Vectors
+  Market},
+  and
+  \texttt{Vitaly
+  Gorbachev}.}
   \bibliography{bibliography.bib}
 
 
