@@ -21,18 +21,18 @@ applications that are not directly employed with the cluster but rather during
 its general development. \\ %
 Log interpretation is a challenging process. Log management system collects data
 from a variety of sources with varying forms, purposes, and granularities.
-Maintaining defined log levels helps give each entry meaning and better
-understand the significance of the related log message\cite{logging_levels}.
 Section \ref{sec:logging_levels} describes common logging levels that are also
 employed in cluster development and implementation.
 
 \section{Levels}
 \label{sec:logging_levels}
 
-A log level is a piece of information that indicates the importance of a log message.
-It is a basic yet effective method of identifying log events from one another. Furthermore,
-it is utilized to filter crucial information regarding the system state to only
-those that are solely informational\cite{logging_levels}. \\ %
+A log level\footnote{\url{https://sematext.com/blog/logging-levels}} is a piece of
+information that indicates the importance of a log message. It is a basic yet
+effective method of identifying log events from one another. Maintaining defined
+log levels helps give each entry meaning and better understand the significance of
+the related log message. Furthermore, it is utilized to filter crucial information
+regarding the system state to only those that are solely informational. \\ %
 During the initialization phase, a level is chosen from the list below (sorted in
 descending order of importance), with the expectation that the lower levels are ignored
 in favor of the higher ones.

@@ -77,90 +77,78 @@ correction of previously unknown bugs and/or errors. External contributions from
 a wide variety of users are so valuable that they are frequently undervalued and
 underestimated in current contexts. \\ %
 
-\section{Internal Energy Source}
-\label{subsec:conclusions_limitations_and_future_works_internal_energy_source}
-
 The combination of the installation script and the external device for measuring
 power consumption only conducts simple and basic readings on the instantaneously
-drawn energy. This is ideal for desktop computers and servers that require an
-external energy source, but it is incompatible with devices that use an internal
-energy source (batteries), such as laptop computers. \\ %
-If the existing implementation of the installation script is executed on a
-laptop computer, the resulting power consumption readings are inaccurate since it
-does not take into consideration the current absorbed energy from both the external
-(plug) and internal (battery) sources, but only the first. As a result, the
-obtained final power consumption data are always lower than what are in reality,
-leading to general inefficiency and erroneous selection by the algorithm in upscaling
-and downscaling operations, because the Server recognizes the node as a much
-more power-efficient system than it is. \\ %
+drawn energy. This is ideal for desktop computers and servers that require an external
+energy source, but it is incompatible with devices that use an internal energy
+source (batteries), such as laptop computers. \\ %
+If the existing implementation of the installation script is executed on a laptop
+computer, the resulting power consumption readings are inaccurate since it does
+not take into consideration the current absorbed energy from both the external (plug)
+and internal (battery) sources, but only the first. As a result, the obtained final
+power consumption data are always lower than what are in reality, leading to
+general inefficiency and erroneous selection by the algorithm in upscaling and
+downscaling operations, because the Server recognizes the node as a much more power-efficient
+system than it is. \\ %
 The script should determine whether the current node has internal energy sources
-and, when conducting power consumption readings and calculations, adjust with a
-more sophisticated but efficient and compatible algorithm that takes into
-account for both external and internal absorbed energy. Moreover, further
-testing on devices with an internal energy source is required to better
-understand how the system is powered, as it can solely use the external source,
-only use the internal source, or even employ both.
+and, when conducting power consumption readings and calculations, adjust with a more
+sophisticated but efficient and compatible algorithm that takes into account for
+both external and internal absorbed energy. Moreover, further testing on devices
+with an internal energy source is required to better understand how the system is
+powered, as it can solely use the external source, only use the internal source,
+or even employ both. \\ %
 
-\section{Cluster Autoscaler Cloud Provider}
-\label{subsec:conclusions_limitations_and_future_works_cluster_autoscaler_cloud_provider}
-
-One of the project's most significant difficulties has been developing the
-recluster Cloud Provider for the Cluster Autoscaler. There are three primary reasons
-for this. \\ %
+Another of the project's most significant difficulties has been developing the recluster
+Cloud Provider for the Cluster Autoscaler. There are three primary reasons for
+this. \\ %
 First off, the Cluster Autoscaler and the majority of the Kubernetes development
-environment are built using the Go\footnote{\url{https://go.dev}} programming
-language. I had never written a line of Go code before developing the \texttt{recluster}
-Cloud Provider, so I had to learn the language from the beginning as well as the
-package ecosystem, code style, and syntax. Although difficult at first, the effort
-paid off in the end. \\ %
-Second, neither official nor unofficial documentation exists that explains how
-to create a Cloud Provider for the Cluster Autoscaler. My entire knowledge of developing
-the \texttt{recluster} Cloud Provider is based on studying and evaluating the
-code developed by the other Cloud Providers. Additionally, because each Cloud
+environment are built using the Go\footnote{\url{https://go.dev}} programming language.
+I had never written a line of Go code before developing the \texttt{recluster} Cloud
+Provider, so I had to learn the language from the beginning as well as the
+package ecosystem, code style, and syntax. Although difficult at first, the
+effort paid off in the end. \\ %
+Second, neither official nor unofficial documentation exists that explains how to
+create a Cloud Provider for the Cluster Autoscaler. My entire knowledge of
+developing the \texttt{recluster} Cloud Provider is based on studying and evaluating
+the code developed by the other Cloud Providers. Additionally, because each Cloud
 Provider has a unique implementation, distinct Server logic, and a different API,
-I had to determine the similarities and fundamental elements that almost all of them
-share to transform it and make it compatible with reCluster. The lack of
-documentation is understandable given that only a small number of entities
-utilize and develop this technology, making it possible for them to access experts
-and/or specialized consulting from the main CA developers themselves. Keep in
-mind that the latter needs familiarity with the Go programming language, which was
-covered in the preceding point. \\ %
-Finally, it took longer than I anticipated to test the Cluster Autoscaler in
-conjunction with the Server and the general architecture since almost every time
-a new, minor error or bug that I hadn't considered appeared. However, the latter
-was not only beneficial for reCluster; it additionally helped in identifying an
-issue\footnote{\url{https://github.com/kubernetes/autoscaler/issues/5378}} in
-the Cluster Autoscaler's main code, which was submitted to the maintainers and promptly
-fixed within a week.
-
-\section{Dashboard}
-\label{subsec:conclusions_limitations_and_future_works_dashboard}
+I had to determine the similarities and fundamental elements that almost all of
+them share to transform it and make it compatible with reCluster. The lack of documentation
+is understandable given that only a small number of entities utilize and develop
+this technology, making it possible for them to access experts and/or
+specialized consulting from the main CA developers themselves. Keep in mind that
+the latter needs familiarity with the Go programming language, which was covered
+in the preceding point. \\ %
+Finally, it took longer than I anticipated to test the Cluster Autoscaler in conjunction
+with the Server and the general architecture since almost every time a new,
+minor error or bug that I hadn't considered appeared. However, the latter was
+not only beneficial for reCluster; it additionally helped in identifying an issue\footnote{\url{https://github.com/kubernetes/autoscaler/issues/5378}}
+in the Cluster Autoscaler's main code, which was submitted to the maintainers
+and promptly fixed within a week. \\ %
 
 Currently, the only way for a user or administrator to interact with the cluster
-is to use applications such as \texttt{curl}, \texttt{wget}, or similarities to directly
-use the various set of GraphQL queries and mutation API, or use the GraphQL
-Studio Explorer, which is not available in production and is only a nicer interface
-for low-level interactions with the GraphQL API. As a result, there is a need to
-create a UI dashboard, such as the one from Kubernetes\footnote{\url{https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard}},
-where all of the information provided by the Server is visually available without
-involving the user in low-level GraphQL API interactions. The majority of
-operations should be simple and intuitive, without needing the user to better understand
-the requirements and outcomes. \\ %
-Because the web application must consider the authentication mechanism, only
-authorized and/or authenticated users may access specific information or do
-certain operations. Furthermore, to provide a better overview of all the
-information accessible to the user, the dashboard should be capable of generating
-faster-to-understand graphs and/or charts. Consider a pie chart in which the
-number of active/working nodes (green color) is visually compared against the
-number of inactive nodes (gray color). The user can immediately understand the current
-cluster capacity/demand, where if the chart is almost entirely green, there is an
-overall high workload in the cluster, whereas if the chart is almost entirely
-gray, there is an overall low workload in the cluster, and thus the number of
-inactive nodes predominates. \\ %
-With so many tools, technologies, and frameworks available for developing a web
-application nowadays, the most difficult and critical phase is choosing which one
-to use before even beginning development. \\ %
-
+is to use applications such as \texttt{curl}, \texttt{wget}, or similarities to
+directly use the various set of GraphQL queries and mutation API, or use the GraphQL
+Studio Explorer, which is not available in production and is only a nicer
+interface for low-level interactions with the GraphQL API. As a result, there is
+a need to create a UI dashboard, such as the one from Kubernetes\footnote{\url{https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard}},
+where all of the information provided by the Server is visually available
+without involving the user in low-level GraphQL API interactions. The majority of
+operations should be simple and intuitive, without needing the user to better
+understand the requirements and outcomes. \\ %
+Because the web application must consider the authentication mechanism, only authorized
+and/or authenticated users may access specific information or do certain operations.
+Furthermore, to provide a better overview of all the information accessible to the
+user, the dashboard should be capable of generating faster-to-understand graphs
+and/or charts. Consider a pie chart in which the number of active/working nodes (green
+color) is visually compared against the number of inactive nodes (gray color).
+The user can immediately understand the current cluster capacity/demand, where if
+the chart is almost entirely green, there is an overall high workload in the
+cluster, whereas if the chart is almost entirely gray, there is an overall low
+workload in the cluster, and thus the number of inactive nodes predominates. \\ %
+With so many tools, technologies, and frameworks available for developing a web application
+nowadays, the most difficult and critical phase is choosing which one to use
+before even beginning development. \\ %
 Also, there may be a desire to improve the simplicity with which each node is managed
 without directly requiring \texttt{SSH} or similar technologies. \\ %
 The latter can be accomplished by directly integrating a protected graphical
@@ -170,9 +158,7 @@ additional operations. \\ %
 \texttt{YunoHost}\footnote{\url{https://yunohost.org}}, which leverages a simple
 and easy-to-use, but incredibly powerful, web UI dashboard to completely
 administer the node, is a starting point for what may be accomplished or developed.
-
-\section{Mobile Devices}
-\label{subsec:conclusions_limitations_and_future_works_mobile_devices}
+\\ %
 
 Computers are the only systems that are currently used and supported in the
 cluster. But, there are an enormous number of unused smartphone and tablet
@@ -202,10 +188,7 @@ solutions. However, it should be mentioned that the sleep mode of mobile devices
 is so efficient that a device in sleep mode consumes almost zero energy and may last
 for more than a week on a single charge. As a result, if the remote wake-up solution
 is too expensive or unfeasible, the concept of keeping a mobile device
-constantly in sleep mode might be considered.
-
-\section{Architectures}
-\label{subsec:conclusions_limitations_and_future_works_architectures}
+constantly in sleep mode might be considered. \\ %
 
 The cluster currently supports only \texttt{amd64} and \texttt{arm64} architectures.
 Because the majority of the employed software and technologies support a wide
@@ -215,10 +198,7 @@ can be ported and/or transformed to be compatible with additional and different
 architectures. \\ %
 Expanding the number of supported architectures allows more devices to be
 incorporated into the cluster, giving them new life while also improving the cluster's
-overall workload capacity.
-
-\section{Node Selection Algorithm}
-\label{subsec:conclusions_limitations_and_future_works_node_selection_algorithm}
+overall workload capacity. \\ %
 
 The existing Node selection algorithm is effective, but it is a simplistic implementation
 because it just depends on maximum and minimum power consumptions and, if both
@@ -244,10 +224,7 @@ significantly reduce total (real) power consumption while also improving overall
 Quality of Service (QoS). \\ %
 The latter are merely possible ideas for what the new enhanced algorithm should
 include and what possible advancements, such as lowering power consumption while
-increasing overall performance, must be addressed.
-
-\section{Performance Management}
-\label{subsec:conclusions_limitations_and_future_works_performance_management}
+increasing overall performance, must be addressed. \\ %
 
 There are no graphs or charts in this document to demonstrate how the generally existing
 cluster implementation performs on different workloads and/or hardware. This is
@@ -285,10 +262,7 @@ system to notify an administrator, is critical; enabling the cluster to be onlin
 and active as much as possible while also performing its main routine of service
 orchestration. \\ %
 Nevertheless, this point is critical, and it must be addressed and implemented in
-future versions of reCluster.
-
-\section{Scenarios Evaluation}
-\label{subsec:conclusions_limitations_and_future_works_scenarios_evaluation}
+future versions of reCluster. \\ %
 
 In addition to the preceding point, there is a missing section where the various
 use-case scenarios are analyzed and tested owing to the same reasons of a single
@@ -325,10 +299,7 @@ just one Controller node active, whereas all worker nodes are inactive. If there
 is workload that has to be scheduled while the main cluster is unavailable, the worker
 nodes start to boot up. It is worth noting that, even if there are hundreds of worker
 nodes, the overall power consumption when the main cluster is healthy is that of
-the single Controller node, which is negligible.
-
-\section{Server}
-\label{subsec:conclusions_limitations_and_future_works_server}
+the single Controller node, which is negligible. \\ %
 
 \begin{wrapfigure}
   {r}{.25\textwidth} %
