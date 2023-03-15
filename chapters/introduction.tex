@@ -442,9 +442,6 @@ The next two principles are not strictly related to achieving a more sustainable
 architecture, but rather to the process of managing, developing and distributing
 the applications and software in general. \\ %
 
-\subsection{Dependencies Reduction}
-\label{subsec:introduction_principles_dependencies_reduction}
-
 \begin{wrapfigure}
   {r}{.2\textwidth} %
   \centering
@@ -452,8 +449,21 @@ the applications and software in general. \\ %
   {\scriptsize \parbox[t]{\linewidth}{ Icon made by \href{https://www.flaticon.com/authors/freepik}{Freepik} from \href{http://www.flaticon.com}{www.flaticon.com} }}
 \end{wrapfigure}
 
-\subsection{Free And Open-Source Software}
-\label{subsec:introduction_principles_reusability_free_and_open_source_software}
+For decades, as stated in \cite{software_dependency_problem}, discussion about
+software reuse was more widespread than real software reuse. Nowadays, the
+situation is reversed, with developers reusing software produced by others regularly
+in the form of software dependencies, and the situation is largely unexamined. Software
+dependencies pose substantial risks that are all too often ignored. The
+transition to easy, fine-grained software reuse has occurred so quickly that there
+is little knowledge of the best practices for identifying and using dependencies
+effectively, or even determining when they are appropriate and when they are not.
+Installing a package as a dependency outsources the effort of developing that code
+--- designing, writing, testing, debugging, and maintaining --- to someone else on
+the Internet that is mostly unknown. Using that code exposes the program to all
+of the problems and weaknesses in the dependency. Therefore, if a dependency
+appears to be too problematic and there is no easy or effective procedure to
+isolate it, the best solution may be to avoid it totally, or at least the parts
+that have been recognized as the most dangerous. \\ %
 
 \begin{wrapfigure}
   {r}{.2\textwidth} %
