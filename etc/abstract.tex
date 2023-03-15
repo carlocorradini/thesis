@@ -3,4 +3,63 @@
 \addcontentsline{toc}{chapter}{Abstract}
 
 
-TODO
+Existing cluster architectures are primarily concerned with maximizing overall
+performance and responsiveness, without consideration for the overall energy impact
+and the many resources involved. Additionally, they are mostly composed of homogenous,
+generally virtualized, machines that rely on modern and cutting-edge hardware components.
+As a result, there is a need to reconsider the various methodologies and principles
+involved, since it is becoming increasingly critical --- nearly unavoidable ---
+to develop or transform cluster architectures orientated toward resource-awareness
+and sustainability. The latter two requirements, where one does not negatively
+influence the other, must be deemed as critical and significant as performance and
+responsiveness. As a direct consequence, this new cluster architecture must retain
+as much as possible of the previous architecture's usability and overall requirements
+while being more mindful of the various components involved and its overall energy
+consumption, achieving a more sustainable architecture not only suitable for the
+present, but most importantly, for the future that is yet to come.
+
+This document attempts to outline the many principles and methodologies that
+should be considered when designing and developing a more resource-aware, sustainable,
+and heterogeneous cluster architecture that is also simple to use and deploy. The
+layout is intended to guide the reader through the different procedures,
+decisions, and techniques that culminated in a final, realistic, and functional sustainable
+cluster implementation. Every preceding chapter/section provides the theoretical
+and practical foundation for the subsequent ones.
+
+Before defining any kind of architecture or implementation, it is important to outline
+the context in addition to the core principles around which the cluster is established.
+A very dynamic and somewhat abstract context that is far from static and must
+adapt/transform to the needs and requirements of the organization managing the
+cluster. A collection of core principles that enhances and provides a basis for improved
+sustainability, reusability, interoperability, and resource awareness while
+minimizing waste as much as possible.
+
+After the foundations, the theoretical architecture is depicted, which defines a
+high-level overview of the whole cluster. This is a collection of all the involved
+hardware and software components, along with their corresponding
+responsibilities outlining how they manage and efficiently maintain the cluster,
+both in terms of energy and resource awareness, and operationally as much as
+possible and continuously. To communicate, the components must be connected, providing
+a network that enables workload orchestration and cluster management. Three
+network layers have been identified, each of which depicts a specific specialization:
+K8s, Internal, and External; where the first layer is contained to the next layer,
+and so on.
+
+Finally, using the core principles and the theorized architecture, a
+heterogeneous cluster has been implemented that attempts to be more resource-aware
+and sustainable while being easy to use and fully functional like any other
+existing cluster. The latter is identified by the name reCluster, which is
+derived from the combination of the words recycling (since only reconditioned hardware
+is being used) and cluster. The implementation defines the relationship between the
+conceptual components and their software counterparts. Some of these
+applications are partially pre-existing, but the two most important, the Server
+and Cluster Autoscaler, necessitate, respectively, a fully custom implementation
+built from the ground up and a custom Cloud Provider implementation that enables
+the Cluster Autoscaler's core to communicate with the Server and vice versa.
+Combining Server and Cluster Autoscaler allows the cluster architecture to
+perform autoscaling procedures like upscaling and downscaling automatically. The
+latter provides a completely autonomous, resource-aware, and sustainable cluster
+by employing only the resources that are strictly required, preferring those
+that are more sustainable than others. \\ %
+
+A more sustainable future for computing environments is already here.
