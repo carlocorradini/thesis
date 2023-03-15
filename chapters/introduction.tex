@@ -421,9 +421,9 @@ result, there is a need to persuade, mostly through legislation, the many manufa
 that are reluctant to adapt and do not meet or do not want to establish a set of
 standards that improve interoperability on their devices. A perfect example of
 the latter is the European Parliament's approval of a law, following an impact assessment
-study\footnote{\url{https://www.politico.eu/wp-content/uploads/2020/02/CLEAN-Common-charger-impact-assessment-study_draft.pdf}},
-that mandates by the end of 2024 a common, standardized, and interoperable
-charger for all mobile devices sold in the EU internal market\footnote{\url{https://www.europarl.europa.eu/news/en/press-room/20220930IPR41928/long-awaited-common-charger-for-mobile-devices-will-be-a-reality-in-2024}}.
+study\footnote{\url{https://data.europa.eu/doi/10.2873/528465}}, that mandates
+by the end of 2024 a common, standardized, and interoperable charger for all
+mobile devices sold in the EU internal market\footnote{\url{https://www.europarl.europa.eu/news/en/press-room/20220930IPR41928/long-awaited-common-charger-for-mobile-devices-will-be-a-reality-in-2024}}.
 The latter has been highly awaited, and it may be regarded as a first step
 toward a much broader trend of standardization and interoperability that can
 establish the foundation for a more sustainable future. \\ %
@@ -464,14 +464,33 @@ of the problems and weaknesses in the dependency. Therefore, if a dependency
 appears to be too problematic and there is no easy or effective procedure to
 isolate it, the best solution may be to avoid it totally, or at least the parts
 that have been recognized as the most dangerous. \\ %
+The latter is essential to acquiring a critical perspective on the dependencies
+used in the overall architecture. There is a need to evaluate the real and unreplaceable
+dependencies and avoid those that are unnecessary and too critical to be adopted
+by the architecture. Thinking about future design with a more LIMITS, post-apocalyptic,
+and mostly resource-aware perspective should begin from the foundation. Lowering
+and simplifying the software stack's core and external dependencies significantly
+minimizes the time required to maintain and deploy it. \\ %
 
 \begin{wrapfigure}
   {r}{.2\textwidth} %
   \centering
   \def\stackalignment{r}\stackunder{ \includegraphics[width=\linewidth]{images/logos/open_source.png} } %
   {\scriptsize \parbox[t]{\linewidth}{ Source: \url{https://opensource.org/logo-usage-guidelines}} }
-  \caption{Open Source Initiative logo}
 \end{wrapfigure}
+
+The software developed and employed in the architecture must be Free/Libre and Open
+Source in all aspects. If a software application is incompatible with the latter,
+an alternative must be identified or developed. \\ %
+Following the GNU Project's philosophy\footnote{\url{https://www.gnu.org/philosophy}}:
+\textit{Free Software means that users have the four essential freedoms: (0) to run
+the program, (1) to study and change the program in source code form, (2) to redistribute
+exact copies, and (3) to distribute modified versions.} \\ %
+This principle's fundamental is presented as Free/Libre and Open Source Software\footnote{\url{https://www.gnu.org/philosophy/floss-and-foss.html}}
+(FLOSS). \\ %
+Being FLOSS-compatible has the significant advantage of allowing external programmers
+to contribute to the software, consequently improving overall quality and
+providing for more performant and efficient logic and algorithms.
 
 \section{State Of The Art}
 \label{sec:introduction_state_of_the_art}
