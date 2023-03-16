@@ -495,9 +495,80 @@ providing for more performant and efficient logic and algorithms.
 \section{State Of The Art}
 \label{sec:introduction_state_of_the_art}
 
-% TODO Problems/Discussions
-% TODO Responsiveness and SLA
-% TODO Cloud Provider
-% TODO SLA consumption
+Most existing systems rely entirely on large data centers, which are excessively
+energy-hungry and do not provide any resource awareness owing to virtualization/abstraction
+layers. Furthermore, the servers are maintained permanently powered on to
+significantly minimize the time necessary for provisioning client instances
+while achieving virtually 100\% uptime\footnote{\url{https://aws.amazon.com/it/compute/sla}}\footnote{\url{https://azure.microsoft.com/support/legal/sla}}\footnote{\url{https://cloud.google.com/compute/sla}}.
+\\ %
+To achieve a greater degree of sustainability, the time necessary for
+provisioning must be rebalanced, allowing servers to be completely powered off while
+maintaining a similar level of uptime. It should be highlighted that this is
+ideal for any applications that may be classified as non-critical, while many critical
+applications, such as emergency response and payment systems, require "five
+nines" or 99.999\% or around five minutes and 15 seconds of downtime per year\footnote{\url{https://aws.amazon.com/blogs/publicsector/achieving-five-nines-cloud-justice-public-safety}}.
+\\ %
 
-% TODO reCluster paper
+\cite{carbon_aware_computing_datacenters} describes Google's Carbon-Intelligent Compute
+Management system, which actively reduces electricity-based carbon footprint and
+power infrastructure costs by deferring temporally flexible workloads. It uses a
+collection of analytical pipelines to acquire the next day's carbon intensity projections,
+train day-ahead demand prediction models, and apply risk-aware optimization to generate
+the next day's carbon-aware capacity for all Google data centers. The system
+limits the resources available to temporally flexible workloads on an hourly
+basis while preserving overall daily capacity, allowing all such workloads to be
+completed within a day. \\ %
+This type of computing solution only accounts for services and processes that can
+be delayed, not those that must be continually active with an acceptable
+response time; sending a critical email that is only delivered the following day
+is unacceptable. It is only compatible with Google's data centers and does not
+provide a more interoperable solution that is compatible with other data centers.
+Moreover, the code is closed source, which means it does not adhere to the FLOSS
+philosophy. Nevertheless, the notion of deferring non-real-time operations,
+employing analysis and projections, to be rescheduled when the system is underutilized,
+improving overall sustainability and lowering the costs, should be considered.
+\\ %
+
+\cite{power_budgeting_big_data_applications} presents a platform that manages a
+power budget to limit the amount of energy spent by users, applications, and
+individual container instances. The energy constraint is accomplished by the platform's
+capability to monitor container energy consumption and dynamically modify its CPU
+and memory resources via Vertical Scaling as necessary (see section
+\ref{subsec:implementation_autoscaling_vertical_pod_autoscaler}). \\ %
+This approach is much more high-level and directly autoscale the resources allocated
+to containers based on the power allocation among users and applications, as
+opposed to a low-level approach that involves physically terminating/bootstrapping
+the server (used by reCluster). Moreover, the energy is viewed as a precious
+resource that can be split and shared, improving the container system's overall awareness
+of its resources. Nevertheless, it needs to be combined with additional approaches
+to achieve high and low levels of energy awareness and reduction. \\ %
+
+\cite{energy_aware_load_balancing} presented an energy-aware operation model for
+load balancing and application scaling on a cloud, outlining an energy-optimal operation
+regime and aiming to increase the number of servers employed in this regime.
+Servers that are idle or only barely loaded are put into one of the sleep modes
+to conserve energy. Therefore, the following could be employed to reformulate
+the conventional idea of load balancing in a large-scale system: \textit{"Distribute
+evenly the workload to the smallest set of servers operating at optimal or near-optimal
+energy levels, while observing the Service Level Agreement (SLA) between the Cloud
+Service Provider (CSP) and a cloud user. An optimal energy level is one when the
+performance per Watt of power is maximized"}. \\ %
+To reduce energy waste, this approach can be applied to an external load balancer
+employed in the architecture. Even more, energy can be saved by completely turning
+off mostly inactive or lightly-loaded servers rather than switching them into sleep
+mode. This new type of load balancer can also be interfaced with the Cluster
+Autoscaler and Server to better understand the overall cluster state, both in terms
+of active/inactive nodes and also of overall power consumption, to obtain more
+fine-grained information and therefore increase the overall efficiency. \\ %
+
+All of the above strategies attempt to minimize energy consumption in various contexts:
+non-real-time services, containerization, and load balancing. Yet, none of them
+address, or only partially address, the core cause of the highest energy usage
+in a cluster architecture, which is the server themselves. To establish a more
+sustainable and resource-aware cluster, the servers must be considered and therefore
+autoscaled by physically bootstrapping or terminating them; since a powered-off
+machine consumes (nearly) zero energy. \\ %
+Nonetheless, the prior techniques should, and must, be extended into future versions
+of reCluster to achieve even higher levels of energy reduction while satisfying the
+SLA. \\ %
+More than ever, a more sustainable cluster architecture is required.
