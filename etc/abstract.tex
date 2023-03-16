@@ -3,58 +3,60 @@
 \addcontentsline{toc}{chapter}{Abstract}
 
 
-Existing cluster architectures are primarily concerned with maximizing overall
-performance and responsiveness, without consideration for the overall energy impact
-and the many resources involved. Additionally, they are mostly composed of homogenous,
-generally virtualized, machines that rely on modern and cutting-edge hardware components.
-As a result, there is a need to reconsider the various methodologies and principles
-involved, since it is becoming increasingly critical --- nearly unavoidable ---
-to develop or transform cluster architectures orientated toward resource-awareness
-and sustainability. The latter two requirements, where one does not negatively
-influence the other, must be deemed as critical and significant as performance and
-responsiveness. As a direct consequence, this new cluster architecture must retain
-as much as possible of the previous architecture's usability and overall requirements
-while being more mindful of the various components involved and its overall energy
-consumption, achieving a more sustainable architecture not only suitable for the
-present, but most importantly, for the future that is yet to come. \\ %
+Many large-scale computing clusters employed to host online services are mainly
+concerned with maximizing overall performance and responsiveness, with the energy
+impact being considered only for cost savings, while overall sustainability is
+mostly marginal. Additionally, commercial data centers are largely homogeneous
+relying on modern and cutting-edge hardware components. If we want data centers to
+become more sustainable, we have to rethink their architecture and include
+awareness of the energy and resources involved. In this work, a possible
+solution for integrating and making sustainability as essential as performance
+and responsiveness in data centers is proposed. As a direct consequence, this
+new cluster architecture must preserve as much of the previous architecture's
+usability and overall requirements as possible, while also being more aware of the
+various resources and minimizing its energy consumption.
 
-This document attempts to outline the many principles and methodologies that should
-be considered when designing and developing a more resource-aware, sustainable, and
-heterogeneous cluster architecture. The layout is intended to guide the reader
-through the different procedures, decisions, and techniques that led to a
-potential sustainable cluster implementation. Every preceding chapter/section provides
-the theoretical and practical foundation for the subsequent ones. \\ %
+This thesis presents a case study of a possible heterogeneous data center architecture
+that is more resource-aware, and generally sustainable. We guide the reader through
+the design process, starting from guiding principles, progressing through theory
+and, finally, implementation and critical reflections.
 
-Before defining any kind of architecture or implementation, it is important to outline
-the context in addition to the core principles around which the cluster is established.
-A dynamic and somewhat abstract context that is far from static and should adapt/transform
-to the needs and requirements of the organization managing the cluster. A collection
-of core principles that enhances and provides a basis for improved sustainability,
-reusability, interoperability, and resource awareness while minimizing waste as
-much as possible. \\ %
+We open the thesis by outlining the context, goals, and core principles around which
+the cluster is established. A dynamic and somewhat abstract context that is far
+from static and should adapt/transform to the needs and requirements of the
+organization managing the cluster. A set of goals aimed at making the cluster appear
+less heterogeneous and more like a single, homogeneous entity. A collection of core
+principles that enhances and provides a basis for improved sustainability, while
+minimizing waste as much as possible: Sustainability, Acknowledging Planetary
+Limits, Hardware Reusability, Energy Reduction, Insourcing, Interoperability, Free/Libre
+And Open Source Software, and Dependencies Reduction.
 
-After the foundations, the theoretical architecture is depicted, which defines a
-high-level overview of the whole cluster. This is a collection of all the
-involved hardware and software components, along with their respective responsibilities
-outlining how they manage and maintain the cluster continuously and with an awareness
-of energy and resources. To communicate, the components must be connected,
-providing a network that enables workload orchestration and cluster management. Three
-network layers have been identified, each of which depicts a specific
-specialization: K8s, Internal, and External; where the first layer is contained
-to the next layer, and so on. \\ %
+After the foundations, we depicts the theoretical architecture, which defines a
+high-level overview of the whole cluster. This is a collection of all the involved
+hardware and software components, along with their respective responsibilities
+outlining how they manage and maintain the cluster continuously and with an
+awareness of energy and resources. To communicate, the components must be
+connected, providing a network that enables workload orchestration and cluster management.
 
-Finally, to develop a more resource-aware and sustainable architecture, an
-operational heterogeneous prototype cluster that integrates the core principles
-with the theorized networks and components has been implemented. The latter is identified
-by the name reCluster, which is derived from the combination of the words
-recycling (since only reconditioned hardware is being used) and cluster. The implementation
-defines the relationship between the conceptual components and their software counterparts.
-Some of these applications are partially pre-existing, but the two most important,
-the Server and Cluster Autoscaler, necessitate, respectively, a fully custom implementation
-built from the ground up and a custom Cloud Provider implementation that enables
-the Cluster Autoscaler's core to communicate with the Server and vice versa.
-Combining Server and Cluster Autoscaler allows the cluster architecture to
-perform autoscaling procedures like upscaling and downscaling automatically. The
-latter provides a completely autonomous, resource-aware, and sustainable cluster
-by employing only the resources that are strictly required, preferring those
-that are more sustainable than others.
+As the core point of the thesis, we detailed how we implemented a prototype
+heterogeneous cluster that integrates the core principles with the theorized
+networks and components. We named it reCluster, and the prefix "re" refers to
+the Right to Repair movement's "reduce, reuse, repair, recycle" slogan. Among
+the most notable reCluster components are the Server, which is a completely new implementation
+developed from the ground up, and the Cluster Autoscaler, which is a reimplementation
+that allows its core to communicate with the Server and vice versa. Combining
+Server and Cluster Autoscaler allows the cluster architecture to perform
+autoscaling procedures like upscaling and downscaling automatically. Moreover,
+we developed a script that automates all of the necessary installation, configuration,
+and deployment procedures. The prototype provides a totally autonomous, resource-aware,
+and sustainable cluster by employing only those resources that are strictly necessary,
+preferring those that are more sustainable than others. \\ %
+
+The initial reCluster concept was theorized in \cite{conceptualising_resource_aware},
+where I contributed to the Kubernetes analysis and the conceptualization of the
+various algorithms, which were eventually implemented in the prototype. \\ %
+
+Adapting what is already available and specifically developed for large and
+energy-hungry data centers to a more sustainable and resource-aware architecture
+while preserving the same original computing industry requirements is not only
+possible, but also necessary for a more sustainable future.

@@ -3,10 +3,11 @@
 
 Current cluster architectures are mainly concerned with maximizing service performance
 and achieving near-instantaneous responsiveness while ignoring the energy impact
-and the various resources involved. As a result, it is becoming more and more necessary---almost
-a requirement---to reconsider and transform existing designs to create architectures
-that are more resource-aware and sustainable. These latter requirements must be
-considered just as vital as performance and responsiveness. \\ %
+and the various resources involved. As a result, it is becoming more and more necessary
+--- almost a requirement --- to reconsider and transform existing designs to create
+architectures that are more resource-aware and sustainable. These latter
+requirements must be considered just as vital as performance and responsiveness.
+\\ %
 The context and fundamental principles on which the new and more sustainable
 cluster architectures should either completely or partially rely on have been
 initially explained in this document. Moreover, due to the outsourcing
@@ -21,11 +22,11 @@ energy consumption while maintaining a certain degree of adaptability and config
 Every component that constitutes the architecture has been thoroughly explained,
 highlighting its main purpose and different capabilities. A cluster is not a
 cluster if the different components are not connected. In the design, there are
-three major network groups; the External Network may even be removed if external
-resources and connections are not required. The reCluster project, which is a practical
-and sustainable cluster implementation of the theorized architecture, has also
-been presented. All of its hardware components have been recycled following decommissioning.
-\\ %
+three major network groups: K8s, Internal and External; where the External Network
+may even be removed if external resources and connections are not required. The
+reCluster project, which is a practical and sustainable cluster implementation of
+the theorized architecture, has also been presented. All of its hardware components
+have been recycled following decommissioning. \\ %
 The implementation thoroughly explains how the reCluster was put into practice while
 adhering to both the fundamental requirements and the theoretical architecture behind
 the networks and components. It begins with the foundations, which are composed of
@@ -36,20 +37,21 @@ application, and some of its most important features used in reCluster are expla
 The way the Server and Cluster Autoscaler components are implemented is
 different because the first one was entirely built from scratch, whereas the second
 one used an existing core that had been modified to be compatible with the cluster
-version. The Server component represents the low-level knowledge of the cluster
-and is deeply described, including the database structure, GraphQL queries and
-mutations API, how the upscaling and downscaling procedures are handled, and how
-to exploit Kubernetes monitoring without the need for a custom implementation. The
-Cluster Autoscaler, on the other hand, represents the high-level knowledge of the
-cluster, and it is used in conjunction with the Server component to perform the
-upscaling or downscaling operations. The Cluster Autoscaler only scales the number
-of nodes and, because it is not the only method of autoscaling in a cluster, the
-other two approaches are also explained: Vertical Pod Autoscaler, which automatically
-adjusts the resources of a Pod, and Horizontal Pod Autoscaler, which automatically
-adjusts the number of Pods. The combination of the Horizontal Pod Autoscaler and
-the Cluster Autoscaler is critical for improving total automation and minimizing
-the need for human intervention, as well as lowering overall power consumption while
-maintaining scalability. \\ %
+architecture. The Server component represents the low-level knowledge of the
+cluster and is deeply described, including the database structure, GraphQL
+queries and mutations API, how the upscaling and downscaling procedures are handled,
+and how to exploit Kubernetes monitoring without the need for a custom
+implementation. The Cluster Autoscaler, on the other hand, represents the high-level
+knowledge of the cluster, and it is used in conjunction with the Server
+component to perform the upscaling or downscaling operations. The Cluster Autoscaler
+only scales the number of nodes and, because it is not the only method of
+autoscaling in a cluster, the other two approaches are also explained: Vertical
+Pod Autoscaler, which automatically adjusts the resources of a Pod, and
+Horizontal Pod Autoscaler, which automatically adjusts the number of Pods. The
+combination of the Horizontal Pod Autoscaler and the Cluster Autoscaler is
+critical for improving total automation and minimizing the need for human
+intervention, as well as lowering overall power consumption while maintaining scalability.
+\\ %
 Lastly, because manually installing the cluster and providing all of the
 necessary information is tedious, the installation script that automatically performs
 the installation operation while following a specific set of configuration parameters
@@ -60,8 +62,8 @@ used are illustrated and discussed, so that the employed features of each can be
 recognized. \\ %
 With all of the prior information and technology, building and deploying a more sustainable
 and resource-aware cluster is feasible without incurring into breaking trade-offs;
-while it may be regarded as a tiny step towards greener computing, it, along
-with other initiatives, attempts to bring the end result closer to realization.
+while it may be regarded as a tiny step towards sustainable computing, it, along
+with other initiatives, attempts to bring the result closer to realization.
 
 \section{Limitations And Future Work}
 \label{sec:conclusions_limitations_and_future_works}
@@ -337,7 +339,7 @@ well as possible recovery mechanisms. The latter can also be extended to use
 various approaches based on the overall circumstances and deployment environment.
 \\ %
 Undoubtedly, many aspects of the Server could be improved but are not covered in
-this section. However, because the project is completely FOSS compliant, users
+this section. However, because the project is completely FLOSS compliant, users
 can contribute and improve the code with ideas that I hadn't even considered
 before.
 
@@ -346,5 +348,5 @@ before.
 
 Adapting existing tools that are specifically developed for big and energy-hungry
 environments to a more sustainable and resource-aware design while maintaining nearly
-the same capabilities for a more green future for the computing industry is not only
-feasible, but also necessary.
+the same capabilities for the computing industry is not only feasible, but also
+necessary for a more sustainable future.
